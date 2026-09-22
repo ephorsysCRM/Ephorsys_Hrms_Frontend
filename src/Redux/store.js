@@ -1,4 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
+import {
+    configureStore,
+} from "@reduxjs/toolkit";
 
 import {
     persistReducer,
@@ -10,47 +12,29 @@ import createWebStorage from
 
 import rootReducer from "./rootReducer";
 
-// =============================================
-// Create Storage
-// =============================================
-
-const storage = createWebStorage("local");
-
-// =============================================
-// Persist Config
-// =============================================
+const storage =
+    createWebStorage("local");
 
 const persistConfig = {
     key: "root",
     storage,
-    whitelist: ["auth"],
 };
 
-// =============================================
-// Persist Reducer
-// =============================================
+const persistedReducer =
+    persistReducer(
+        persistConfig,
+        rootReducer
+    );
 
-const persistedReducer = persistReducer(
-    persistConfig,
-    rootReducer
-);
+export const store =
+    configureStore({
+        reducer: persistedReducer,
 
-// =============================================
-// Store
-// =============================================
-
-export const store = configureStore({
-    reducer: persistedReducer,
-
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: false,
-        }),
-});
-
-// =============================================
-// Persistor
-// =============================================
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware({
+                serializableCheck: false,
+            }),
+    });
 
 export const persistor =
     persistStore(store);

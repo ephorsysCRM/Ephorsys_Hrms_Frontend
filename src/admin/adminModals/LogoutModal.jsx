@@ -1,6 +1,27 @@
 import { LogOut, X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { logOutAdmin } from "../../Redux/features/auth/authThunk";
 
 const LogoutModal = ({ onClose }) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const { loading } = useSelector((state) => state.auth);
+
+    const handleLogout = async () => {
+        const result = await dispatch(logOutAdmin());
+
+        if (result.success) {
+            onClose();
+
+            navigate("/", {
+                replace: true,
+            });
+        }
+    };
+
     return (
         <div className="w-full">
 
@@ -10,37 +31,43 @@ const LogoutModal = ({ onClose }) => {
             <div className="mt-4 text-center">
 
                 {/* Logout Icon */}
-                <div className="
-                    mx-auto
-                    mb-4
-                    w-12
-                    h-12
-                    rounded-full
-                    bg-black
-                    flex
-                    items-center
-                    justify-center
-                    text-white
-                ">
+                <div
+                    className="
+                        mx-auto
+                        mb-4
+                        w-12
+                        h-12
+                        rounded-full
+                        bg-black
+                        flex
+                        items-center
+                        justify-center
+                        text-white
+                    "
+                >
                     <LogOut size={22} />
                 </div>
 
                 {/* Title */}
-                <h2 className="
-                    text-lg
-                    font-semibold
-                    text-black
-                ">
+                <h2
+                    className="
+                        text-lg
+                        font-semibold
+                        text-black
+                    "
+                >
                     Logout Account
                 </h2>
 
                 {/* Description */}
-                <p className="
-                    text-sm
-                    text-black/50
-                    mt-1
-                    leading-relaxed
-                ">
+                <p
+                    className="
+                        text-sm
+                        text-black/50
+                        mt-1
+                        leading-relaxed
+                    "
+                >
                     Are you sure you want to logout
                     from your account?
                 </p>
@@ -57,6 +84,7 @@ const LogoutModal = ({ onClose }) => {
                 <button
                     type="button"
                     onClick={onClose}
+                    disabled={loading}
                     className="
                         h-11
                         rounded-xl
@@ -75,6 +103,8 @@ const LogoutModal = ({ onClose }) => {
                         items-center
                         justify-center
                         gap-2
+                        disabled:opacity-50
+                        disabled:cursor-not-allowed
                     "
                 >
                     <X size={16} />
@@ -86,6 +116,8 @@ const LogoutModal = ({ onClose }) => {
                 ================================================= */}
                 <button
                     type="button"
+                    onClick={handleLogout}
+                    disabled={loading}
                     className="
                         h-11
                         rounded-xl
@@ -101,10 +133,13 @@ const LogoutModal = ({ onClose }) => {
                         items-center
                         justify-center
                         gap-2
+                        disabled:opacity-60
+                        disabled:cursor-not-allowed
                     "
                 >
                     <LogOut size={16} />
-                    Logout
+
+                    {loading ? "Logging out..." : "Logout"}
                 </button>
 
             </div>

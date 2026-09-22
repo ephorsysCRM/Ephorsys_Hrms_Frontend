@@ -8,10 +8,16 @@ import {
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector } from "react-redux";
 
 const TopBar = ({ setSidebarOpen }) => {
     const [profileOpen, setProfileOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // =========================================================
+    // GET LOGGED-IN ADMIN FROM REDUX
+    // =========================================================
+    const admin = useSelector((state) => state.auth.admin);
 
     // =========================================================
     // FULLSCREEN
@@ -67,6 +73,27 @@ const TopBar = ({ setSidebarOpen }) => {
             );
         };
     }, []);
+
+    // =========================================================
+    // ADMIN DATA
+    // =========================================================
+    const adminName = admin?.name || "Admin";
+
+    const adminRole =
+        admin?.role === "super_admin"
+            ? "Super Administrator"
+            : admin?.role === "admin"
+                ? "Administrator"
+                : "Admin";
+
+    const adminInitials = admin?.name
+        ? admin.name
+            .split(" ")
+            .map((name) => name[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase()
+        : "AD";
 
     return (
         <motion.header
@@ -171,9 +198,7 @@ const TopBar = ({ setSidebarOpen }) => {
             ===================================================== */}
             <div className="flex items-center gap-2 sm:gap-3">
 
-                {/* =================================================
-                    FULLSCREEN BUTTON
-                ================================================= */}
+                {/* FULLSCREEN BUTTON */}
                 <motion.button
                     whileTap={{ scale: 0.92 }}
                     onClick={toggleFullscreen}
@@ -202,9 +227,7 @@ const TopBar = ({ setSidebarOpen }) => {
                     )}
                 </motion.button>
 
-                {/* =================================================
-                    NOTIFICATION BUTTON
-                ================================================= */}
+                {/* NOTIFICATION BUTTON */}
                 <motion.button
                     whileTap={{ scale: 0.92 }}
                     className="
@@ -228,9 +251,7 @@ const TopBar = ({ setSidebarOpen }) => {
                     <Bell size={18} />
                 </motion.button>
 
-                {/* =================================================
-                    PROFILE
-                ================================================= */}
+                {/* PROFILE */}
                 <div className="relative profile-dropdown">
 
                     {/* Profile Button */}
@@ -264,7 +285,7 @@ const TopBar = ({ setSidebarOpen }) => {
                                     leading-tight
                                 "
                             >
-                                Admin
+                                {adminName}
                             </p>
 
                             <p
@@ -277,7 +298,7 @@ const TopBar = ({ setSidebarOpen }) => {
                                     mt-0.5
                                 "
                             >
-                                Administrator
+                                {adminRole}
                             </p>
 
                         </div>
@@ -297,13 +318,26 @@ const TopBar = ({ setSidebarOpen }) => {
                                 text-white
                             "
                         >
-                            <User size={18} />
+                            {admin?.profileImage ? (
+                                <img
+                                    src={admin.profileImage}
+                                    alt={adminName}
+                                    className="
+                                        w-full
+                                        h-full
+                                        rounded-full
+                                        object-cover
+                                    "
+                                />
+                            ) : (
+                                <span className="text-[12px] font-semibold">
+                                    {adminInitials}
+                                </span>
+                            )}
                         </div>
                     </motion.button>
 
-                    {/* =================================================
-                        PROFILE DROPDOWN
-                    ================================================= */}
+                    {/* PROFILE DROPDOWN */}
                     <AnimatePresence>
                         {profileOpen && (
                             <motion.div
@@ -353,6 +387,7 @@ const TopBar = ({ setSidebarOpen }) => {
                                         border-black/10
                                     "
                                 >
+
                                     {/* Avatar */}
                                     <div
                                         className="
@@ -367,9 +402,18 @@ const TopBar = ({ setSidebarOpen }) => {
                                             text-[12px]
                                             font-semibold
                                             shrink-0
+                                            overflow-hidden
                                         "
                                     >
-                                        AD
+                                        {admin?.profileImage ? (
+                                            <img
+                                                src={admin.profileImage}
+                                                alt={adminName}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            adminInitials
+                                        )}
                                     </div>
 
                                     {/* User Details */}
@@ -381,7 +425,7 @@ const TopBar = ({ setSidebarOpen }) => {
                                                 text-black
                                             "
                                         >
-                                            Admin
+                                            {adminName}
                                         </p>
 
                                         <p
@@ -392,13 +436,22 @@ const TopBar = ({ setSidebarOpen }) => {
                                                 mt-0.5
                                             "
                                         >
-                                            Administrator
+                                            {adminRole}
                                         </p>
+
+                                        {admin?.email && (
+                                            <p className="text-[10px] text-black/30 mt-1">
+                                                {admin.email}
+                                            </p>
+                                        )}
                                     </div>
+
                                 </div>
+
                             </motion.div>
                         )}
                     </AnimatePresence>
+
                 </div>
             </div>
         </motion.header>
