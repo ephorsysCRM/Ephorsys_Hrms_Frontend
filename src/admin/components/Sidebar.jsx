@@ -34,19 +34,24 @@ const NAV_ITEMS = [
         children: [
             {
                 label: "All Employees",
-                path: "/admin/employees",
+                path: "/all-employees",
                 icon: UserRound,
             },
+            
+            
+        ],
+    },
+     {
+        label: "Departments",
+        icon: Building2,
+        children: [
+            
             {
                 label: "Departments",
                 path: "/admin/departments",
                 icon: Building2,
             },
-            {
-                label: "Designations",
-                path: "/admin/designations",
-                icon: BriefcaseBusiness,
-            },
+            
         ],
     },
 
@@ -276,7 +281,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                     transition-all
                                     duration-200
                                     ${isActive
-                                                                            ? "bg-black text-white font-medium"
+                                                                            ? "bg-black !text-white font-medium"
                                                                             : "text-black/60 hover:bg-black/5 hover:text-black"
                                                                         }
                                   `}

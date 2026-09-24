@@ -6,6 +6,7 @@ import AdminDashboard from "../admin/pages/AdminDashboard";
 import ProtectedRoute from "./protected.routes";
 import AdminLayout from "../layout/AdminLayout";
 import NotFound from "../NotFound";
+import AllEmployee from "../admin/pages/AllEmployee";
 
 const AdminRoutes = (
     <Route path="/">
@@ -23,6 +24,10 @@ const AdminRoutes = (
                 <Route
                     path="dashboard"
                     element={<AdminDashboard />}
+                />
+                <Route
+                    path="all-employees"
+                    element={<AllEmployee />}
                 />
 
             </Route>
