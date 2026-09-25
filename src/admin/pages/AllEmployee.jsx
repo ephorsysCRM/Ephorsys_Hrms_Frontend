@@ -247,7 +247,7 @@ const AllEmployee = () => {
         {/* Horizontal scroll only when required */}
         <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
 
-          <div className="min-w-[850px] bg-white">
+          <div className="min-w-212.5 bg-white">
 
             {/* TABLE HEADING */}
             <div
