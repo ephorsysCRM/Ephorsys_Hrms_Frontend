@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import CreateUserModal from "../features/employee/CreateUserModal";
+import { useNavigate } from "react-router-dom";
 const employeesData = [
   {
     id: "EMP001",
@@ -103,6 +104,8 @@ const AllEmployee = () => {
 
   const [showModal, setShowModal] = useState(false);
    const [employees, setEmployees] = useState(employeesData);
+
+   const navigate = useNavigate();
   return (
     <div className="min-h-screen text-black">
 
@@ -358,7 +361,7 @@ const AllEmployee = () => {
                       {employee.status}
                     </span>
                     <Eye className="cursor-pointer text-green-900 transition hover:text-black" size={19}
-                    onClick={() => console.log(employee)}
+                    onClick={() => navigate(`/employees/${employee.id}`)}
                     />
                   </div>
 
