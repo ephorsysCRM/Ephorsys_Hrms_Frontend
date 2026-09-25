@@ -6,7 +6,7 @@ import BasicInfoStep from "./steps/BasicInfoStep";
 import EmploymentStep from "./steps/EmploymentStep";
 import RoleStep from "./steps/RoleStep";
 import PayrollStep from "./steps/PayrollStep";
-import AccessStep from "./steps/AccessStep";
+import AccessStep from "./steps/AcessStep";
 import ReviewStep from "./steps/ReviewStep";
 
 export default function CreateUserModal({

@@ -4,7 +4,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useState } from "react";
-import CreateUserModal from "../features/employees/CreateUserModal";
+import CreateUserModal from "../features/employee/CreateUserModal";
 const employeesData = [
   {
     id: "EMP001",
