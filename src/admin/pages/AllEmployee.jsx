@@ -1,8 +1,6 @@
 import {
   Search,
   Plus,
-  MoreHorizontal,
-  Mail,
   Eye,
 } from "lucide-react";
 import { useState } from "react";
@@ -83,35 +81,35 @@ const employeesData = [
 ];
 
 const AllEmployee = () => {
-const [search, setSearch] = useState("");
-const [filter, setFilter] = useState("All");
-const filteredEmployees = employeesData.filter((employee) => {
-  const matchesSearch =
-    employee.name.toLowerCase().includes(search.toLowerCase()) ||
-    employee.email.toLowerCase().includes(search.toLowerCase()) ||
-    employee.role.toLowerCase().includes(search.toLowerCase()) ||
-    employee.department.toLowerCase().includes(search.toLowerCase()) ||
-    employee.manager.toLowerCase().includes(search.toLowerCase());
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
+  const filteredEmployees = employeesData.filter((employee) => {
+    const matchesSearch =
+      employee.name.toLowerCase().includes(search.toLowerCase()) ||
+      employee.email.toLowerCase().includes(search.toLowerCase()) ||
+      employee.role.toLowerCase().includes(search.toLowerCase()) ||
+      employee.department.toLowerCase().includes(search.toLowerCase()) ||
+      employee.manager.toLowerCase().includes(search.toLowerCase());
 
-  const matchesFilter =
-    filter === "All" ||
-    employee.role === filter ||
-    (filter === "Manager & HR" &&
-      (employee.role === "Manager" || employee.role === "HR"));
+    const matchesFilter =
+      filter === "All" ||
+      employee.role === filter ||
+      (filter === "Manager & HR" &&
+        (employee.role === "Manager" || employee.role === "HR"));
 
-  return matchesSearch && matchesFilter;
-});
+    return matchesSearch && matchesFilter;
+  });
 
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen text-black">
 
       {/* HEADER */}
-      <div className="flex flex-col gap-4 px-4 py-5 sm:px-6 sm:py-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 py-5  sm:py-3 md:flex-row md:items-center md:justify-between">
 
         <div>
           <h1 className="text-xl font-semibold sm:text-2xl">
-            Employees
+            All Employees
           </h1>
 
           <p className="mt-1 text-sm text-gray-500">
@@ -129,7 +127,7 @@ const filteredEmployees = employeesData.filter((employee) => {
             rounded-lg
             bg-black
             px-4
-            py-2.5
+            py-2
             text-sm
             font-medium
             text-white
@@ -146,9 +144,9 @@ const filteredEmployees = employeesData.filter((employee) => {
 
 
       {/* SEARCH */}
-      <div className="px-4 sm:px-6">
+      <div className="">
 
-        <div className="rounded-xl border border-gray-200 p-3">
+        <div className="rounded-xl border border-gray-200 p-1">
 
           <div className="relative">
 
@@ -166,7 +164,7 @@ const filteredEmployees = employeesData.filter((employee) => {
                 w-full
                 rounded-lg
                 bg-gray-100
-                py-3
+                py-2 sm:py-3
                 pl-10
                 pr-4
                 text-sm
@@ -185,7 +183,7 @@ const filteredEmployees = employeesData.filter((employee) => {
 
 
       {/* FILTER TYPE */}
-      <div className="mt-5 px-4 sm:px-6">
+      <div className="mt-5">
 
         <div
           className="
@@ -196,38 +194,36 @@ const filteredEmployees = employeesData.filter((employee) => {
             border
             border-gray-200
             p-1
+            gap-2
             sm:w-fit
           "
         >
 
           <button
-           className={`shrink-0 rounded-md px-4 py-2 text-sm ${
-  filter === "All"
-    ? "bg-black text-white"
-    : "text-gray-500 hover:bg-gray-100"
-}`}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === "All"
+              ? "bg-black text-white"
+              : "text-gray-500 hover:bg-gray-100"
+              }`}
             onClick={() => setFilter("All")}
           >
             All
           </button>
 
           <button
-          className={`shrink-0 rounded-md px-4 py-2 text-sm ${
-  filter === "Employee"
-    ? "bg-black text-white"
-    : "text-gray-500 hover:bg-gray-100"
-}`}
-             onClick={() => setFilter("Employee")}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === "Employee"
+              ? "bg-black text-white"
+              : "text-gray-500 hover:bg-gray-100"
+              }`}
+            onClick={() => setFilter("Employee")}
           >
             Employee
           </button>
 
           <button
-          className={`shrink-0 rounded-md px-4 py-2 text-sm ${
-  filter === "Manager & HR"
-    ? "bg-black text-white"
-    : "text-gray-500 hover:bg-gray-100"
-}`}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === "Manager & HR"
+              ? "bg-black text-white"
+              : "text-gray-500 hover:bg-gray-100"
+              }`}
             onClick={() => setFilter("Manager & HR")}
           >
             Manager & HR
@@ -238,12 +234,12 @@ const filteredEmployees = employeesData.filter((employee) => {
       </div>
 
       {/* Employee count */}
-<p className="mt-3 px-4 text-sm text-gray-500 sm:px-6">
-  {filteredEmployees.length}{" "}
-  {filteredEmployees.length === 1 ? "Employee" : "Employees"}
-</p>
+      <p className="mt-3 text-sm text-gray-500">
+        {filteredEmployees.length}{" "}
+        {filteredEmployees.length === 1 ? "Employee" : "Employees"}
+      </p>
       {/* EMPLOYEE TABLE */}
-      <div className="mt-5 px-4 pb-6 sm:px-6">
+      <div className="mt-5  pb-6">
 
         {/* Horizontal scroll only when required */}
         <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
@@ -274,16 +270,16 @@ const filteredEmployees = employeesData.filter((employee) => {
 
 
             {/* EMPLOYEES */}
-           {filteredEmployees.length === 0 ? (
-  <div className="p-8 text-center text-sm text-gray-500">
-    No employees found.
-  </div>
-) : (
-  filteredEmployees.map((employee) => (
+            {filteredEmployees.length === 0 ? (
+              <div className="p-8 text-center text-sm text-gray-500">
+                No employees found.
+              </div>
+            ) : (
+              filteredEmployees.map((employee) => (
 
-    <div
-      key={employee.id}
-      className="
+                <div
+                  key={employee.id}
+                  className="
         grid
         grid-cols-5
         gap-4
@@ -292,57 +288,57 @@ const filteredEmployees = employeesData.filter((employee) => {
         p-4
         last:border-b-0
       "
-    >
+                >
 
-      {/* Name + Role */}
-      <div className="min-w-0">
+                  {/* Name + Role */}
+                  <div className="min-w-0">
 
-        <h3 className="truncate font-semibold">
-          {employee.name}
-        </h3>
+                    <h3 className="truncate font-semibold">
+                      {employee.name}
+                    </h3>
 
-        <p className="text-sm text-gray-500">
-          {employee.role}
-        </p>
+                    <p className="text-sm text-gray-500">
+                      {employee.role}
+                    </p>
 
-      </div>
-
-
-      {/* Email */}
-      <div className="min-w-0">
-
-        <p className="truncate text-sm">
-          {employee.email}
-        </p>
-
-      </div>
+                  </div>
 
 
-      {/* Department */}
-      <div className="min-w-0">
+                  {/* Email */}
+                  <div className="min-w-0">
 
-        <p className="truncate text-sm">
-          {employee.department}
-        </p>
+                    <p className="truncate text-sm">
+                      {employee.email}
+                    </p>
 
-      </div>
-
-
-      {/* Manager */}
-      <div className="min-w-0">
-
-        <p className="truncate text-sm">
-          {employee.manager}
-        </p>
-
-      </div>
+                  </div>
 
 
-      {/* Status */}
-      <div className=" flex gap-4">
+                  {/* Department */}
+                  <div className="min-w-0">
 
-        <span
-          className={`
+                    <p className="truncate text-sm">
+                      {employee.department}
+                    </p>
+
+                  </div>
+
+
+                  {/* Manager */}
+                  <div className="min-w-0">
+
+                    <p className="truncate text-sm">
+                      {employee.manager}
+                    </p>
+
+                  </div>
+
+
+                  {/* Status */}
+                  <div className=" flex gap-4">
+
+                    <span
+                      className={`
             inline-flex
             rounded-full
             px-2.5
@@ -350,22 +346,21 @@ const filteredEmployees = employeesData.filter((employee) => {
             text-xs
             font-medium
             text-center w-15 h-8
-            ${
-              employee.status === "Active"
-                ? "bg-green-50 text-green-700"
-                : "bg-gray-100 text-gray-500"
-            }
+            ${employee.status === "Active"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                        }
           `}
-        >
-          {employee.status}
-        </span>
-        <Eye/>
-      </div>
+                    >
+                      {employee.status}
+                    </span>
+                    <Eye />
+                  </div>
 
-    </div>
+                </div>
 
-  ))
-)}
+              ))
+            )}
           </div>
 
         </div>
