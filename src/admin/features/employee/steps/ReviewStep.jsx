@@ -1,28 +1,81 @@
 export default function ReviewStep({ data }) {
   return (
-    <div>
-      <h2 className="mb-4 text-xl font-semibold">
-        Review & Create
-      </h2>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-xl font-semibold">
+          Review & Create
+        </h2>
 
-      <div className="space-y-2">
-        <p><b>Name:</b> {data.name}</p>
-        <p><b>Email:</b> {data.email}</p>
-        <p><b>Phone:</b> {data.phone}</p>
+        <p className="text-sm text-gray-500">
+          Review all details and create the account
+        </p>
+      </div>
 
-        <p><b>Employee ID:</b> {data.employeeId}</p>
-        <p><b>Joining Date:</b> {data.joiningDate}</p>
-        <p><b>Employment Type:</b> {data.employmentType}</p>
+      <div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2">
+        <p>
+          <b>Name:</b>{" "}
+          {data.firstName} {data.lastName}
+        </p>
 
-        <p><b>Job Title:</b> {data.jobTitle}</p>
-        <p><b>Department:</b> {data.department}</p>
-        <p><b>Manager:</b> {data.manager}</p>
+        <p>
+          <b>Email:</b> {data.email}
+        </p>
 
-        <p><b>Location:</b> {data.location}</p>
-        <p><b>Salary:</b> {data.salary}</p>
-        <p><b>Payroll:</b> {data.payroll}</p>
+        <p>
+          <b>Phone:</b> {data.phone}
+        </p>
 
-        <p><b>Access:</b> {data.access}</p>
+        <p>
+          <b>Employee ID:</b> {data.id}
+        </p>
+
+        <p>
+          <b>Department:</b> {data.department}
+        </p>
+
+        <p>
+          <b>Designation:</b> {data.designation}
+        </p>
+
+        <p>
+          <b>Joining Date:</b> {data.joiningDate}
+        </p>
+
+        <p>
+          <b>Role:</b> {data.role}
+        </p>
+
+        <p>
+          <b>Manager:</b> {data.manager}
+        </p>
+
+        <p>
+          <b>Team:</b> {data.team}
+        </p>
+
+        <p>
+          <b>Work Location:</b> {data.workLocation}
+        </p>
+
+        <p>
+          <b>Employment Type:</b> {data.employmentType}
+        </p>
+
+        <p>
+          <b>Salary:</b> {data.salary}
+        </p>
+
+        <p>
+          <b>Pay Frequency:</b> {data.payFrequency}
+        </p>
+
+        <p>
+          <b>Login Email:</b> {data.loginEmail}
+        </p>
+
+        <p>
+          <b>System Access:</b> {data.systemAccess}
+        </p>
       </div>
     </div>
   );

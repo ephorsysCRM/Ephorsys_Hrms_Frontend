@@ -1,38 +1,69 @@
 export default function EmploymentStep({ data, setData }) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Employment Details</h2>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-xl font-semibold">
+          Employment Details
+        </h2>
+
+        <p className="text-sm text-gray-500">
+          Employee ID, department, designation, joining date
+        </p>
+      </div>
 
       <input
-        className="w-full border p-2"
+        className="w-full rounded-lg border p-3"
         placeholder="Employee ID"
-        value={data.employeeId}
+        value={data.id}
         onChange={(e) =>
-          setData({ ...data, employeeId: e.target.value })
+          setData({ ...data, id: e.target.value })
         }
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <select
+          className="rounded-lg border p-3"
+          value={data.department}
+          onChange={(e) =>
+            setData({
+              ...data,
+              department: e.target.value,
+            })
+          }
+        >
+          <option value="">Select Department</option>
+          <option value="Development">Development</option>
+          <option value="Design">Design</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Human Resources">
+            Human Resources
+          </option>
+        </select>
+
+        <input
+          className="rounded-lg border p-3"
+          placeholder="Designation"
+          value={data.designation}
+          onChange={(e) =>
+            setData({
+              ...data,
+              designation: e.target.value,
+            })
+          }
+        />
+      </div>
 
       <input
         type="date"
-        className="w-full border p-2"
+        className="w-full rounded-lg border p-3"
         value={data.joiningDate}
         onChange={(e) =>
-          setData({ ...data, joiningDate: e.target.value })
+          setData({
+            ...data,
+            joiningDate: e.target.value,
+          })
         }
       />
-
-      <select
-        className="w-full border p-2"
-        value={data.employmentType}
-        onChange={(e) =>
-          setData({ ...data, employmentType: e.target.value })
-        }
-      >
-        <option value="">Employment Type</option>
-        <option value="Full Time">Full Time</option>
-        <option value="Part Time">Part Time</option>
-        <option value="Contract">Contract</option>
-      </select>
     </div>
   );
 }

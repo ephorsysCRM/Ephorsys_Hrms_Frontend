@@ -102,7 +102,7 @@ const AllEmployee = () => {
 
 
   const [showModal, setShowModal] = useState(false);
-   const [employees, setEmployees] = useState(employeesData);
+  const [employees, setEmployees] = useState(employeesData);
   return (
     <div className="min-h-screen text-black">
 
@@ -137,7 +137,7 @@ const AllEmployee = () => {
             hover:bg-gray-800
             sm:w-auto
           "
-           onClick={() => setShowModal(true)}
+          onClick={() => setShowModal(true)}
         >
           <Plus size={17} />
           Add Employee
@@ -358,7 +358,7 @@ const AllEmployee = () => {
                       {employee.status}
                     </span>
                     <Eye className="cursor-pointer text-green-900 transition hover:text-black" size={19}
-                    onClick={() => console.log(employee)}
+                      onClick={() => console.log(employee)}
                     />
                   </div>
 
@@ -371,18 +371,18 @@ const AllEmployee = () => {
         </div>
 
       </div>
-       {showModal && (
-  <CreateUserModal
-    role="Employee"
-    onClose={() => setShowModal(false)}
-    onCreate={(data) => {
-      setEmployees([...employees, data]);
-      setShowModal(false);
-    }}
-  />
-)}
+      {showModal && (
+        <CreateUserModal
+          role="Employee"
+          onClose={() => setShowModal(false)}
+          onCreate={(data) => {
+            setEmployees([...employees, data]);
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
-    
+
   );
 };
 
