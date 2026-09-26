@@ -28,19 +28,6 @@ const NAV_ITEMS = [
         icon: LayoutDashboard,
     },
 
-    {
-        label: "Employees",
-        icon: Users,
-        children: [
-            {
-                label: "All Employees",
-                path: "/all-employees",
-                icon: UserRound,
-            },
-            
-            
-        ],
-    },
      {
         label: "Departments",
         icon: Building2,
@@ -55,6 +42,20 @@ const NAV_ITEMS = [
         ],
     },
 
+    {
+        label: "Employees",
+        icon: Users,
+        children: [
+            {
+                label: "All Employees",
+                path: "/all-employees",
+                icon: UserRound,
+            },
+            
+            
+        ],
+    },
+    
     {
         label: "Attendance",
         icon: CalendarCheck,

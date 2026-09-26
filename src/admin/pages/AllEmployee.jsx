@@ -1,9 +1,13 @@
 import {
   Search,
   Plus,
+  MoreHorizontal,
   Eye,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const employeesData = [
   {
@@ -83,6 +87,8 @@ const employeesData = [
 const AllEmployee = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const navigate = useNavigate();
+  const [openMenu, setOpenMenu] = useState(null);
   const filteredEmployees = employeesData.filter((employee) => {
     const matchesSearch =
       employee.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -250,7 +256,7 @@ const AllEmployee = () => {
             <div
               className="
                 grid
-                grid-cols-5
+                grid-cols-6
                 gap-4
                 border-b
                 border-gray-200
@@ -266,6 +272,7 @@ const AllEmployee = () => {
               <div>Department</div>
               <div>Manager</div>
               <div>Status</div>
+              <div>Action</div>
             </div>
 
 
@@ -281,7 +288,7 @@ const AllEmployee = () => {
                   key={employee.id}
                   className="
         grid
-        grid-cols-5
+        grid-cols-6
         gap-4
         border-b
         border-gray-200
@@ -335,7 +342,7 @@ const AllEmployee = () => {
 
 
                   {/* Status */}
-                  <div className=" flex gap-4">
+                  <div>
 
                     <span
                       className={`
@@ -354,7 +361,45 @@ const AllEmployee = () => {
                     >
                       {employee.status}
                     </span>
-                    <Eye />
+
+                  </div>
+
+
+                  {/* Actions */}
+                  <div className="relative">
+                    <button
+                      onClick={() =>
+                        setOpenMenu(
+                          openMenu === employee.id ? null : employee.id
+                        )
+                      }
+                      className="rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-black"
+                    >
+                      <MoreHorizontal size={20} />
+                    </button>
+
+                    {openMenu === employee.id && (
+                      <div className="absolute right-0 top-10 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
+                        <button
+                          onClick={() => navigate(`/employees/${employee.id}`, {
+                            state: { employee },
+                          })}
+                          className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100">
+                          <Eye size={16} />
+                          View
+                        </button>
+
+                        <button className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100">
+                          <Pencil size={16} />
+                          Edit
+                        </button>
+
+                        <button className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                 </div>
