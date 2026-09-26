@@ -7,6 +7,7 @@ import ProtectedRoute from "./protected.routes";
 import AdminLayout from "../layout/AdminLayout";
 import NotFound from "../NotFound";
 import AllEmployee from "../admin/pages/AllEmployee";
+import EmployeeProfile from "../admin/pages/EmployeeProfile";
 
 const AdminRoutes = (
     <Route path="/">
@@ -29,7 +30,7 @@ const AdminRoutes = (
                     path="all-employees"
                     element={<AllEmployee />}
                 />
-
+                  <Route path="/employees/:id" element={<EmployeeProfile />} />
             </Route>
         </Route>
 
