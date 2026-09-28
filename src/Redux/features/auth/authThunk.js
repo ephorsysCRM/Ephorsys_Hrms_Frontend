@@ -61,12 +61,6 @@ export const loginAdmin = (formData) => async (dispatch) => {
 // =====================================================
 // RESTORE SESSION
 // =====================================================
-//
-// Called when application starts/reloads.
-//
-// Refresh token is automatically sent by browser
-// because api.js has withCredentials: true.
-//
 
 export const restoreAdminSession = () => async (dispatch) => {
   try {
@@ -76,17 +70,21 @@ export const restoreAdminSession = () => async (dispatch) => {
       "/admin/refresh-token"
     );
 
-    const accessToken = data.data.accessToken;
+    const accessToken =
+      data.data.accessToken;
 
-    // Fetch current admin profile
-    // const profileResponse = await api.get(
-    //   "/admin/profile",
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`,
-    //     },
-    //   }
-    // );
+    // -----------------------------------------------
+    // GET ADMIN PROFILE
+    // -----------------------------------------------
+
+    const profileResponse = await api.get(
+      "/admin/profile",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
     dispatch(
       sessionRestored({
@@ -108,6 +106,116 @@ export const restoreAdminSession = () => async (dispatch) => {
 };
 
 // =====================================================
+// GET ADMIN PROFILE
+// =====================================================
+
+export const getAdminProfile = () => async (
+  dispatch,
+  getState
+) => {
+  try {
+    dispatch(authStart());
+
+    const accessToken =
+      getState().auth.accessToken;
+
+    const { data } = await api.get(
+      "/admin/profile",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    dispatch(
+      sessionRestored({
+        admin: data.data,
+        accessToken,
+      })
+    );
+
+    return {
+      success: true,
+      data: data.data,
+    };
+
+  } catch (error) {
+
+    const msg =
+      error.response?.data?.message ||
+      "Failed to load profile";
+
+    dispatch(authFailure(msg));
+
+    return {
+      success: false,
+      message: msg,
+    };
+  }
+};
+
+// =====================================================
+// UPDATE ADMIN PROFILE
+// =====================================================
+
+export const updateAdminProfile =
+  (adminId, formData) =>
+    async (dispatch, getState) => {
+      try {
+        dispatch(authStart());
+
+        const accessToken =
+          getState().auth.accessToken;
+
+        const { data } = await api.put(
+          `/admin/profile/${adminId}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // -----------------------------------------------
+        // UPDATE REDUX ADMIN DATA
+        // -----------------------------------------------
+
+        dispatch(
+          sessionRestored({
+            admin: data.data,
+            accessToken,
+          })
+        );
+
+        toast.success(
+          data.message ||
+          "Profile updated successfully"
+        );
+
+        return {
+          success: true,
+          data: data.data,
+        };
+      } catch (error) {
+        const msg =
+          error.response?.data?.message ||
+          "Profile update failed";
+
+        dispatch(authFailure(msg));
+
+        toast.error(msg);
+
+        return {
+          success: false,
+          message: msg,
+        };
+      }
+    };
+
+// =====================================================
 // LOGOUT
 // =====================================================
 
@@ -127,9 +235,6 @@ export const logOutAdmin = () => async (dispatch) => {
       success: true,
     };
   } catch (error) {
-    // Even if server logout fails,
-    // clear frontend authentication state.
-
     dispatch(logoutSuccess());
 
     const msg =
@@ -162,9 +267,7 @@ export const sendForgotPasswordOtp =
       );
 
       dispatch(
-        otpSentSuccess(
-          email
-        )
+        otpSentSuccess(email)
       );
 
       toast.success(
