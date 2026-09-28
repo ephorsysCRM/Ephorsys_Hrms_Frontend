@@ -1,11 +1,8 @@
-import { useState } from "react";
-
 export default function WorkPayrollDetails({
   data,
   onChange,
+  errors = {},
 }) {
-  const [errors, setErrors] = useState({});
-
   // =========================================
   // UPDATE FIELD
   // =========================================
@@ -15,13 +12,6 @@ export default function WorkPayrollDetails({
       ...data,
       [field]: value,
     });
-
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
-    }
   };
 
   // =========================================
@@ -122,72 +112,6 @@ export default function WorkPayrollDetails({
     grossSalary + employerPfAmount;
 
   // =========================================
-  // VALIDATION
-  // =========================================
-
-  const validate = () => {
-    const newErrors = {};
-
-    // Basic salary
-    if (!data.basicSalary) {
-      newErrors.basicSalary =
-        "Basic salary is required.";
-    } else if (basicSalary < 0) {
-      newErrors.basicSalary =
-        "Basic salary cannot be negative.";
-    }
-
-    // HRA
-    if (!data.hraPercentage) {
-      newErrors.hraPercentage =
-        "HRA percentage is required.";
-    } else if (
-      hraPercentage < 0 ||
-      hraPercentage > 100
-    ) {
-      newErrors.hraPercentage =
-        "HRA must be between 0 and 100%.";
-    }
-
-    // EPF
-    if (
-      epfPercentage < 0 ||
-      epfPercentage > 100
-    ) {
-      newErrors.epfPercentage =
-        "EPF must be between 0 and 100%.";
-    }
-
-    // Professional Tax
-    if (
-      professionalTaxPercentage < 0 ||
-      professionalTaxPercentage > 100
-    ) {
-      newErrors.professionalTaxPercentage =
-        "PT must be between 0 and 100%.";
-    }
-
-    // TDS
-    if (tds < 0) {
-      newErrors.tds =
-        "TDS cannot be negative.";
-    }
-
-    // Employer PF
-    if (
-      employerPfPercentage < 0 ||
-      employerPfPercentage > 100
-    ) {
-      newErrors.employerPfPercentage =
-        "Employer PF must be between 0 and 100%.";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // =========================================
   // FORMAT CURRENCY
   // =========================================
 
@@ -207,8 +131,8 @@ export default function WorkPayrollDetails({
   // =========================================
 
   const inputClass = (field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2.5 
-     outline-none transition 
+    `mt-2 w-full rounded-lg border px-3 py-2.5
+     outline-none transition
      ${
        errors[field]
          ? "border-red-500 focus:border-red-500"
@@ -293,7 +217,6 @@ export default function WorkPayrollDetails({
                     e.target.value
                   )
                 }
-                onBlur={validate}
                 placeholder="50000"
                 className={`${inputClass(
                   "basicSalary"
@@ -332,9 +255,10 @@ export default function WorkPayrollDetails({
                       e.target.value
                     )
                   }
-                  onBlur={validate}
                   placeholder="40"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-8 outline-none focus:border-black"
+                  className={`${inputClass(
+                    "hraPercentage"
+                  )} pr-8`}
                 />
 
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -493,9 +417,10 @@ export default function WorkPayrollDetails({
                       e.target.value
                     )
                   }
-                  onBlur={validate}
                   placeholder="12"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-8 outline-none focus:border-black"
+                  className={`${inputClass(
+                    "epfPercentage"
+                  )} pr-8`}
                 />
 
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -544,9 +469,10 @@ export default function WorkPayrollDetails({
                       e.target.value
                     )
                   }
-                  onBlur={validate}
                   placeholder="2"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-8 outline-none focus:border-black"
+                  className={`${inputClass(
+                    "professionalTaxPercentage"
+                  )} pr-8`}
                 />
 
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -598,7 +524,6 @@ export default function WorkPayrollDetails({
                     e.target.value
                   )
                 }
-                onBlur={validate}
                 placeholder="2500"
                 className={`${inputClass(
                   "tds"
@@ -702,9 +627,10 @@ export default function WorkPayrollDetails({
                       e.target.value
                     )
                   }
-                  onBlur={validate}
                   placeholder="12"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-8 outline-none focus:border-black"
+                  className={`${inputClass(
+                    "employerPfPercentage"
+                  )} pr-8`}
                 />
 
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">

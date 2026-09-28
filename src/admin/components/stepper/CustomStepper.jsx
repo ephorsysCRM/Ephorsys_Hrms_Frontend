@@ -6,8 +6,8 @@ export default function CustomStepper({
   onStepClick,
 }) {
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex min-w-max items-center px-1 sm:min-w-0 sm:w-full">
+    <div className="w-full overflow-x-auto scrollbar-none">
+      <div className="flex min-w-max items-center py-2 sm:min-w-0 sm:w-full">
         {steps.map((step, index) => {
           const isActive = index === activeStep;
           const isCompleted = index < activeStep;

@@ -13,6 +13,15 @@ import DocUpload from "../components/steps/DocUpload";
 import AccessPermission from "../components/steps/AccessPermission";
 
 import { validateInfo } from "../utils/ValidateInfo";
+import { validateContactInfo } from "../utils/ValidateContactInfo";
+import { validateJobInfo } from "../utils/ValidateJobInfo";
+import { validateBankInfo } from "../utils/ValidateBankInfo";
+import { validatePayRoll } from "../utils/ValidatePayRoll";
+import { validateEducation } from "../utils/ValidateEducation";
+import { validateExperience } from "../utils/ValidateExperience";
+import { validateDoc } from "../utils/ValidateDoc";
+import { validatePermission } from "../utils/ValidatePermission";
+import AccessPermissions from "../components/steps/AccessPermission";
 
 export default function AddEmployee() {
   const navigate = useNavigate();
@@ -33,11 +42,17 @@ export default function AddEmployee() {
 
     // Step 2: Contact Information
     contact: {
+      personalEmail: "",
+      officialEmail: "",
+      mobile: "",
+      alternateMobile: "",
       emergencyContactName: "",
       emergencyContactNumber: "",
-      relationship: "",
-      alternateEmail: "",
-      alternatePhone: "",
+      city: "",
+      state: "",
+      pinCode: "",
+      currentAddress: "",
+      permanentAddress: "",
     },
 
     // Step 3: Job Information
@@ -100,19 +115,79 @@ export default function AddEmployee() {
 
     // Step 8: Document Verification
     documents: {
-      files: [],
+      aadhaar: [],
+      pan: [],
+      resume: [],
+      offerLetter: [],
+      experienceLetter: [],
+      signedNda: [],
+      idCard: [],
     },
 
     // Step 9: Access & Permissions
     access: {
-      loginEmail: "",
-      username: "",
       password: "",
       confirmPassword: "",
-      systemRole: "",
-      permissions: [],
     },
   });
+
+  const handleContinue = () => {
+    let errors = {};
+
+    switch (activeStep) {
+      case 0:
+        errors = validateInfo(formData.basic);
+        break;
+
+      case 1:
+        errors = validateContactInfo(formData.contact);
+        break;
+
+      case 2:
+        errors = validateJobInfo(formData.employment);
+        break;
+
+      case 3:
+        errors = validatePayRoll(formData.payroll);
+        break;
+
+      case 4:
+        errors = validateBankInfo(formData.bank);
+        break;
+
+      case 5:
+        errors = validateEducation(formData.education);
+        break;
+      case 6:
+        errors = validateExperience(formData.experience);
+        break;
+      case 7:
+        errors = validateDoc(
+          formData.documents
+        );
+        break;
+      case 8:
+        errors = validatePermission(
+          formData.access
+        );
+        break;
+
+      default:
+        errors = {};
+    }
+
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    setActiveStep((prev) =>
+      Math.min(prev + 1, steps.length - 1)
+    );
+
+    setValidationErrors({});
+  };
 
   const steps = [
     { title: "Basic Information" },
@@ -137,39 +212,10 @@ export default function AddEmployee() {
   };
 
   // Receive validation errors from child component
-  const handleValidation = (errors) => {
-    setValidationErrors(errors);
-  };
+  // const handleValidation = (errors) => {
+  //   setValidationErrors(errors);
+  // };
 
-  // Continue button
-  const handleContinue = () => {
-    let errors = {};
-
-    /*
-     * Validate the current step.
-     *
-     * Currently Basic Information has the validation
-     * function validateInfo(), so validate formData.basic.
-     */
-    if (activeStep === 0) {
-      errors = validateInfo(formData.basic);
-
-      setValidationErrors(errors);
-
-      // Stop here if validation errors exist
-      if (Object.keys(errors).length > 0) {
-        return;
-      }
-    }
-
-    // Move to next step only when current step is valid
-    setActiveStep((prev) =>
-      Math.min(prev + 1, steps.length - 1)
-    );
-
-    // Clear errors after successfully moving forward
-    setValidationErrors({});
-  };
 
   // Back button
   const previousStep = () => {
@@ -204,10 +250,7 @@ export default function AddEmployee() {
 
   // Final submit
   const createEmployee = () => {
-    /*
-     * Validate Basic Information one more time
-     * before creating the employee.
-     */
+
     const basicErrors = validateInfo(formData.basic);
 
     if (Object.keys(basicErrors).length > 0) {
@@ -228,9 +271,9 @@ export default function AddEmployee() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen w-full md:p-6">
       <div className="w-full">
-        <div className="w-full rounded-xl bg-white p-4 shadow-sm md:p-6">
+        <div className="w-full p-3 md:p-6">
 
           {/* Stepper */}
           <CustomStepper
@@ -239,7 +282,7 @@ export default function AddEmployee() {
             onStepClick={handleStepClick}
           />
 
-          <div className="my-6 border-t border-gray-200" />
+          <div className="my-6 border-t border-gray-300" />
 
           {/* Active Step Content */}
           <div className="min-h-100">
@@ -248,10 +291,10 @@ export default function AddEmployee() {
             {activeStep === 0 && (
               <BasicInformation
                 data={formData.basic}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("basic", data)
                 }
-                onValidation={handleValidation}
               />
             )}
 
@@ -259,6 +302,7 @@ export default function AddEmployee() {
             {activeStep === 1 && (
               <ContactInfo
                 data={formData.contact}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("contact", data)
                 }
@@ -269,6 +313,7 @@ export default function AddEmployee() {
             {activeStep === 2 && (
               <JobInfo
                 data={formData.employment}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("employment", data)
                 }
@@ -279,6 +324,7 @@ export default function AddEmployee() {
             {activeStep === 3 && (
               <PayRollInfo
                 data={formData.payroll}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("payroll", data)
                 }
@@ -289,6 +335,7 @@ export default function AddEmployee() {
             {activeStep === 4 && (
               <BankInfo
                 data={formData.bank}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("bank", data)
                 }
@@ -299,6 +346,7 @@ export default function AddEmployee() {
             {activeStep === 5 && (
               <Education
                 data={formData.education}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("education", data)
                 }
@@ -309,6 +357,7 @@ export default function AddEmployee() {
             {activeStep === 6 && (
               <ExperienceInfo
                 data={formData.experience}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("experience", data)
                 }
@@ -319,6 +368,7 @@ export default function AddEmployee() {
             {activeStep === 7 && (
               <DocUpload
                 data={formData.documents}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("documents", data)
                 }
@@ -327,8 +377,9 @@ export default function AddEmployee() {
 
             {/* Step 9 */}
             {activeStep === 8 && (
-              <AccessPermission
+              <AccessPermissions
                 data={formData.access}
+                errors={validationErrors}
                 onChange={(data) =>
                   updateSection("access", data)
                 }

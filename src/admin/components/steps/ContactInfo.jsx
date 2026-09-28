@@ -1,105 +1,8 @@
-import { useState } from "react";
-
-/* --------------------------------
-   Validation
--------------------------------- */
-
-export const validateContactInfo = (data) => {
-  const errors = {};
-
-  /* Personal Email */
-  if (!data.personalEmail?.trim()) {
-    errors.personalEmail = "Personal email is required.";
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      data.personalEmail.trim()
-    )
-  ) {
-    errors.personalEmail = "Please enter a valid email address.";
-  }
-
-  /* Official Email */
-  if (!data.officialEmail?.trim()) {
-    errors.officialEmail = "Official email is required.";
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      data.officialEmail.trim()
-    )
-  ) {
-    errors.officialEmail = "Please enter a valid email address.";
-  }
-
-  /* Mobile Number */
-  if (!data.mobile?.trim()) {
-    errors.mobile = "Mobile number is required.";
-  } else if (!/^\d{10}$/.test(data.mobile.trim())) {
-    errors.mobile = "Mobile number must be 10 digits.";
-  }
-
-  /* Alternate Mobile - Optional */
-  if (
-    data.alternateMobile?.trim() &&
-    !/^\d{10}$/.test(data.alternateMobile.trim())
-  ) {
-    errors.alternateMobile =
-      "Alternate mobile number must be 10 digits.";
-  }
-
-  /* Emergency Contact Number - Optional */
-  if (
-    data.emergencyContactNumber?.trim() &&
-    !/^\d{10}$/.test(
-      data.emergencyContactNumber.trim()
-    )
-  ) {
-    errors.emergencyContactNumber =
-      "Emergency contact number must be 10 digits.";
-  }
-
-  /* City */
-  if (!data.city?.trim()) {
-    errors.city = "City is required.";
-  }
-
-  /* State */
-  if (!data.state?.trim()) {
-    errors.state = "State is required.";
-  }
-
-  /* PIN Code */
-  if (!data.pinCode?.trim()) {
-    errors.pinCode = "PIN code is required.";
-  } else if (!/^\d{6}$/.test(data.pinCode.trim())) {
-    errors.pinCode = "PIN code must be 6 digits.";
-  }
-
-  /* Current Address */
-  if (!data.currentAddress?.trim()) {
-    errors.currentAddress =
-      "Current address is required.";
-  }
-
-  /* Permanent Address */
-  if (!data.permanentAddress?.trim()) {
-    errors.permanentAddress =
-      "Permanent address is required.";
-  }
-
-  return errors;
-};
-
-
-/* --------------------------------
-   Component
--------------------------------- */
-
 export default function ContactInfo({
   data,
   onChange,
+  errors = {},
 }) {
-  const [errors, setErrors] = useState({});
-
-
   /* --------------------------------
      Update Field
   -------------------------------- */
@@ -109,30 +12,7 @@ export default function ContactInfo({
       ...data,
       [field]: value,
     });
-
-    // Remove error once user starts correcting it
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
-    }
   };
-
-
-  /* --------------------------------
-     Validate Field
-  -------------------------------- */
-
-  const validateField = (field) => {
-    const fieldErrors = validateContactInfo(data);
-
-    setErrors((prev) => ({
-      ...prev,
-      [field]: fieldErrors[field] || "",
-    }));
-  };
-
 
   /* --------------------------------
      Label
@@ -153,7 +33,6 @@ export default function ContactInfo({
     </label>
   );
 
-
   /* --------------------------------
      Input Class
   -------------------------------- */
@@ -164,7 +43,6 @@ export default function ContactInfo({
         ? "border-red-500 focus:border-red-500"
         : "border-gray-300 focus:border-black"
     }`;
-
 
   return (
     <div>
@@ -181,14 +59,9 @@ export default function ContactInfo({
         </p>
       </div>
 
-
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
 
-
-        {/* ================================
-            PERSONAL EMAIL
-        ================================= */}
-
+        {/* PERSONAL EMAIL */}
         <div>
           <Label required>
             Personal Email
@@ -203,13 +76,8 @@ export default function ContactInfo({
                 e.target.value
               )
             }
-            onBlur={() =>
-              validateField("personalEmail")
-            }
             placeholder="employee@gmail.com"
-            className={inputClass(
-              "personalEmail"
-            )}
+            className={inputClass("personalEmail")}
           />
 
           {errors.personalEmail && (
@@ -219,11 +87,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            OFFICIAL EMAIL
-        ================================= */}
-
+        {/* OFFICIAL EMAIL */}
         <div>
           <Label required>
             Official Email
@@ -238,13 +102,8 @@ export default function ContactInfo({
                 e.target.value
               )
             }
-            onBlur={() =>
-              validateField("officialEmail")
-            }
             placeholder="employee@company.com"
-            className={inputClass(
-              "officialEmail"
-            )}
+            className={inputClass("officialEmail")}
           />
 
           {errors.officialEmail && (
@@ -254,11 +113,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            MOBILE
-        ================================= */}
-
+        {/* MOBILE */}
         <div>
           <Label required>
             Mobile Number
@@ -275,9 +130,6 @@ export default function ContactInfo({
                 e.target.value.replace(/\D/g, "")
               )
             }
-            onBlur={() =>
-              validateField("mobile")
-            }
             placeholder="Enter mobile number"
             className={inputClass("mobile")}
           />
@@ -289,11 +141,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            ALTERNATE MOBILE
-        ================================= */}
-
+        {/* ALTERNATE MOBILE */}
         <div>
           <Label>
             Alternate Mobile Number
@@ -310,13 +158,8 @@ export default function ContactInfo({
                 e.target.value.replace(/\D/g, "")
               )
             }
-            onBlur={() =>
-              validateField("alternateMobile")
-            }
             placeholder="Enter alternate number"
-            className={inputClass(
-              "alternateMobile"
-            )}
+            className={inputClass("alternateMobile")}
           />
 
           {errors.alternateMobile && (
@@ -326,11 +169,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            EMERGENCY CONTACT NAME
-        ================================= */}
-
+        {/* EMERGENCY CONTACT NAME */}
         <div>
           <Label>
             Emergency Contact Name
@@ -338,18 +177,11 @@ export default function ContactInfo({
 
           <input
             type="text"
-            value={
-              data.emergencyContactName || ""
-            }
+            value={data.emergencyContactName || ""}
             onChange={(e) =>
               update(
                 "emergencyContactName",
                 e.target.value
-              )
-            }
-            onBlur={() =>
-              validateField(
-                "emergencyContactName"
               )
             }
             placeholder="Enter emergency contact name"
@@ -365,11 +197,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            EMERGENCY CONTACT NUMBER
-        ================================= */}
-
+        {/* EMERGENCY CONTACT NUMBER */}
         <div>
           <Label>
             Emergency Contact Number
@@ -379,18 +207,11 @@ export default function ContactInfo({
             type="tel"
             inputMode="numeric"
             maxLength={10}
-            value={
-              data.emergencyContactNumber || ""
-            }
+            value={data.emergencyContactNumber || ""}
             onChange={(e) =>
               update(
                 "emergencyContactNumber",
                 e.target.value.replace(/\D/g, "")
-              )
-            }
-            onBlur={() =>
-              validateField(
-                "emergencyContactNumber"
               )
             }
             placeholder="Enter emergency number"
@@ -406,11 +227,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            CITY
-        ================================= */}
-
+        {/* CITY */}
         <div>
           <Label required>
             City
@@ -421,9 +238,6 @@ export default function ContactInfo({
             value={data.city || ""}
             onChange={(e) =>
               update("city", e.target.value)
-            }
-            onBlur={() =>
-              validateField("city")
             }
             placeholder="Enter city"
             className={inputClass("city")}
@@ -436,11 +250,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            STATE
-        ================================= */}
-
+        {/* STATE */}
         <div>
           <Label required>
             State
@@ -451,9 +261,6 @@ export default function ContactInfo({
             value={data.state || ""}
             onChange={(e) =>
               update("state", e.target.value)
-            }
-            onBlur={() =>
-              validateField("state")
             }
             placeholder="Enter state"
             className={inputClass("state")}
@@ -466,11 +273,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            PIN CODE
-        ================================= */}
-
+        {/* PIN CODE */}
         <div>
           <Label required>
             PIN Code
@@ -487,9 +290,6 @@ export default function ContactInfo({
                 e.target.value.replace(/\D/g, "")
               )
             }
-            onBlur={() =>
-              validateField("pinCode")
-            }
             placeholder="Enter PIN code"
             className={inputClass("pinCode")}
           />
@@ -501,11 +301,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            CURRENT ADDRESS
-        ================================= */}
-
+        {/* CURRENT ADDRESS */}
         <div className="md:col-span-2">
           <Label required>
             Current Address
@@ -519,14 +315,9 @@ export default function ContactInfo({
                 e.target.value
               )
             }
-            onBlur={() =>
-              validateField("currentAddress")
-            }
             placeholder="Enter current residential address"
             rows={3}
-            className={inputClass(
-              "currentAddress"
-            )}
+            className={inputClass("currentAddress")}
           />
 
           {errors.currentAddress && (
@@ -536,11 +327,7 @@ export default function ContactInfo({
           )}
         </div>
 
-
-        {/* ================================
-            PERMANENT ADDRESS
-        ================================= */}
-
+        {/* PERMANENT ADDRESS */}
         <div className="md:col-span-2">
           <Label required>
             Permanent Address
@@ -554,14 +341,9 @@ export default function ContactInfo({
                 e.target.value
               )
             }
-            onBlur={() =>
-              validateField("permanentAddress")
-            }
             placeholder="Enter permanent residential address"
             rows={3}
-            className={inputClass(
-              "permanentAddress"
-            )}
+            className={inputClass("permanentAddress")}
           />
 
           {errors.permanentAddress && (
