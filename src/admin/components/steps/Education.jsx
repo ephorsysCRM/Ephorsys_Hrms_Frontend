@@ -11,12 +11,12 @@ const emptyEducation = {
 };
 
 export default function Education({ data, onChange }) {
-  // Make sure education is always an array
   const educationList =
     Array.isArray(data) && data.length > 0
       ? data
       : [emptyEducation];
 
+  // Update a specific education field
   const updateEducation = (index, field, value) => {
     const updated = [...educationList];
 
@@ -28,6 +28,7 @@ export default function Education({ data, onChange }) {
     onChange(updated);
   };
 
+  // Add another education
   const addEducation = () => {
     onChange([
       ...educationList,
@@ -38,6 +39,7 @@ export default function Education({ data, onChange }) {
     ]);
   };
 
+  // Remove education
   const removeEducation = (index) => {
     if (educationList.length === 1) return;
 
@@ -48,6 +50,7 @@ export default function Education({ data, onChange }) {
     onChange(updated);
   };
 
+  // Handle multiple PDF documents
   const handleDocuments = (index, files) => {
     const pdfFiles = Array.from(files).filter(
       (file) => file.type === "application/pdf"
@@ -66,12 +69,18 @@ export default function Education({ data, onChange }) {
     onChange(updated);
   };
 
-  const removeDocument = (educationIndex, documentIndex) => {
+  // Remove document
+  const removeDocument = (
+    educationIndex,
+    documentIndex
+  ) => {
     const updated = [...educationList];
 
     updated[educationIndex] = {
       ...updated[educationIndex],
-      documents: updated[educationIndex].documents.filter(
+      documents: updated[
+        educationIndex
+      ].documents.filter(
         (_, index) => index !== documentIndex
       ),
     };
@@ -84,7 +93,7 @@ export default function Education({ data, onChange }) {
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-black">
-          Education
+          Education Details
         </h2>
 
         <p className="mt-1 text-sm text-gray-500">
@@ -93,14 +102,14 @@ export default function Education({ data, onChange }) {
         </p>
       </div>
 
-      {/* Education Sections */}
+      {/* Education Forms */}
       <div className="space-y-6">
         {educationList.map((education, index) => (
           <div
             key={index}
             className="rounded-xl border border-gray-200 bg-white p-5"
           >
-            {/* Section Header */}
+            {/* Education Header */}
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-semibold text-black">
@@ -108,15 +117,18 @@ export default function Education({ data, onChange }) {
                 </h3>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  Enter qualification details.
+                  Enter qualification and academic details.
                 </p>
               </div>
 
+              {/* Remove Button */}
               {educationList.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => removeEducation(index)}
-                  className="text-sm font-medium text-red-600 hover:text-red-700"
+                  onClick={() =>
+                    removeEducation(index)
+                  }
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
                 >
                   Remove
                 </button>
@@ -124,7 +136,8 @@ export default function Education({ data, onChange }) {
             </div>
 
             {/* Fields */}
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+
               {/* Qualification */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
@@ -143,7 +156,7 @@ export default function Education({ data, onChange }) {
                     )
                   }
                   placeholder="e.g. B.Tech, MBA, B.Sc"
-                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-black"
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black"
                 />
               </div>
 
@@ -165,7 +178,7 @@ export default function Education({ data, onChange }) {
                     )
                   }
                   placeholder="Enter university or board"
-                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-black"
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black"
                 />
               </div>
 
@@ -189,19 +202,80 @@ export default function Education({ data, onChange }) {
                     )
                   }
                   placeholder="e.g. 2024"
-                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-black"
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black"
                 />
               </div>
 
               {/* Score Type */}
               <div>
-                <label>
-                  Percentage/CGPA
+                <label className="text-sm font-medium text-gray-700">
+                  Score Type{" "}
+                  <span className="text-red-500">*</span>
                 </label>
-                <input type="number"
-                  placeholder="e.g 8.5 or 85%"
-                />
 
+                <select
+                  value={education.scoreType}
+                  onChange={(e) =>
+                    updateEducation(
+                      index,
+                      "scoreType",
+                      e.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 outline-none transition focus:border-black"
+                >
+                  <option value="percentage">
+                    Percentage
+                  </option>
+
+                  <option value="cgpa">
+                    CGPA
+                  </option>
+                </select>
+              </div>
+
+              {/* Percentage / CGPA */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  {education.scoreType === "cgpa"
+                    ? "CGPA"
+                    : "Percentage"}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+
+                <div className="relative mt-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max={
+                      education.scoreType ===
+                      "percentage"
+                        ? "100"
+                        : "10"
+                    }
+                    step="0.01"
+                    value={education.score}
+                    onChange={(e) =>
+                      updateEducation(
+                        index,
+                        "score",
+                        e.target.value
+                      )
+                    }
+                    placeholder={
+                      education.scoreType === "cgpa"
+                        ? "e.g. 8.5"
+                        : "e.g. 85"
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-10 outline-none transition focus:border-black"
+                  />
+
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    {education.scoreType === "cgpa"
+                      ? "CGPA"
+                      : "%"}
+                  </span>
+                </div>
               </div>
 
               {/* Specialization */}
@@ -221,7 +295,7 @@ export default function Education({ data, onChange }) {
                     )
                   }
                   placeholder="e.g. Computer Science"
-                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-black"
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black"
                 />
               </div>
 
@@ -232,8 +306,8 @@ export default function Education({ data, onChange }) {
                 </label>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  Upload marksheets, certificates, or degree
-                  documents. Only PDF files are allowed.
+                  Upload marksheets, certificates, degree
+                  documents, etc. Only PDF files are allowed.
                 </p>
 
                 <input
@@ -241,7 +315,12 @@ export default function Education({ data, onChange }) {
                   accept="application/pdf,.pdf"
                   multiple
                   onChange={(e) => {
-                    handleDocuments(index, e.target.files);
+                    handleDocuments(
+                      index,
+                      e.target.files
+                    );
+
+                    // Allow the same file to be selected again
                     e.target.value = "";
                   }}
                   className="mt-3 block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-gray-800"
@@ -278,7 +357,7 @@ export default function Education({ data, onChange }) {
                                 documentIndex
                               )
                             }
-                            className="ml-3 text-sm font-medium text-red-600 hover:text-red-700"
+                            className="ml-3 shrink-0 text-sm font-medium text-red-600 hover:text-red-700"
                           >
                             Remove
                           </button>
@@ -299,7 +378,10 @@ export default function Education({ data, onChange }) {
         onClick={addEducation}
         className="mt-5 inline-flex items-center gap-2 rounded-lg border border-black bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
       >
-        <span className="text-lg leading-none">+</span>
+        <span className="text-lg leading-none">
+          +
+        </span>
+
         Add Education
       </button>
     </div>
