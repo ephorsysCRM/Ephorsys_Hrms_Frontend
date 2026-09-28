@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import DocumentModal from "../adminModals/DocumentModal";
 import { useNavigate, useParams } from "react-router-dom";
+import Modal from "../../UI/Modal";
 
 const EmployeeProfile = () => {
   const { id } = useParams();
@@ -1456,12 +1457,17 @@ const EmployeeProfile = () => {
 
 
         {/* Document Modal */}
-        {selectedDocument && (
+        <Modal
+          isOpen={!!selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+          title={selectedDocument}
+          size="lg"
+        >
           <DocumentModal
             document={selectedDocument}
             onClose={() => setSelectedDocument(null)}
           />
-        )}
+        </Modal>
 
 
         {/* ================= ACCESS ================= */}

@@ -1,38 +1,72 @@
 const DocumentModal = ({ document, onClose }) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    return (
+        <div className="w-full">
 
-      <div className="w-full max-w-3xl rounded-xl bg-white shadow-xl">
+            {/* =====================================================
+                DOCUMENT INFO
+            ===================================================== */}
+            <div className="mt-2">
 
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <p className="text-sm text-black/50">
+                    Selected Document
+                </p>
 
-          <h2 className="text-lg font-semibold text-black">
-            {document}
-          </h2>
+                <h3 className="mt-1 text-lg font-semibold text-black">
+                    {document}
+                </h3>
 
-          <button
-            onClick={onClose}
-            className="rounded-lg px-3 py-1 text-xl text-gray-500 hover:bg-gray-100 hover:text-black"
-          >
-            ×
-          </button>
+            </div>
+
+            {/* =====================================================
+                DOCUMENT PREVIEW
+            ===================================================== */}
+            <div
+                className="
+                    mt-5
+                    flex
+                    min-h-100
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-black/10
+                    bg-black/5
+                "
+            >
+                <p className="text-sm text-black/50">
+                    Document preview will appear here
+                </p>
+            </div>
+
+            {/* =====================================================
+                ACTION
+            ===================================================== */}
+            <div className="mt-6 flex justify-end">
+
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="
+                        h-11
+                        rounded-xl
+                        bg-black
+                        px-6
+                        text-sm
+                        font-semibold
+                        text-white
+                        transition-all
+                        duration-200
+                        hover:bg-black/80
+                        cursor-pointer
+                    "
+                >
+                    Close
+                </button>
+
+            </div>
 
         </div>
-
-        {/* Document Preview */}
-        <div className="flex min-h-100 items-center justify-center p-6">
-
-          <p className="text-sm text-gray-500">
-            Document preview will appear here
-          </p>
-
-        </div>
-
-      </div>
-
-    </div>
-  );
+    );
 };
 
 export default DocumentModal;

@@ -10,6 +10,7 @@ import NotFound from "../NotFound";
 import AllEmployee from "../admin/pages/AllEmployee";
 import EmployeeProfile from "../admin/pages/EmployeeProfile";
 import AddEmployee from "../admin/pages/AddEmployee";
+import Department from "../admin/pages/Department";
 
 const AdminRoutes = (
     <Route path="/">
@@ -46,6 +47,10 @@ const AdminRoutes = (
                     path="employees/:id"
                     element={<EmployeeProfile />}
                 />
+
+                <Route
+                     path="departments"
+                     element={<Department />} />
 
             </Route>
         </Route>
