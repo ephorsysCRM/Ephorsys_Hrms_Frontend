@@ -38,7 +38,7 @@ export default function ContactInfo({
   -------------------------------- */
 
   const inputClass = (field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2.5 outline-none transition ${
+    `mt-2 w-full rounded-lg border px-3 py-2 outline-none transition ${
       errors[field]
         ? "border-red-500 focus:border-red-500"
         : "border-gray-300 focus:border-black"

@@ -61,7 +61,7 @@ export default function BasicInformation({
                                 update("employeeId", e.target.value)
                             }
                             placeholder="Enter Employee ID"
-                            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                                 errors.employeeId
                                     ? "border-red-500 focus:ring-red-100"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-100"
@@ -88,7 +88,7 @@ export default function BasicInformation({
                                 update("firstName", e.target.value)
                             }
                             placeholder="Enter First Name"
-                            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                                 errors.firstName
                                     ? "border-red-500 focus:ring-red-100"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-100"
@@ -115,7 +115,7 @@ export default function BasicInformation({
                                 update("middleName", e.target.value)
                             }
                             placeholder="Enter Middle Name"
-                            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                                 errors.middleName
                                     ? "border-red-500 focus:ring-red-100"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-100"
@@ -142,7 +142,7 @@ export default function BasicInformation({
                                 update("lastName", e.target.value)
                             }
                             placeholder="Enter Last Name"
-                            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                                 errors.lastName
                                     ? "border-red-500 focus:ring-red-100"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-100"
@@ -263,7 +263,7 @@ export default function BasicInformation({
                             onChange={(e) =>
                                 update("dateOfBirth", e.target.value)
                             }
-                            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                                 errors.dateOfBirth
                                     ? "border-red-500 focus:ring-red-100"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-100"

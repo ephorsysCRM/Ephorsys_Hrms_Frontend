@@ -71,6 +71,7 @@ const AllEmployee = () => {
             hover:bg-gray-800
             sm:w-auto
           '
+          onClick={()=>navigate("/add-employee")}
         >
           <Plus size={17} />
           Add Employee
@@ -125,33 +126,30 @@ const AllEmployee = () => {
           '
         >
           <button
-            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${
-              filter === 'All'
-                ? 'bg-black text-white'
-                : 'text-gray-500 hover:bg-gray-100'
-            }`}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'All'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
             onClick={() => setFilter('All')}
           >
             All
           </button>
 
           <button
-            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${
-              filter === 'Employee'
-                ? 'bg-black text-white'
-                : 'text-gray-500 hover:bg-gray-100'
-            }`}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'Employee'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
             onClick={() => setFilter('Employee')}
           >
             Employee
           </button>
 
           <button
-            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${
-              filter === 'Manager & HR'
-                ? 'bg-black text-white'
-                : 'text-gray-500 hover:bg-gray-100'
-            }`}
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'Manager & HR'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
             onClick={() => setFilter('Manager & HR')}
           >
             Manager & HR
@@ -264,6 +262,25 @@ const AllEmployee = () => {
                   </div>
 
                   {/* Status */}
+                  <div>
+                    <span
+                      className={`
+            inline-flex
+            rounded-full
+            px-2.5
+            py-1
+            text-xs
+            font-medium
+            text-center w-15 h-8
+            ${employee.status === 'Active'
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-gray-100 text-gray-500'
+                        }
+          `}
+                    >
+                      {employee.status}
+                    </span>
+                  </div>
                  <div className="flex items-center gap-2">
     <button
         onClick={() => handleStatusToggle(employee.id)}

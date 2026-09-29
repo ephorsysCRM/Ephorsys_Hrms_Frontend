@@ -10,18 +10,18 @@ import BankInfo from "../components/steps/BankInfo";
 import Education from "../components/steps/Education";
 import ExperienceInfo from "../components/steps/ExperienceInfo";
 import DocUpload from "../components/steps/DocUpload";
-import AccessPermission from "../components/steps/AccessPermission";
+import AccessPermissions from "../components/steps/AccessPermission";
+
 
 import { validateInfo } from "../utils/ValidateInfo";
 import { validateContactInfo } from "../utils/ValidateContactInfo";
-import { validateJobInfo } from "../utils/ValidateJobInfo";
 import { validateBankInfo } from "../utils/ValidateBankInfo";
 import { validatePayRoll } from "../utils/ValidatePayRoll";
 import { validateEducation } from "../utils/ValidateEducation";
 import { validateExperience } from "../utils/ValidateExperience";
 import { validateDoc } from "../utils/ValidateDoc";
 import { validatePermission } from "../utils/ValidatePermission";
-import AccessPermissions from "../components/steps/AccessPermission";
+import { validateJobInfo } from "../utils/ValidateJobInfo";
 
 export default function AddEmployee() {
   const navigate = useNavigate();
@@ -211,12 +211,6 @@ export default function AddEmployee() {
     }));
   };
 
-  // Receive validation errors from child component
-  // const handleValidation = (errors) => {
-  //   setValidationErrors(errors);
-  // };
-
-
   // Back button
   const previousStep = () => {
     setValidationErrors({});
@@ -271,9 +265,9 @@ export default function AddEmployee() {
   };
 
   return (
-    <div className="min-h-screen w-full md:p-6">
+    <div className="min-h-screen w-full px-2">
       <div className="w-full">
-        <div className="w-full p-3 md:p-6">
+        <div className="w-full">
 
           {/* Stepper */}
           <CustomStepper
@@ -282,10 +276,9 @@ export default function AddEmployee() {
             onStepClick={handleStepClick}
           />
 
-          <div className="my-6 border-t border-gray-300" />
 
           {/* Active Step Content */}
-          <div className="min-h-100">
+          <div className="min-h-100 py-2">
 
             {/* Step 1 */}
             {activeStep === 0 && (

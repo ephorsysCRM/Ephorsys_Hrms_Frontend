@@ -40,7 +40,7 @@ export default function JobInfo({
   const hasError =
     errors[field] || fieldErrors[field];
 
-  return `mt-2 w-full rounded-lg border px-3 py-2.5 outline-none transition ${
+  return `mt-2 w-full rounded-lg border px-3 py-2 outline-none transition ${
     hasError
       ? "border-red-500 focus:border-red-500"
       : "border-gray-300 focus:border-black"
