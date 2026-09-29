@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import LogoutModal from "../adminModals/LogoutModal";
 import { useState } from "react";
 import Modal from "../../UI/Modal";
-
+import image from "/icon.png"
 const NAV_ITEMS = [
     {
         label: "Dashboard",
@@ -35,7 +35,7 @@ const NAV_ITEMS = [
             
             {
                 label: "Departments",
-                path: "/admin/departments",
+                path: "/departments",
                 icon: Building2,
             },
             
@@ -155,8 +155,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <div className="h-16 flex items-center justify-between px-5  border-black/10">
                     <div className="flex items-center gap-3">
                         {/* Logo */}
-                        <div className="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center">
-                            <span className="font-bold text-sm">E</span>
+                        <div className="w-9 h-9 rounded-lg  text-white flex items-center justify-center">
+                           <img src={image} alt="" />
                         </div>
 
                         <div>
@@ -359,10 +359,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               px-3
               py-3
               rounded-lg
-              text-black/60
-              bg-black/5
-              hover:bg-black
-              hover:text-white
+              bg-black
+              text-white
+              hover:bg-black/5
+              hover:text-black
               transition-all
               duration-200
             "

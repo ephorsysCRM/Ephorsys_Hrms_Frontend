@@ -11,6 +11,7 @@ import AllEmployee from "../admin/pages/AllEmployee";
 import EmployeeProfile from "../admin/pages/EmployeeProfile";
 import AddEmployee from "../admin/pages/AddEmployee";
 import Department from "../admin/pages/Department";
+import DepartmentView from "../admin/pages/DepartmentView";
 
 const AdminRoutes = (
     <Route path="/">
@@ -51,6 +52,10 @@ const AdminRoutes = (
                 <Route
                      path="departments"
                      element={<Department />} />
+
+                <Route
+                    path="departments/:id"
+                    element={<DepartmentView />} />
 
             </Route>
         </Route>
