@@ -1,62 +1,15 @@
 import { Eye, MoreHorizontal, Pencil, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { departmentsData } from "../data/departmentsData";
+import { employeesData } from "../data/employeesData";
+import Modal from "../../UI/Modal";
+import AddDepartment from "../adminModals/AddDepartment";
 
 const Department = () => {
 
-
-    const departmentsData = [
-        {
-            id: "DEP001",
-            name: "Development",
-            manager: "Rahul Sharma",
-            employees: 4,
-            status: "Active",
-        },
-        {
-            id: "DEP002",
-            name: "Digital Marketing",
-            manager: "Priya Das",
-            employees: 1,
-            status: "Active",
-        },
-        {
-            id: "DEP003",
-            name: "BDE",
-            manager: "Sourav Mohanty",
-            employees: 1,
-            status: "Active",
-        },
-        {
-            id: "DEP004",
-            name: "Marketing",
-            manager: "Rakesh Kumar",
-            employees: 2,
-            status: "Active",
-        },
-        {
-            id: "DEP005",
-            name: "Finance",
-            manager: "Sourav Mohanty",
-            employees: 0,
-            status: "Active",
-        },
-        {
-            id: "DEP006",
-            name: "Sales",
-            manager: "Sourav Mohanty",
-            employees: 0,
-            status: "Active",
-        },
-        {
-            id: "DEP007",
-            name: "IT Support",
-            manager: "Sourav Mohanty",
-            employees: 0,
-            status: "Inactive",
-        },
-
-    ];
     const [search, setSearch] = useState("");
+
     const filteredDepartments = departmentsData.filter((department) => {
         const searchText = search.toLowerCase();
 
@@ -75,13 +28,33 @@ const Department = () => {
         (department) => department.status === "Active"
     ).length;
 
-    const totalEmployees = departmentsData.reduce(
-        (total, department) => total + department.employees,
-        0
-    );
+    const totalEmployees = employeesData.length;
 
     const [openMenu, setOpenMenu] = useState(null);
 
+    const navigate = useNavigate();
+
+    const getDepartmentEmployeeCount = (departmentName) => {
+        return employeesData.filter(
+            employee => employee.department === departmentName
+        ).length;
+    };
+
+    const [departmentStatus, setDepartmentStatus] = useState(
+        departmentsData.reduce((status, department) => {
+            status[department.id] = department.status;
+            return status;
+        }, {})
+    );
+
+    const handleStatusToggle = (departmentId) => {
+        setDepartmentStatus((prev) => ({
+            ...prev,
+            [departmentId]:
+                prev[departmentId] === "Active" ? "Inactive" : "Active",
+        }));
+    };
+    const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-1 text-black sm:px-6 lg:px-2">
 
@@ -116,11 +89,21 @@ const Department = () => {
             hover:bg-gray-800
             sm:w-auto
           "
+                    onClick={() => setAddDepartmentOpen(true)}
                 >
                     <Plus size={17} />
                     Add Department
                 </button>
-
+                <Modal
+                    isOpen={addDepartmentOpen}
+                    onClose={() => setAddDepartmentOpen(false)}
+                    title="Add Department"
+                    size="md"
+                >
+                    <AddDepartment
+                        onClose={() => setAddDepartmentOpen(false)}
+                    />
+                </Modal>
             </div>
 
 
@@ -163,10 +146,10 @@ const Department = () => {
             </div>
 
             {/* DEPARTMENT STATS */}
-            <div className="mt-5 flex flex-row gap-1 overflow-x-auto">
+            <div className="mt-5 grid grid-cols-2 gap-1 sm:flex sm:flex-row sm:overflow-x-auto">
 
-                <div className="shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white">
-                    <p className="text-xs text-gray-400">
+                <div className="shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white text-center">
+                    <p className="text-xs text-gray-300">
                         Total Departments
                     </p>
 
@@ -175,8 +158,8 @@ const Department = () => {
                     </p>
                 </div>
 
-                <div className="shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white">
-                    <p className="text-xs text-gray-400">
+                <div className="shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white text-center">
+                    <p className="text-xs text-gray-300">
                         Active Departments
                     </p>
 
@@ -185,12 +168,12 @@ const Department = () => {
                     </p>
                 </div>
 
-                <div className="shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white">
-                    <p className="text-xs text-gray-400">
+                <div className="col-span-2 shrink-0 rounded-lg border border-gray-200 bg-black px-3 py-2 text-white sm:col-span-1 text-center">
+                    <p className="text-xs text-gray-300 ">
                         Total Employees
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold text-center">
+                    <p className="mt-1 text-lg font-semibold ">
                         {totalEmployees}
                     </p>
                 </div>
@@ -264,31 +247,31 @@ const Department = () => {
                                 {/* Employees */}
                                 <div>
                                     <p className="text-sm">
-                                        {department.employees}
+                                        {getDepartmentEmployeeCount(department.name)}
                                     </p>
                                 </div>
 
                                 {/* Status */}
-                                <div>
-                                    <span
-                                        className={`
-                inline-flex
-                rounded-full
-                px-2.5
-                py-1
-                text-xs
-                font-medium
-                text-center
-                ${department.status === "Active"
-                                                ? "bg-green-50 text-green-700"
-                                                : "bg-gray-100 text-gray-500"
-                                            }
-              `}
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleStatusToggle(department.id)}
+                                        className={`relative h-6 w-11 rounded-full transition ${departmentStatus[department.id] === "Active"
+                                                ? "bg-black"
+                                                : "bg-gray-300"
+                                            }`}
                                     >
-                                        {department.status}
+                                        <span
+                                            className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${departmentStatus[department.id] === "Active"
+                                                    ? "left-6"
+                                                    : "left-1"
+                                                }`}
+                                        />
+                                    </button>
+
+                                    <span className="text-sm">
+                                        {departmentStatus[department.id]}
                                     </span>
                                 </div>
-
                                 {/* Action */}
                                 <div className="relative">
                                     <button
@@ -311,9 +294,8 @@ const Department = () => {
                                     {openMenu === department.id && (
                                         <div className="absolute right-10 top-4 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
                                             <button
-                                                //   onClick={() => navigate(`/employees/${employee.id}`, {
-                                                //     state: { employee },
-                                                //   })}
+                                                onClick={() => navigate(`/departments/${department.id}`)}
+
                                                 className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100">
                                                 <Eye size={16} />
                                                 View
