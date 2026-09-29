@@ -1,5 +1,4 @@
 import { Trash } from "lucide-react";
-import React from "react";
 
 const emptyEducation = {
   qualification: "",
@@ -130,7 +129,7 @@ export default function Education({
   // =========================================
 
   const inputClass = (index, field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2.5 outline-none transition ${
+    `mt-2 w-full rounded-lg border px-3 py-2 outline-none transition ${
       fieldError(index, field)
         ? "border-red-500 focus:border-red-500"
         : "border-gray-300 focus:border-black"

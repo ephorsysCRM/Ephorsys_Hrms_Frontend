@@ -11,10 +11,9 @@ export default function BankInfo({
   };
 
   const inputClass = (field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2.5 outline-none transition ${
-      errors[field]
-        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-        : "border-gray-300 focus:border-black focus:ring-1 focus:ring-black"
+    `mt-2 w-full rounded-lg border px-3 py-2 outline-none transition ${errors[field]
+      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+      : "border-gray-300 focus:border-black focus:ring-1 focus:ring-black"
     }`;
 
   const labelClass = "text-sm font-medium text-gray-700";
@@ -174,11 +173,10 @@ export default function BankInfo({
                 e.target.files?.[0] || null
               )
             }
-            className={`mt-2 block w-full cursor-pointer rounded-lg border bg-white px-3 py-2.5 text-sm outline-none file:mr-4 file:rounded-md file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-gray-800 ${
-              errors.bankDocument
+            className={`mt-2 block w-full cursor-pointer rounded-lg border bg-white px-3 py-2 text-sm outline-none file:mr-4 file:rounded-md file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-gray-800 ${errors.bankDocument
                 ? "border-red-500"
                 : "border-gray-300"
-            }`}
+              }`}
           />
 
           <p className="mt-1 text-xs text-gray-500">

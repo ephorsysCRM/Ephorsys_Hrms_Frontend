@@ -131,7 +131,7 @@ export default function WorkPayrollDetails({
   // =========================================
 
   const inputClass = (field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2.5
+    `mt-2 w-full rounded-lg border px-3 py-2
      outline-none transition
      ${
        errors[field]

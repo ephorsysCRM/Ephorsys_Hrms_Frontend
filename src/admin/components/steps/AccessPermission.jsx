@@ -130,7 +130,7 @@ export default function AccessPermissions({
                   )
                 }
                 placeholder="Confirm password"
-                className={`w-full rounded-lg border px-3 py-2.5 pr-20 outline-none ${
+                className={`w-full rounded-lg border px-3 py-2 pr-20 outline-none ${
                   errors.confirmPassword
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-black"
