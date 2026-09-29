@@ -125,10 +125,10 @@ export default function AddEmployee() {
     },
 
     // Step 9: Access & Permissions
-    access: {
-      password: "",
-      confirmPassword: "",
-    },
+    // access: {
+    //   password: "",
+    //   confirmPassword: "",
+    // },
   });
 
   const handleContinue = () => {
@@ -166,12 +166,6 @@ export default function AddEmployee() {
           formData.documents
         );
         break;
-      case 8:
-        errors = validatePermission(
-          formData.access
-        );
-        break;
-
       default:
         errors = {};
     }
@@ -198,7 +192,6 @@ export default function AddEmployee() {
     { title: "Education" },
     { title: "Experience" },
     { title: "Document Verification" },
-    { title: "Access" },
   ];
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -261,7 +254,7 @@ export default function AddEmployee() {
 
     alert("Employee form submitted successfully!");
 
-    navigate("/employees");
+    navigate("/all-employees");
   };
 
   return (
@@ -369,7 +362,7 @@ export default function AddEmployee() {
             )}
 
             {/* Step 9 */}
-            {activeStep === 8 && (
+            {/* {activeStep === 8 && (
               <AccessPermissions
                 data={formData.access}
                 errors={validationErrors}
@@ -377,7 +370,7 @@ export default function AddEmployee() {
                   updateSection("access", data)
                 }
               />
-            )}
+            )} */}
 
           </div>
 

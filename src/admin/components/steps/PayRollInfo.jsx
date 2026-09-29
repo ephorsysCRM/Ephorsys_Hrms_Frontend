@@ -131,7 +131,7 @@ export default function WorkPayrollDetails({
   // =========================================
 
   const inputClass = (field) =>
-    `mt-2 w-full rounded-lg border px-3 py-2
+    `w-full rounded-lg border px-3 py-2
      outline-none transition
      ${
        errors[field]
@@ -240,7 +240,7 @@ export default function WorkPayrollDetails({
               HRA
             </Label>
 
-            <div className="mt-2 flex gap-2">
+            <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
                   type="number"
@@ -402,7 +402,7 @@ export default function WorkPayrollDetails({
               EPF
             </Label>
 
-            <div className="mt-2 flex gap-2">
+            <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
                   type="number"
@@ -453,7 +453,7 @@ export default function WorkPayrollDetails({
               Professional Tax
             </Label>
 
-            <div className="mt-2 flex gap-2">
+            <div className=" flex gap-2">
               <div className="relative flex-1">
                 <input
                   type="number"

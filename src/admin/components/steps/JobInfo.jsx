@@ -68,30 +68,63 @@ export default function JobInfo({
         ================================== */}
 
         <div>
-          <Label required>
-            Department
-          </Label>
+  <Label required>
+    Department
+  </Label>
 
-          <input
-            type="text"
-            value={data.department || ""}
-            onChange={(e) =>
-              update("department", e.target.value)
-            }
-            onBlur={() =>
-              validateField("department")
-            }
-            placeholder="Enter department"
-            className={inputClass("department")}
-          />
+  <select
+    value={data.department || ""}
+    onChange={(e) =>
+      update("department", e.target.value)
+    }
+    onBlur={() =>
+      validateField("department")
+    }
+    className={inputClass("department")}
+  >
+    <option value=" ">
+      Select department
+    </option>
 
-          {(errors.department || fieldErrors.department) && (
-  <p className="mt-1 text-xs text-red-500">
-    {errors.department || fieldErrors.department}
-  </p>
-)}
-        </div>
+    <option value="Tech">
+      Tech
+    </option>
 
+    <option value="Digital Marketing">
+      Digital Marketing
+    </option>
+
+    <option value="BDE">
+      BDE
+    </option>
+
+    <option value="Human Resources">
+      Human Resources
+    </option>
+
+    <option value="Finance">
+      Finance
+    </option>
+
+    <option value="Sales">
+      Sales
+    </option>
+
+    <option value="Design">
+      Design
+    </option>
+
+    <option value="Operations">
+      Operations
+    </option>
+  </select>
+
+  {(errors.department || fieldErrors.department) && (
+    <p className="mt-1 text-xs text-red-500">
+      {errors.department || fieldErrors.department}
+    </p>
+  )}
+</div>
         {/* =================================
             DESIGNATION
         ================================== */}
@@ -270,18 +303,15 @@ export default function JobInfo({
             SHIFT TIMING
         ================================== */}
 
-        <div className="md:col-span-2">
-          <Label>
-            Shift Timing
-          </Label>
+        
 
-          <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+
 
             {/* From */}
             <div>
-              <label className="text-xs text-gray-500">
-                From
-              </label>
+              <Label>
+                Shift Time From
+              </Label>
 
               <input
                 type="time"
@@ -301,9 +331,9 @@ export default function JobInfo({
 
             {/* To */}
             <div>
-              <label className="text-xs text-gray-500">
-                To
-              </label>
+              <Label>
+               Shift Time To
+              </Label>
 
               <input
                 type="time"
@@ -327,8 +357,8 @@ export default function JobInfo({
               )}
             </div>
 
-          </div>
-        </div>
+         
+        
 
         {/* =================================
             WORK MODE
