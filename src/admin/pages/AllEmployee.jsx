@@ -2,81 +2,9 @@ import { Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../../UI/Pagination'
+import { employeesData } from '../data/employeesData'
 
-const employeesData = [
-  {
-    id: 'EMP001',
-    name: 'Ananya Pradhan',
-    email: 'ananya@gmail.com',
-    role: 'Employee',
-    department: 'Development',
-    manager: 'Rahul Sharma',
-    status: 'Active'
-  },
-  {
-    id: 'EMP002',
-    name: 'Rahul Sharma',
-    email: 'rahul@company.com',
-    role: 'Manager',
-    department: 'Development',
-    manager: 'Admin',
-    status: 'Active'
-  },
-  {
-    id: 'EMP003',
-    name: 'Priya Das',
-    email: 'priya@company.com',
-    role: 'HR',
-    department: 'Human Resources',
-    manager: 'Admin',
-    status: 'Active'
-  },
-  {
-    id: 'EMP004',
-    name: 'Sourav Mohanty',
-    email: 'sourav@company.com',
-    role: 'Employee',
-    department: 'Design',
-    manager: 'Rahul Sharma',
-    status: 'Active'
-  },
-  {
-    id: 'EMP005',
-    name: 'Sneha Patnaik',
-    email: 'sneha@company.com',
-    role: 'Employee',
-    department: 'Marketing',
-    manager: 'Rahul Sharma',
-    status: 'Inactive'
-  },
-  {
-    id: 'EMP006',
-    name: 'Rakesh Kumar',
-    email: 'rakesh@company.com',
-    role: 'Manager',
-    department: 'Marketing',
-    manager: 'Admin',
-    status: 'Active'
-  },
-  {
-    id: 'EMP007',
-    name: 'Neha Singh',
-    email: 'neha@company.com',
-    role: 'Employee',
-    department: 'Development',
-    manager: 'Rakesh Kumar',
-    status: 'Active'
-  },
-  {
-    id: 'EMP008',
-    name: 'Arjun Das',
-    email: 'arjun@company.com',
-    role: 'Employee',
-    department: 'Development',
-    manager: 'Rahul Sharma',
-    status: 'Active'
-  }
-]
+
 
 const AllEmployee = () => {
   const [search, setSearch] = useState('')
@@ -99,7 +27,20 @@ const AllEmployee = () => {
 
     return matchesSearch && matchesFilter
   })
-
+   const [employeeStatus, setEmployeeStatus] = useState(
+           employeesData.reduce((status, employee) => {
+               status[employee.id] = employee.status;
+               return status;
+           }, {})
+       );
+   
+       const handleStatusToggle = (employeeId) => {
+           setEmployeeStatus((prev) => ({
+               ...prev,
+               [employeeId]:
+                   prev[employeeId] === "Active" ? "Inactive" : "Active",
+           }));
+       };
   return (
     <div className='min-h-screen text-black'>
       {/* HEADER */}
@@ -269,11 +210,41 @@ const AllEmployee = () => {
       '
                 >
                   {/* Name + Role */}
-                  <div className='min-w-0'>
-                    <h3 className='truncate font-semibold'>{employee.name}</h3>
+                 <div className="flex items-center gap-3">
+    
+    <div
+        className="
+            flex
+            h-10
+            w-10
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            bg-black
+            text-xs
+            font-bold
+            text-white
+        "
+    >
+        {employee.name
+            .split(" ")
+            .map(word => word[0])
+            .join("")
+            .slice(0, 2)}
+    </div>
 
-                    <p className='text-sm text-gray-500'>{employee.role}</p>
-                  </div>
+    <div className="min-w-0">
+        <h3 className="truncate text-sm font-semibold text-gray-900">
+            {employee.name}
+        </h3>
+
+        <p className="mt-0.5 text-xs text-gray-500">
+            {employee.role}
+        </p>
+    </div>
+
+</div>
 
                   {/* Email */}
                   <div className='min-w-0'>
@@ -310,6 +281,28 @@ const AllEmployee = () => {
                       {employee.status}
                     </span>
                   </div>
+                 <div className="flex items-center gap-2">
+    <button
+        onClick={() => handleStatusToggle(employee.id)}
+        className={`relative h-6 w-11 rounded-full transition ${
+            employeeStatus[employee.id] === "Active"
+                ? "bg-black"
+                : "bg-gray-300"
+        }`}
+    >
+        <span
+            className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${
+                employeeStatus[employee.id] === "Active"
+                    ? "left-6"
+                    : "left-1"
+            }`}
+        />
+    </button>
+
+    <span className="text-sm">
+        {employeeStatus[employee.id]}
+    </span>
+</div>
 
                   {/* Actions */}
                   <div className='relative'>
@@ -328,9 +321,7 @@ const AllEmployee = () => {
                       <div className='absolute right-0 top-10 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
                         <button
                           onClick={() =>
-                            navigate(`/employees/${employee.id}`, {
-                              state: { employee }
-                            })
+                            navigate(`/employees/${employee.id}`)
                           }
                           className='flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
                         >
