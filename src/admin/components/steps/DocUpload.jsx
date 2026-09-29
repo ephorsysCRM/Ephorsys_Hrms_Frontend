@@ -21,11 +21,6 @@ const documentTypes = [
     description: "Upload offer letter",
   },
   {
-    key: "experienceLetter",
-    label: "Experience Letter",
-    description: "Upload previous experience letter",
-  },
-  {
     key: "signedNda",
     label: "Signed NDA",
     description: "Upload signed NDA document",
@@ -42,7 +37,6 @@ const emptyDocuments = {
   pan: [],
   resume: [],
   offerLetter: [],
-  experienceLetter: [],
   signedNda: [],
   idCard: [],
 };
@@ -117,12 +111,12 @@ export default function DocUpload({
 
       {/* Documents */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 ">
         {documentTypes.map(
           (document) => (
             <div
               key={document.key}
-              className={`rounded-xl border bg-white p-5 ${
+              className={`rounded-xl border bg-white p-4 ${
                 errors[document.key]
                   ? "border-red-500"
                   : "border-gray-200"
@@ -133,10 +127,11 @@ export default function DocUpload({
               <div className="mb-4">
                 <label className="text-sm font-semibold text-gray-800">
                   {document.label}
-
+                   {document.key !== "idCard" && (
                   <span className="ml-1 text-red-500">
                     *
                   </span>
+                   )}
                 </label>
 
                 <p className="mt-1 text-xs text-gray-500">
