@@ -1,3 +1,4 @@
+
 const documentTypes = [
   {
     key: "aadhaar",

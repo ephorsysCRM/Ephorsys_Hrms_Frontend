@@ -265,7 +265,7 @@ export default function AddEmployee() {
   };
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full px-2">
       <div className="w-full">
         <div className="w-full">
 
