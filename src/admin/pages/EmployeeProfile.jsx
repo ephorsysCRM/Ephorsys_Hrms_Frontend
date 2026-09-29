@@ -41,10 +41,10 @@ const EmployeeProfile = () => {
     "mt-1.5 text-sm font-semibold text-gray-900";
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] px-4 py-2 text-black sm:px-6 lg:px-8">
+    <div className="min-h-screen  py-2 text-black ">
 
       {/* Back Button */}
-      <div className="mx-auto mb-5 max-w-6xl">
+      <div className="mx-auto mb-5">
         <button
           onClick={() => navigate("/all-employees")}
           className="group inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-white hover:text-black"
@@ -57,7 +57,7 @@ const EmployeeProfile = () => {
         </button>
       </div>
 
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto">
 
         {/* ================= PROFILE HEADER ================= */}
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
