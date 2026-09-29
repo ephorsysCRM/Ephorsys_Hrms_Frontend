@@ -44,8 +44,8 @@ const AllEmployee = () => {
   return (
     <div className='min-h-screen text-black'>
       {/* HEADER */}
-      <div className='flex flex-col gap-4 py-5  sm:py-3 md:flex-row md:items-center md:justify-between'>
-        <div>
+      <div className='flex flex-col gap-4 py-3 sm:px-1  sm:py-3 md:flex-row md:items-center md:justify-between'>
+        <div >
           <h1 className='text-xl font-semibold sm:text-2xl'>All Employees</h1>
 
           <p className='mt-1 text-sm text-gray-500'>
@@ -262,25 +262,7 @@ const AllEmployee = () => {
                   </div>
 
                   {/* Status */}
-                  <div>
-                    <span
-                      className={`
-            inline-flex
-            rounded-full
-            px-2.5
-            py-1
-            text-xs
-            font-medium
-            text-center w-15 h-8
-            ${employee.status === 'Active'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                        }
-          `}
-                    >
-                      {employee.status}
-                    </span>
-                  </div>
+                 
                  <div className="flex items-center gap-2">
     <button
         onClick={() => handleStatusToggle(employee.id)}

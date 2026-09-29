@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { employeesData } from "../data/employeesData";
 import { departmentsData } from "../data/departmentsData";
 import { useState } from "react";
+import Pagination from "../../UI/Pagination";
 
 const DepartmentView = () => {
     const { id } = useParams();
@@ -20,95 +21,108 @@ const DepartmentView = () => {
         <div className="min-h-screen bg-[#f7f7f7] text-black">
 
             {/* HEADER */}
-            <div className="border-b border-gray-200 bg-white px-5 py-6 sm:px-8">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="border-b border-gray-200 bg-white px-3 py-2 sm:px-8">
 
-                    <div className="flex items-center gap-4">
+                {/* TITLE */}
+                <div>
+                    <div className="mb-1 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-black"></span>
 
-                        <div>
-                            <div className="mb-1 flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-black"></span>
-
-                                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                                    Department
-                                </p>
-                            </div>
-
-                            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                                Department Management
-                            </h1>
-
-                            <p className="mt-1.5 text-sm text-gray-500">
-                                Manage department information and employees
-                            </p>
-
-                            <p className="mt-1 text-xs text-gray-400">
-                                Department ID:
-                                <span className="ml-1 font-semibold text-gray-600">
-                                    {id}
-                                </span>
-                            </p>
-                        </div>
-
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                            Department
+                        </p>
                     </div>
 
+                    <h1 className="md:text-2xl font-bold tracking-tight text-xl">
+                        Department Management
+                    </h1>
+                </div>
+
+
+                {/* ACTIONS */}
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                    {/* BACK BUTTON */}
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="
+                flex
+                w-full
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                border
+                border-gray-200
+                bg-white
+                px-4
+                py-2.5
+                text-sm
+                font-medium
+                text-gray-600
+                shadow-sm
+                transition-all
+                duration-200
+                hover:border-black
+                hover:bg-black
+                hover:text-white
+                hover:shadow-md
+                sm:w-auto
+            "
+                    >
+                        <ArrowLeft size={18} />
+                        Back to department
+                    </button>
+
+
+                    {/* ADD EMPLOYEE */}
                     <button
                         className="
-                            flex
-                            w-full
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            bg-black
-                            px-5
-                            py-3
-                            text-sm
-                            font-semibold
-                            text-white
-                            shadow-lg
-                            shadow-black/10
-                            transition-all
-                            duration-200
-                            hover:-translate-y-0.5
-                            hover:bg-gray-800
-                            hover:shadow-xl
-                            sm:w-auto
-                        "
-                        onClick={()=>navigate("/add-employee")}
+                flex
+                w-full
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                bg-black
+                px-5
+                py-2.5
+                text-sm
+                font-semibold
+                text-white
+                shadow-lg
+                shadow-black/10
+                transition-all
+                duration-200
+                hover:bg-gray-800
+                hover:shadow-xl
+                sm:w-auto
+            "
+                        onClick={() => navigate("/add-employee")}
                     >
                         <Plus size={17} />
                         Add Employee
                     </button>
 
                 </div>
+
             </div>
 
 
             {/* MAIN CONTENT */}
-            <div className="px-5 py-6 sm:px-8 lg:px-1">
+            <div className="px-0 md:py-6 py-3 lg:px-1">
 
                 {/* DEPARTMENT DETAILS */}
                 <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-                    <div className="border-b border-gray-100 px-5 py-6 sm:px-7">
+                    <div className="border-b border-gray-100 px-5 py-4 sm:px-7">
 
                         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
                             <div>
-                                <div className="flex items-center gap-2">
+                              
 
-                                    <span className="rounded-lg bg-black px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                                        Department
-                                    </span>
-
-                                    <span className="text-xs text-gray-400">
-                                        {id}
-                                    </span>
-
-                                </div>
-
-                                <h2 className="mt-3 text-2xl font-bold tracking-tight">
+                                <h2 className="mt-1 text-2xl font-bold tracking-tight">
                                     {department.name}
                                 </h2>
                             </div>
@@ -124,42 +138,39 @@ const DepartmentView = () => {
 
 
                     {/* STATS */}
-                    <div className="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                  <div className="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
 
-                        <div className="p-5 sm:p-6">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                                Department Head
-                            </p>
+    <div className="px-5 py-2 sm:p-6">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+            Department Head
+        </p>
 
-                            <p className="mt-3 text-base font-semibold text-gray-900">
-                                {department.manager}
-                            </p>
-                        </div>
+        <p className="mt-1 text-base font-semibold text-gray-900">
+            {department.manager}
+        </p>
+    </div>
 
+    <div className="px-5 py-2 sm:p-6">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+            Total Employees
+        </p>
 
-                        <div className="p-5 sm:p-6">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                                Total Employees
-                            </p>
+        <p className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
+            {departmentEmployees.length}
+        </p>
+    </div>
 
-                            <p className="mt-3 text-2xl font-bold tracking-tight text-gray-900">
-                                {departmentEmployees.length}
-                            </p>
-                        </div>
+    <div className="px-5 py-2 sm:p-6">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+            Department ID
+        </p>
 
+        <p className="mt-1 text-base font-semibold text-gray-900">
+            {id}
+        </p>
+    </div>
 
-                        <div className="p-5 sm:p-6">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                                Department ID
-                            </p>
-
-                            <p className="mt-3 text-base font-semibold text-gray-900">
-                                {id}
-                            </p>
-                        </div>
-
-                    </div>
-
+</div>
                 </div>
 
 
@@ -182,15 +193,11 @@ const DepartmentView = () => {
 
                             </div>
 
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-xs text-gray-500">
                                 Employees working under this department
                             </p>
 
                         </div>
-
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
-                            Department Members
-                        </p>
 
                     </div>
 
@@ -457,38 +464,11 @@ const DepartmentView = () => {
                 </div>
 
 
-                {/* BACK BUTTON */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="
-                        mt-6
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-white
-                        px-4
-                        py-2.5
-                        text-sm
-                        font-medium
-                        text-gray-600
-                        shadow-sm
-                        transition-all
-                        duration-200
-                        hover:border-black
-                        hover:bg-black
-                        hover:text-white
-                        hover:shadow-md
-                    "
-                >
-                    <ArrowLeft size={18} />
-                    Back to department
-                </button>
+
 
             </div>
+                {/* Pagination */}
+      <Pagination currentPage={1} totalPages={10} onPageChange={5} />
 
         </div>
     );

@@ -5,6 +5,7 @@ import { departmentsData } from "../data/departmentsData";
 import { employeesData } from "../data/employeesData";
 import Modal from "../../UI/Modal";
 import AddDepartment from "../adminModals/AddDepartment";
+import Pagination from "../../UI/Pagination";
 
 const Department = () => {
 
@@ -56,10 +57,10 @@ const Department = () => {
     };
     const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-1 text-black sm:px-6 lg:px-2">
+        <div className="min-h-screen bg-gray-50 px-1 py-0 text-black sm:px-6 lg:px-1">
 
             {/* HEADER */}
-            <div className="flex flex-col gap-4 py-5  sm:py-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 py-3  sm:py-3 md:flex-row md:items-center md:justify-between">
 
                 <div>
                     <h1 className="text-xl font-semibold sm:text-2xl">
@@ -256,14 +257,14 @@ const Department = () => {
                                     <button
                                         onClick={() => handleStatusToggle(department.id)}
                                         className={`relative h-6 w-11 rounded-full transition ${departmentStatus[department.id] === "Active"
-                                                ? "bg-black"
-                                                : "bg-gray-300"
+                                            ? "bg-black"
+                                            : "bg-gray-300"
                                             }`}
                                     >
                                         <span
                                             className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${departmentStatus[department.id] === "Active"
-                                                    ? "left-6"
-                                                    : "left-1"
+                                                ? "left-6"
+                                                : "left-1"
                                                 }`}
                                         />
                                     </button>
@@ -318,6 +319,9 @@ const Department = () => {
                 </div>
 
             </div>
+            {/* Pagination */}
+            <Pagination currentPage={1} totalPages={10} onPageChange={5} />
+
         </div>
     );
 };
