@@ -6,6 +6,7 @@ import { employeesData } from "../data/employeesData";
 import Modal from "../../UI/Modal";
 import AddDepartment from "../adminModals/AddDepartment";
 import Pagination from "../../UI/Pagination";
+import DepartmentEditModal from "../adminModals/DepartmentEditModal";
 
 const Department = () => {
 
@@ -56,6 +57,8 @@ const Department = () => {
         }));
     };
     const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
+    const [addDepartmentEdit, setAddDepartmentEdit] = useState(false);
+    const [selectedDepartment, setSelectedDepartment] = useState(null);
     return (
         <div className="min-h-screen bg-gray-50 px-1 py-0 text-black sm:px-6 lg:px-1">
 
@@ -302,18 +305,35 @@ const Department = () => {
                                                 View
                                             </button>
 
-                                            <button className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100">
+                                            <button className="flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100"
+                                                onClick={() => {
+                                                    setSelectedDepartment(department);
+                                                    setAddDepartmentEdit(true)
+                                                }}
+                                            >
                                                 <Pencil size={16} />
                                                 Edit
                                             </button>
                                         </div>
                                     )}
+
+
                                 </div>
 
                             </div>
 
                         ))}
-
+                        <Modal
+                            isOpen={addDepartmentEdit}
+                            onClose={() => setAddDepartmentEdit(false)}
+                            title="Edit Department"
+                            size="md"
+                        >
+                            <DepartmentEditModal
+                                department={selectedDepartment}
+                                onClose={() => setAddDepartmentEdit(false)}
+                            />
+                        </Modal>
                     </div>
 
                 </div>
