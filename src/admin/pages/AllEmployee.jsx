@@ -71,7 +71,7 @@ const AllEmployee = () => {
             hover:bg-gray-800
             sm:w-auto
           '
-          onClick={()=>navigate("/add-employee")}
+          onClick={()=>navigate("/admin/add-employee")}
         >
           <Plus size={17} />
           Add Employee

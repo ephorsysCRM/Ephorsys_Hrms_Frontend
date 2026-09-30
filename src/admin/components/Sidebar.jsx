@@ -24,21 +24,21 @@ import image from "/icon.png"
 const NAV_ITEMS = [
     {
         label: "Dashboard",
-        path: "/dashboard",
+        path: "/admin/dashboard",
         icon: LayoutDashboard,
     },
 
-     {
+    {
         label: "Departments",
         icon: Building2,
         children: [
-            
+
             {
                 label: "Departments",
-                path: "/departments",
+                path: "/admin/departments",
                 icon: Building2,
             },
-            
+
         ],
     },
 
@@ -48,14 +48,14 @@ const NAV_ITEMS = [
         children: [
             {
                 label: "All Employees",
-                path: "/all-employees",
+                path: "/admin/all-employees",
                 icon: UserRound,
             },
-            
-            
+
+
         ],
     },
-    
+
     {
         label: "Attendance",
         icon: CalendarCheck,
@@ -156,7 +156,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     <div className="flex items-center gap-3">
                         {/* Logo */}
                         <div className="w-9 h-9 rounded-lg  text-white flex items-center justify-center">
-                           <img src={image} alt="" />
+                            <img src={image} alt="" />
                         </div>
 
                         <div>

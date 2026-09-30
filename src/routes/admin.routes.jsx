@@ -23,7 +23,7 @@ const AdminRoutes = (
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
-            <Route element={<AdminLayout />}>
+            <Route path="admin" element={<AdminLayout />}>
 
                 {/* Dashboard */}
                 <Route

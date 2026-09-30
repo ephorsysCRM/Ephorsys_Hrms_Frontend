@@ -74,7 +74,7 @@ const Login = () => {
     // Login successful
     // Navigate to Dashboard
     if (result.success) {
-      navigate("/dashboard", {
+      navigate("/admin/dashboard", {
         replace: true,
       });
     }
