@@ -254,7 +254,7 @@ export default function AddEmployee() {
 
     alert("Employee form submitted successfully!");
 
-    navigate("/all-employees");
+    navigate("/admin/all-employees");
   };
 
   return (
