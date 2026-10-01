@@ -1,0 +1,334 @@
+import { Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Pagination from '../../UI/Pagination'
+import { employeesData } from '../data/employeesData'
+
+
+
+const AllEmployee = () => {
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('All')
+  const navigate = useNavigate()
+  const [openMenu, setOpenMenu] = useState(null)
+  const filteredEmployees = employeesData.filter(employee => {
+    const matchesSearch =
+      employee.name.toLowerCase().includes(search.toLowerCase()) ||
+      employee.email.toLowerCase().includes(search.toLowerCase()) ||
+      employee.role.toLowerCase().includes(search.toLowerCase()) ||
+      employee.department.toLowerCase().includes(search.toLowerCase()) ||
+      employee.manager.toLowerCase().includes(search.toLowerCase())
+
+    const matchesFilter =
+      filter === 'All' ||
+      employee.role === filter ||
+      (filter === 'Manager & HR' &&
+        (employee.role === 'Manager' || employee.role === 'HR'))
+
+    return matchesSearch && matchesFilter
+  })
+   const [employeeStatus, setEmployeeStatus] = useState(
+           employeesData.reduce((status, employee) => {
+               status[employee.id] = employee.status;
+               return status;
+           }, {})
+       );
+   
+       const handleStatusToggle = (employeeId) => {
+           setEmployeeStatus((prev) => ({
+               ...prev,
+               [employeeId]:
+                   prev[employeeId] === "Active" ? "Inactive" : "Active",
+           }));
+       };
+  return (
+    <div className='min-h-screen text-black'>
+      {/* HEADER */}
+      <div className='flex flex-col gap-4 py-3 sm:px-1  sm:py-3 md:flex-row md:items-center md:justify-between'>
+        <div >
+          <h1 className='text-xl font-semibold sm:text-2xl'>All Employees</h1>
+
+          <p className='mt-1 text-sm text-gray-500'>
+            Manage your employees and organization members
+          </p>
+        </div>
+
+        <button
+          className='
+            flex
+            w-full
+            items-center
+            justify-center
+            gap-2
+            rounded-lg
+            bg-black
+            px-4
+            py-2
+            text-sm
+            font-medium
+            text-white
+            transition
+            hover:bg-gray-800
+            sm:w-auto
+          '
+          onClick={()=>navigate("/hr/add-employee")}
+        >
+          <Plus size={17} />
+          Add Employee
+        </button>
+      </div>
+
+      {/* SEARCH */}
+      <div className=''>
+        <div className='rounded-xl border border-gray-200 p-1'>
+          <div className='relative'>
+            <Search
+              size={18}
+              className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
+            />
+
+            <input
+              type='text'
+              value={search}
+              placeholder='Search employees...'
+              onChange={e => setSearch(e.target.value)}
+              className='
+                w-full
+                rounded-lg
+                bg-gray-100
+                py-2 sm:py-3
+                pl-10
+                pr-4
+                text-sm
+                outline-none
+                transition
+                focus:ring-2
+                focus:ring-black/10
+              '
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* FILTER TYPE */}
+      <div className='mt-5'>
+        <div
+          className='
+            flex
+            w-full
+            overflow-x-auto
+            rounded-lg
+            border
+            border-gray-200
+            p-1
+            gap-2
+            sm:w-fit
+          '
+        >
+          <button
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'All'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            onClick={() => setFilter('All')}
+          >
+            All
+          </button>
+
+          <button
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'Employee'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            onClick={() => setFilter('Employee')}
+          >
+            Employee
+          </button>
+
+          <button
+            className={`shrink-0 rounded-md px-4 py-1 sm:py-2 text-sm ${filter === 'Manager & HR'
+              ? 'bg-black text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            onClick={() => setFilter('Manager & HR')}
+          >
+            Manager & HR
+          </button>
+        </div>
+      </div>
+
+      {/* Employee count */}
+      <p className='mt-3 text-sm text-gray-500'>
+        {filteredEmployees.length}{' '}
+        {filteredEmployees.length === 1 ? 'Employee' : 'Employees'}
+      </p>
+      {/* EMPLOYEE TABLE */}
+      <div className='mt-5  pb-6'>
+        {/* Horizontal scroll only when required */}
+        <div className='w-full overflow-x-auto rounded-xl border border-gray-200'>
+          <div className='min-w-212.5 bg-white'>
+            {/* TABLE HEADING */}
+            <div
+              className='
+                grid
+                grid-cols-6
+                gap-4
+                border-b
+                border-gray-200
+                bg-gray-50
+                p-4
+                text-sm
+                font-medium
+                text-gray-500
+              '
+            >
+              <div>Name & Role</div>
+              <div>Email</div>
+              <div>Department</div>
+              <div>Manager</div>
+              <div>Status</div>
+              <div>Action</div>
+            </div>
+
+            {/* EMPLOYEES */}
+            {filteredEmployees.length === 0 ? (
+              <div className='p-8 text-center text-sm text-gray-500'>
+                No employees found.
+              </div>
+            ) : (
+              filteredEmployees.map(employee => (
+                <div
+                  key={employee.id}
+                  className='
+        grid
+        grid-cols-6
+        gap-4
+        border-b
+        border-gray-200
+        p-4
+        last:border-b-0
+      '
+                >
+                  {/* Name + Role */}
+                 <div className="flex items-center gap-3">
+    
+    <div
+        className="
+            flex
+            h-10
+            w-10
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            bg-black
+            text-xs
+            font-bold
+            text-white
+        "
+    >
+        {employee.name
+            .split(" ")
+            .map(word => word[0])
+            .join("")
+            .slice(0, 2)}
+    </div>
+
+    <div className="min-w-0">
+        <h3 className="truncate text-sm font-semibold text-gray-900">
+            {employee.name}
+        </h3>
+
+        <p className="mt-0.5 text-xs text-gray-500">
+            {employee.role}
+        </p>
+    </div>
+
+</div>
+
+                  {/* Email */}
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm'>{employee.email}</p>
+                  </div>
+
+                  {/* Department */}
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm'>{employee.department}</p>
+                  </div>
+
+                  {/* Manager */}
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm'>{employee.manager}</p>
+                  </div>
+
+                  {/* Status */}
+                 
+                 <div className="flex items-center gap-2">
+    <button
+        onClick={() => handleStatusToggle(employee.id)}
+        className={`relative h-6 w-11 rounded-full transition ${
+            employeeStatus[employee.id] === "Active"
+                ? "bg-black"
+                : "bg-gray-300"
+        }`}
+    >
+        <span
+            className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${
+                employeeStatus[employee.id] === "Active"
+                    ? "left-6"
+                    : "left-1"
+            }`}
+        />
+    </button>
+
+    <span className="text-sm">
+        {employeeStatus[employee.id]}
+    </span>
+</div>
+
+                  {/* Actions */}
+                  <div className='relative'>
+                    <button
+                      onClick={() =>
+                        setOpenMenu(
+                          openMenu === employee.id ? null : employee.id
+                        )
+                      }
+                      className='rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-black'
+                    >
+                      <MoreHorizontal size={20} />
+                    </button>
+
+                    {openMenu === employee.id && (
+                      <div className='absolute right-0 top-10 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
+                        <button
+                          onClick={() =>
+                            navigate(`/employees/${employee.id}`)
+                          }
+                          className='flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
+                        >
+                          <Eye size={16} />
+                          View
+                        </button>
+
+                        <button className='flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'>
+                          <Pencil size={16} />
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <Pagination currentPage={1} totalPages={10} onPageChange={5} />
+    </div>
+  )
+}
+
+export default AllEmployee
