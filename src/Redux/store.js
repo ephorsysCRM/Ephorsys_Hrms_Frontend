@@ -12,13 +12,19 @@ import createWebStorage from
 
 import rootReducer from "./rootReducer";
 
+
 const storage =
     createWebStorage("local");
 
+
 const persistConfig = {
+
     key: "root",
+
     storage,
+
 };
+
 
 const persistedReducer =
     persistReducer(
@@ -26,15 +32,24 @@ const persistedReducer =
         rootReducer
     );
 
+
 export const store =
     configureStore({
-        reducer: persistedReducer,
 
-        middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware({
-                serializableCheck: false,
-            }),
+        reducer:
+            persistedReducer,
+
+        middleware:
+            (getDefaultMiddleware) =>
+                getDefaultMiddleware({
+
+                    serializableCheck:
+                        false,
+
+                }),
+
     });
+
 
 export const persistor =
     persistStore(store);

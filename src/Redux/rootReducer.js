@@ -1,4 +1,5 @@
 import { combineReducers } from "@reduxjs/toolkit";
+
 import {
     persistReducer,
 } from "redux-persist";
@@ -6,20 +7,28 @@ import {
 import createWebStorage from
     "redux-persist/es/storage/createWebStorage";
 
-import authReducer from "./features/auth/authSlice";
+import authReducer from
+    "./features/auth/authSlice";
+
 
 const storage =
     createWebStorage("local");
 
+
 const authPersistConfig = {
+
     key: "auth",
+
     storage,
 
-    // Only these fields will be stored
+    // Only admin data will persist.
+    // Access token will NOT be persisted.
+
     whitelist: [
         "admin",
     ],
 };
+
 
 const persistedAuthReducer =
     persistReducer(
@@ -27,8 +36,14 @@ const persistedAuthReducer =
         authReducer
     );
 
-const rootReducer = combineReducers({
-    auth: persistedAuthReducer,
-});
+
+const rootReducer =
+    combineReducers({
+
+        auth:
+            persistedAuthReducer,
+
+    });
+
 
 export default rootReducer;

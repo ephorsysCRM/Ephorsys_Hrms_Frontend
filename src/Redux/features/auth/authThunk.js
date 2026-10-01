@@ -1,4 +1,7 @@
-import api from "../../services/api";
+import api, {
+  setAccessToken,
+  clearAccessToken,
+} from "../../services/api";
 
 import toast from "react-hot-toast";
 
@@ -14,146 +17,213 @@ import {
   authCheckComplete,
 } from "./authSlice";
 
+
 // =====================================================
 // LOGIN
 // =====================================================
 
-export const loginAdmin = (formData) => async (dispatch) => {
-  try {
-    dispatch(authStart());
+export const loginAdmin =
+  (formData) =>
+    async (dispatch) => {
 
-    const { data } = await api.post(
-      "/admin/login",
-      formData
-    );
+      try {
 
-    dispatch(
-      loginSuccess({
-        admin: data.data.admin,
-        accessToken: data.data.accessToken,
-      })
-    );
+        dispatch(authStart());
 
-    toast.success(
-      data.message || "Login successful"
-    );
+        const { data } =
+          await api.post(
+            "/admin/login",
+            formData
+          );
 
-    return {
-      success: true,
-      data: data.data,
+        // ---------------------------------------------
+        // GET ACCESS TOKEN
+        // ---------------------------------------------
+
+        const accessToken =
+          data.data.accessToken;
+
+        // ---------------------------------------------
+        // SET ACCESS TOKEN IN API SERVICE
+        // ---------------------------------------------
+
+        setAccessToken(accessToken);
+
+        // ---------------------------------------------
+        // SAVE ADMIN + TOKEN IN REDUX
+        // ---------------------------------------------
+
+        dispatch(
+          loginSuccess({
+            admin: data.data.admin,
+            accessToken,
+          })
+        );
+
+        toast.success(
+          data.message ||
+          "Login successful"
+        );
+
+        return {
+          success: true,
+          data: data.data,
+        };
+
+      } catch (error) {
+
+        const msg =
+          error.response?.data?.message ||
+          "Login failed";
+
+        dispatch(
+          authFailure(msg)
+        );
+
+        toast.error(msg);
+
+        return {
+          success: false,
+          message: msg,
+        };
+      }
     };
-  } catch (error) {
-    const msg =
-      error.response?.data?.message ||
-      "Login failed";
 
-    dispatch(authFailure(msg));
-
-    toast.error(msg);
-
-    return {
-      success: false,
-      message: msg,
-    };
-  }
-};
 
 // =====================================================
 // RESTORE SESSION
 // =====================================================
 
-export const restoreAdminSession = () => async (dispatch) => {
-  try {
-    dispatch(authStart());
+export const restoreAdminSession =
+  () =>
+    async (dispatch) => {
 
-    const { data } = await api.post(
-      "/admin/refresh-token"
-    );
+      try {
 
-    const accessToken =
-      data.data.accessToken;
+        dispatch(authStart());
 
-    // -----------------------------------------------
-    // GET ADMIN PROFILE
-    // -----------------------------------------------
+        // ---------------------------------------------
+        // REFRESH TOKEN
+        // ---------------------------------------------
 
-    const profileResponse = await api.get(
-      "/admin/profile",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        const { data } =
+          await api.post(
+            "/admin/refresh-token"
+          );
+
+        const accessToken =
+          data.data.accessToken;
+
+        // ---------------------------------------------
+        // SET NEW ACCESS TOKEN
+        // ---------------------------------------------
+
+        setAccessToken(accessToken);
+
+        // ---------------------------------------------
+        // GET ADMIN PROFILE
+        // ---------------------------------------------
+
+        const profileResponse =
+          await api.get(
+            "/admin/profile"
+          );
+
+        // ---------------------------------------------
+        // SAVE SESSION
+        // ---------------------------------------------
+
+        dispatch(
+          sessionRestored({
+            admin:
+              profileResponse
+                .data
+                .data,
+
+            accessToken,
+          })
+        );
+
+        return {
+          success: true,
+        };
+
+      } catch (error) {
+
+        clearAccessToken();
+
+        dispatch(
+          authCheckComplete()
+        );
+
+        return {
+          success: false,
+        };
       }
-    );
-
-    dispatch(
-      sessionRestored({
-        admin: profileResponse.data.data,
-        accessToken,
-      })
-    );
-
-    return {
-      success: true,
     };
-  } catch (error) {
-    dispatch(authCheckComplete());
 
-    return {
-      success: false,
-    };
-  }
-};
 
 // =====================================================
 // GET ADMIN PROFILE
 // =====================================================
 
-export const getAdminProfile = () => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch(authStart());
+export const getAdminProfile =
+  () =>
+    async (dispatch, getState) => {
 
-    const accessToken =
-      getState().auth.accessToken;
+      try {
 
-    const { data } = await api.get(
-      "/admin/profile",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        dispatch(authStart());
+
+        const accessToken =
+          getState()
+            .auth
+            .accessToken;
+
+        // ---------------------------------------------
+        // SYNC TOKEN WITH API SERVICE
+        // ---------------------------------------------
+
+        if (accessToken) {
+          setAccessToken(
+            accessToken
+          );
+        }
+
+        const { data } =
+          await api.get(
+            "/admin/profile"
+          );
+
+        dispatch(
+          sessionRestored({
+            admin: data.data,
+            accessToken,
+          })
+        );
+
+        return {
+          success: true,
+          data: data.data,
+        };
+
+      } catch (error) {
+
+        const msg =
+          error.response?.data?.message ||
+          "Failed to load profile";
+
+        dispatch(
+          authFailure(msg)
+        );
+
+        return {
+          success: false,
+          message: msg,
+        };
       }
-    );
-
-    dispatch(
-      sessionRestored({
-        admin: data.data,
-        accessToken,
-      })
-    );
-
-    return {
-      success: true,
-      data: data.data,
     };
 
-  } catch (error) {
-
-    const msg =
-      error.response?.data?.message ||
-      "Failed to load profile";
-
-    dispatch(authFailure(msg));
-
-    return {
-      success: false,
-      message: msg,
-    };
-  }
-};
 
 // =====================================================
 // UPDATE ADMIN PROFILE
@@ -162,26 +232,45 @@ export const getAdminProfile = () => async (
 export const updateAdminProfile =
   (adminId, formData) =>
     async (dispatch, getState) => {
+
       try {
+
         dispatch(authStart());
 
         const accessToken =
-          getState().auth.accessToken;
+          getState()
+            .auth
+            .accessToken;
 
-        const { data } = await api.put(
-          `/admin/profile/${adminId}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        // ---------------------------------------------
+        // SYNC TOKEN
+        // ---------------------------------------------
 
-        // -----------------------------------------------
-        // UPDATE REDUX ADMIN DATA
-        // -----------------------------------------------
+        if (accessToken) {
+          setAccessToken(
+            accessToken
+          );
+        }
+
+        // ---------------------------------------------
+        // UPDATE PROFILE
+        // ---------------------------------------------
+
+        const { data } =
+          await api.put(
+            `/admin/profile/${adminId}`,
+            formData,
+            {
+              headers: {
+                "Content-Type":
+                  "multipart/form-data",
+              },
+            }
+          );
+
+        // ---------------------------------------------
+        // UPDATE REDUX
+        // ---------------------------------------------
 
         dispatch(
           sessionRestored({
@@ -199,12 +288,16 @@ export const updateAdminProfile =
           success: true,
           data: data.data,
         };
+
       } catch (error) {
+
         const msg =
           error.response?.data?.message ||
           "Profile update failed";
 
-        dispatch(authFailure(msg));
+        dispatch(
+          authFailure(msg)
+        );
 
         toast.error(msg);
 
@@ -215,129 +308,177 @@ export const updateAdminProfile =
       }
     };
 
+
 // =====================================================
 // LOGOUT
 // =====================================================
 
-export const logOutAdmin = () => async (dispatch) => {
-  try {
-    const { data } = await api.post(
-      "/admin/logout"
-    );
+export const logOutAdmin =
+  () =>
+    async (dispatch) => {
 
-    dispatch(logoutSuccess());
+      try {
 
-    toast.success(
-      data.message || "Logout successful"
-    );
+        const { data } =
+          await api.post(
+            "/admin/logout"
+          );
 
-    return {
-      success: true,
+        // ---------------------------------------------
+        // CLEAR TOKEN FROM API SERVICE
+        // ---------------------------------------------
+
+        clearAccessToken();
+
+        // ---------------------------------------------
+        // CLEAR REDUX
+        // ---------------------------------------------
+
+        dispatch(
+          logoutSuccess()
+        );
+
+        toast.success(
+          data.message ||
+          "Logout successful"
+        );
+
+        return {
+          success: true,
+        };
+
+      } catch (error) {
+
+        // ---------------------------------------------
+        // CLEAR TOKEN EVEN IF API FAILS
+        // ---------------------------------------------
+
+        clearAccessToken();
+
+        dispatch(
+          logoutSuccess()
+        );
+
+        const msg =
+          error.response?.data?.message ||
+          "Logout failed";
+
+        toast.error(msg);
+
+        return {
+          success: false,
+          message: msg,
+        };
+      }
     };
-  } catch (error) {
-    dispatch(logoutSuccess());
 
-    const msg =
-      error.response?.data?.message ||
-      "Logout failed";
-
-    toast.error(msg);
-
-    return {
-      success: false,
-      message: msg,
-    };
-  }
-};
 
 // =====================================================
 // SEND FORGOT PASSWORD OTP
 // =====================================================
 
 export const sendForgotPasswordOtp =
-  (email) => async (dispatch) => {
-    try {
-      dispatch(authStart());
+  (email) =>
+    async (dispatch) => {
 
-      const { data } = await api.post(
-        "/admin/forgot-password",
-        {
-          email,
-        }
-      );
+      try {
 
-      dispatch(
-        otpSentSuccess(email)
-      );
+        dispatch(authStart());
 
-      toast.success(
-        data.message ||
-        "OTP sent successfully"
-      );
+        const { data } =
+          await api.post(
+            "/admin/forgot-password",
+            {
+              email,
+            }
+          );
 
-      return {
-        success: true,
-      };
-    } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        "Failed to send OTP";
+        dispatch(
+          otpSentSuccess(email)
+        );
 
-      dispatch(authFailure(msg));
+        toast.success(
+          data.message ||
+          "OTP sent successfully"
+        );
 
-      toast.error(msg);
+        return {
+          success: true,
+        };
 
-      return {
-        success: false,
-        message: msg,
-      };
-    }
-  };
+      } catch (error) {
+
+        const msg =
+          error.response?.data?.message ||
+          "Failed to send OTP";
+
+        dispatch(
+          authFailure(msg)
+        );
+
+        toast.error(msg);
+
+        return {
+          success: false,
+          message: msg,
+        };
+      }
+    };
+
 
 // =====================================================
 // VERIFY OTP
 // =====================================================
 
 export const verifyForgotOtp =
-  (email, otp) => async (dispatch) => {
-    try {
-      dispatch(authStart());
+  (email, otp) =>
+    async (dispatch) => {
 
-      const { data } = await api.post(
-        "/admin/verify-otp",
-        {
-          email,
-          otp,
-        }
-      );
+      try {
 
-      dispatch(
-        otpVerifiedSuccess()
-      );
+        dispatch(authStart());
 
-      toast.success(
-        data.message ||
-        "OTP verified successfully"
-      );
+        const { data } =
+          await api.post(
+            "/admin/verify-otp",
+            {
+              email,
+              otp,
+            }
+          );
 
-      return {
-        success: true,
-      };
-    } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        "Invalid OTP";
+        dispatch(
+          otpVerifiedSuccess()
+        );
 
-      dispatch(authFailure(msg));
+        toast.success(
+          data.message ||
+          "OTP verified successfully"
+        );
 
-      toast.error(msg);
+        return {
+          success: true,
+        };
 
-      return {
-        success: false,
-        message: msg,
-      };
-    }
-  };
+      } catch (error) {
+
+        const msg =
+          error.response?.data?.message ||
+          "Invalid OTP";
+
+        dispatch(
+          authFailure(msg)
+        );
+
+        toast.error(msg);
+
+        return {
+          success: false,
+          message: msg,
+        };
+      }
+    };
+
 
 // =====================================================
 // RESET PASSWORD
@@ -350,17 +491,20 @@ export const resetForgotPassword =
     confirmPassword
   ) =>
     async (dispatch) => {
+
       try {
+
         dispatch(authStart());
 
-        const { data } = await api.post(
-          "/admin/reset-password",
-          {
-            email,
-            newPassword,
-            confirmPassword,
-          }
-        );
+        const { data } =
+          await api.post(
+            "/admin/reset-password",
+            {
+              email,
+              newPassword,
+              confirmPassword,
+            }
+          );
 
         dispatch(
           passwordResetSuccess()
@@ -374,12 +518,16 @@ export const resetForgotPassword =
         return {
           success: true,
         };
+
       } catch (error) {
+
         const msg =
           error.response?.data?.message ||
           "Password reset failed";
 
-        dispatch(authFailure(msg));
+        dispatch(
+          authFailure(msg)
+        );
 
         toast.error(msg);
 

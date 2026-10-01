@@ -18,13 +18,25 @@ const api = axios.create({
 
 let accessToken = null;
 
+// =====================================================
+// SET ACCESS TOKEN
+// =====================================================
+
 export const setAccessToken = (token) => {
     accessToken = token;
 };
 
+// =====================================================
+// CLEAR ACCESS TOKEN
+// =====================================================
+
 export const clearAccessToken = () => {
     accessToken = null;
 };
+
+// =====================================================
+// GET ACCESS TOKEN
+// =====================================================
 
 export const getAccessToken = () => {
     return accessToken;
