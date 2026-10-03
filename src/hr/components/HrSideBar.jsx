@@ -5,7 +5,6 @@ import {
   Users,
   UserRound,
   Building2,
-  BriefcaseBusiness,
   CalendarCheck,
   CalendarDays,
   WalletCards,
@@ -25,7 +24,7 @@ import LogoutModal from '../../admin/adminModals/LogoutModal'
 const NAV_ITEMS = [
   {
     label: 'Dashboard',
-    path: '/admin/dashboard',
+    path: '/hr/dashboard',
     icon: LayoutDashboard
   },
 
@@ -35,7 +34,7 @@ const NAV_ITEMS = [
     children: [
       {
         label: 'Departments',
-        path: '/admin/departments',
+        path: '/hr/departments',
         icon: Building2
       }
     ]
@@ -47,7 +46,7 @@ const NAV_ITEMS = [
     children: [
       {
         label: 'All Employees',
-        path: '/admin/all-employees',
+        path: '/hr/all-employees',
         icon: UserRound
       }
     ]
@@ -59,12 +58,12 @@ const NAV_ITEMS = [
     children: [
       {
         label: 'Attendance',
-        path: '/admin/attendance',
+        path: '/hr/attendance',
         icon: CalendarDays
       },
       {
         label: 'Leave Management',
-        path: '/admin/leave-management',
+        path: '/hr/leave-management',
         icon: ClipboardList
       }
     ]
@@ -76,12 +75,12 @@ const NAV_ITEMS = [
     children: [
       {
         label: 'Payroll',
-        path: '/admin/payroll',
+        path: '/hr/payroll',
         icon: WalletCards
       },
       {
         label: 'Payslips',
-        path: '/admin/payslips',
+        path: '/hr/payslips',
         icon: FileText
       }
     ]
@@ -89,13 +88,13 @@ const NAV_ITEMS = [
 
   {
     label: 'Reports',
-    path: '/admin/reports',
+    path: '/hr/reports',
     icon: FileText
   },
 
   {
     label: 'Settings',
-    path: '/admin/settings',
+    path: '/hr/settings',
     icon: Settings
   }
 ]
