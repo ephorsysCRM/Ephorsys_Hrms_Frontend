@@ -1,7 +1,4 @@
-import api, {
-  setAccessToken,
-  clearAccessToken,
-} from "../../services/api";
+import api from "../../services/api";
 
 import toast from "react-hot-toast";
 
@@ -25,38 +22,25 @@ import {
 export const loginAdmin =
   (formData) =>
     async (dispatch) => {
-
       try {
-
         dispatch(authStart());
 
-        const { data } =
-          await api.post(
-            "/admin/login",
-            formData
-          );
+        const { data } = await api.post(
+          "/admin/login",
+          formData
+        );
 
-        // ---------------------------------------------
-        // GET ACCESS TOKEN
-        // ---------------------------------------------
-
-        const accessToken =
-          data.data.accessToken;
-
-        // ---------------------------------------------
-        // SET ACCESS TOKEN IN API SERVICE
-        // ---------------------------------------------
-
-        setAccessToken(accessToken);
-
-        // ---------------------------------------------
-        // SAVE ADMIN + TOKEN IN REDUX
-        // ---------------------------------------------
+        // =====================================================
+        // SAVE ADMIN ONLY
+        // =====================================================
+        //
+        // JWT is stored inside HTTP-only cookie by backend.
+        // Frontend does NOT receive or store the token.
+        //
 
         dispatch(
           loginSuccess({
             admin: data.data.admin,
-            accessToken,
           })
         );
 
@@ -71,14 +55,11 @@ export const loginAdmin =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Login failed";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         toast.error(msg);
 
@@ -97,50 +78,26 @@ export const loginAdmin =
 export const restoreAdminSession =
   () =>
     async (dispatch) => {
-
       try {
-
         dispatch(authStart());
 
-        // ---------------------------------------------
-        // REFRESH TOKEN
-        // ---------------------------------------------
-
-        const { data } =
-          await api.post(
-            "/admin/refresh-token"
-          );
-
-        const accessToken =
-          data.data.accessToken;
-
-        // ---------------------------------------------
-        // SET NEW ACCESS TOKEN
-        // ---------------------------------------------
-
-        setAccessToken(accessToken);
-
-        // ---------------------------------------------
+        // =====================================================
         // GET ADMIN PROFILE
-        // ---------------------------------------------
+        // =====================================================
+        //
+        // Browser automatically sends the HTTP-only
+        // "token" cookie because axios uses:
+        //
+        // withCredentials: true
+        //
 
-        const profileResponse =
-          await api.get(
-            "/admin/profile"
-          );
-
-        // ---------------------------------------------
-        // SAVE SESSION
-        // ---------------------------------------------
+        const { data } = await api.get(
+          "/admin/profile"
+        );
 
         dispatch(
           sessionRestored({
-            admin:
-              profileResponse
-                .data
-                .data,
-
-            accessToken,
+            admin: data.data,
           })
         );
 
@@ -149,12 +106,11 @@ export const restoreAdminSession =
         };
 
       } catch (error) {
+        // =====================================================
+        // NO VALID SESSION
+        // =====================================================
 
-        clearAccessToken();
-
-        dispatch(
-          authCheckComplete()
-        );
+        dispatch(authCheckComplete());
 
         return {
           success: false,
@@ -169,36 +125,17 @@ export const restoreAdminSession =
 
 export const getAdminProfile =
   () =>
-    async (dispatch, getState) => {
-
+    async (dispatch) => {
       try {
-
         dispatch(authStart());
 
-        const accessToken =
-          getState()
-            .auth
-            .accessToken;
-
-        // ---------------------------------------------
-        // SYNC TOKEN WITH API SERVICE
-        // ---------------------------------------------
-
-        if (accessToken) {
-          setAccessToken(
-            accessToken
-          );
-        }
-
-        const { data } =
-          await api.get(
-            "/admin/profile"
-          );
+        const { data } = await api.get(
+          "/admin/profile"
+        );
 
         dispatch(
           sessionRestored({
             admin: data.data,
-            accessToken,
           })
         );
 
@@ -208,14 +145,11 @@ export const getAdminProfile =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Failed to load profile";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         return {
           success: false,
@@ -231,30 +165,9 @@ export const getAdminProfile =
 
 export const updateAdminProfile =
   (adminId, formData) =>
-    async (dispatch, getState) => {
-
+    async (dispatch) => {
       try {
-
         dispatch(authStart());
-
-        const accessToken =
-          getState()
-            .auth
-            .accessToken;
-
-        // ---------------------------------------------
-        // SYNC TOKEN
-        // ---------------------------------------------
-
-        if (accessToken) {
-          setAccessToken(
-            accessToken
-          );
-        }
-
-        // ---------------------------------------------
-        // UPDATE PROFILE
-        // ---------------------------------------------
 
         const { data } =
           await api.put(
@@ -268,14 +181,9 @@ export const updateAdminProfile =
             }
           );
 
-        // ---------------------------------------------
-        // UPDATE REDUX
-        // ---------------------------------------------
-
         dispatch(
           sessionRestored({
             admin: data.data,
-            accessToken,
           })
         );
 
@@ -290,14 +198,11 @@ export const updateAdminProfile =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Profile update failed";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         toast.error(msg);
 
@@ -316,27 +221,17 @@ export const updateAdminProfile =
 export const logOutAdmin =
   () =>
     async (dispatch) => {
-
       try {
-
         const { data } =
           await api.post(
             "/admin/logout"
           );
 
-        // ---------------------------------------------
-        // CLEAR TOKEN FROM API SERVICE
-        // ---------------------------------------------
+        // =====================================================
+        // BACKEND CLEARS HTTP-ONLY COOKIE
+        // =====================================================
 
-        clearAccessToken();
-
-        // ---------------------------------------------
-        // CLEAR REDUX
-        // ---------------------------------------------
-
-        dispatch(
-          logoutSuccess()
-        );
+        dispatch(logoutSuccess());
 
         toast.success(
           data.message ||
@@ -348,16 +243,11 @@ export const logOutAdmin =
         };
 
       } catch (error) {
+        // =====================================================
+        // CLEAR REDUX EVEN IF API FAILS
+        // =====================================================
 
-        // ---------------------------------------------
-        // CLEAR TOKEN EVEN IF API FAILS
-        // ---------------------------------------------
-
-        clearAccessToken();
-
-        dispatch(
-          logoutSuccess()
-        );
+        dispatch(logoutSuccess());
 
         const msg =
           error.response?.data?.message ||
@@ -380,9 +270,7 @@ export const logOutAdmin =
 export const sendForgotPasswordOtp =
   (email) =>
     async (dispatch) => {
-
       try {
-
         dispatch(authStart());
 
         const { data } =
@@ -407,14 +295,11 @@ export const sendForgotPasswordOtp =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Failed to send OTP";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         toast.error(msg);
 
@@ -433,9 +318,7 @@ export const sendForgotPasswordOtp =
 export const verifyForgotOtp =
   (email, otp) =>
     async (dispatch) => {
-
       try {
-
         dispatch(authStart());
 
         const { data } =
@@ -461,14 +344,11 @@ export const verifyForgotOtp =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Invalid OTP";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         toast.error(msg);
 
@@ -491,9 +371,7 @@ export const resetForgotPassword =
     confirmPassword
   ) =>
     async (dispatch) => {
-
       try {
-
         dispatch(authStart());
 
         const { data } =
@@ -520,14 +398,11 @@ export const resetForgotPassword =
         };
 
       } catch (error) {
-
         const msg =
           error.response?.data?.message ||
           "Password reset failed";
 
-        dispatch(
-          authFailure(msg)
-        );
+        dispatch(authFailure(msg));
 
         toast.error(msg);
 

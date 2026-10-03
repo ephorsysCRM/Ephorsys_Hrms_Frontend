@@ -1,4 +1,6 @@
-import { combineReducers } from "@reduxjs/toolkit";
+import {
+    combineReducers,
+} from "@reduxjs/toolkit";
 
 import {
     persistReducer,
@@ -10,10 +12,31 @@ import createWebStorage from
 import authReducer from
     "./features/auth/authSlice";
 
+import departmentReducer from
+    "./features/department/departmentSlice";
+
+
+// =====================================================
+// LOCAL STORAGE
+// =====================================================
 
 const storage =
     createWebStorage("local");
 
+
+// =====================================================
+// AUTH PERSIST CONFIG
+// =====================================================
+//
+// Only admin information will be persisted.
+//
+// JWT is NOT stored in:
+// - Redux
+// - localStorage
+// - sessionStorage
+//
+// JWT is stored in HTTP-only cookie by backend.
+// =====================================================
 
 const authPersistConfig = {
 
@@ -21,14 +44,16 @@ const authPersistConfig = {
 
     storage,
 
-    // Only admin data will persist.
-    // Access token will NOT be persisted.
-
     whitelist: [
         "admin",
     ],
+
 };
 
+
+// =====================================================
+// PERSIST AUTH REDUCER
+// =====================================================
 
 const persistedAuthReducer =
     persistReducer(
@@ -37,11 +62,27 @@ const persistedAuthReducer =
     );
 
 
+// =====================================================
+// ROOT REDUCER
+// =====================================================
+
 const rootReducer =
     combineReducers({
 
+        // =================================================
+        // AUTH
+        // =================================================
+
         auth:
             persistedAuthReducer,
+
+
+        // =================================================
+        // DEPARTMENT
+        // =================================================
+
+        department:
+            departmentReducer,
 
     });
 

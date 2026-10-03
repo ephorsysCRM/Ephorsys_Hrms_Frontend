@@ -1,477 +1,284 @@
-import { ArrowLeft, Eye, MoreHorizontal, Pencil, Plus } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import { employeesData } from "../data/employeesData";
-import { departmentsData } from "../data/departmentsData";
-import { useState } from "react";
-import Pagination from "../../UI/Pagination";
+import {
+  ArrowLeft,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  FileText,
+  Hash,
+  User,
+  XCircle
+} from 'lucide-react'
+
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import { getDepartment } from '../../Redux/features/department/departmentThunk'
 
 const DepartmentView = () => {
-    const { id } = useParams();
-    const department = departmentsData.find(
-        department => department.id === id
-    );
-    const departmentEmployees = employeesData.filter(
-        employee => employee.department === department.name
-    );
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-    const navigate = useNavigate();
-    const [openMenu, setOpenMenu] = useState(null);
+  const { department, fetchingSingle, error } = useSelector(
+    state => state.department
+  )
 
+  useEffect(() => {
+    if (id) {
+      dispatch(getDepartment(id))
+    }
+  }, [dispatch, id])
+
+  if (fetchingSingle) {
     return (
-        <div className="min-h-screen bg-[#f7f7f7] text-black">
-
-            {/* HEADER */}
-            <div className="border-b border-gray-200 bg-white px-3 py-2 sm:px-8">
-
-                {/* TITLE */}
-                <div>
-                    <div className="mb-1 flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-black"></span>
-
-                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                            Department
-                        </p>
-                    </div>
-
-                    <h1 className="md:text-2xl font-bold tracking-tight text-xl">
-                        Department Management
-                    </h1>
-                </div>
-
-
-                {/* ACTIONS */}
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-                    {/* BACK BUTTON */}
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="
-                flex
-                w-full
-                items-center
-                justify-center
-                gap-2
-                rounded-xl
-                border
-                border-gray-200
-                bg-white
-                px-4
-                py-2.5
-                text-sm
-                font-medium
-                text-gray-600
-                shadow-sm
-                transition-all
-                duration-200
-                hover:border-black
-                hover:bg-black
-                hover:text-white
-                hover:shadow-md
-                sm:w-auto
-            "
-                    >
-                        <ArrowLeft size={18} />
-                        Back to department
-                    </button>
-
-
-                    {/* ADD EMPLOYEE */}
-                    <button
-                        className="
-                flex
-                w-full
-                items-center
-                justify-center
-                gap-2
-                rounded-xl
-                bg-black
-                px-5
-                py-2.5
-                text-sm
-                font-semibold
-                text-white
-                shadow-lg
-                shadow-black/10
-                transition-all
-                duration-200
-                hover:bg-gray-800
-                hover:shadow-xl
-                sm:w-auto
-            "
-                        onClick={() => navigate("/add-employee")}
-                    >
-                        <Plus size={17} />
-                        Add Employee
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            {/* MAIN CONTENT */}
-            <div className="px-0 md:py-6 py-3 lg:px-1">
-
-                {/* DEPARTMENT DETAILS */}
-                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-
-                    <div className="border-b border-gray-100 px-5 py-4 sm:px-7">
-
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-                            <div>
-                              
-
-                                <h2 className="mt-1 text-2xl font-bold tracking-tight">
-                                    {department.name}
-                                </h2>
-                            </div>
-
-                            <span className="flex w-fit items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3.5 py-2 text-xs font-semibold text-green-700">
-                                <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
-                                {department.status}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    {/* STATS */}
-                  <div className="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-
-    <div className="px-5 py-2 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-            Department Head
-        </p>
-
-        <p className="mt-1 text-base font-semibold text-gray-900">
-            {department.manager}
-        </p>
-    </div>
-
-    <div className="px-5 py-2 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-            Total Employees
-        </p>
-
-        <p className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
-            {departmentEmployees.length}
-        </p>
-    </div>
-
-    <div className="px-5 py-2 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-            Department ID
-        </p>
-
-        <p className="mt-1 text-base font-semibold text-gray-900">
-            {id}
-        </p>
-    </div>
-
-</div>
-                </div>
-
-
-                {/* EMPLOYEES */}
-                <div className="mt-8">
-
-                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between px-5">
-
-                        <div>
-
-                            <div className="flex items-center gap-2">
-
-                                <h2 className="text-xl font-bold tracking-tight">
-                                    Employees
-                                </h2>
-
-                                <span className="rounded-full bg-black px-2 py-0.5 text-[10px] font-bold text-white">
-                                    {departmentEmployees.length}
-                                </span>
-
-                            </div>
-
-                            <p className="mt-1 text-xs text-gray-500">
-                                Employees working under this department
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    {/* TABLE */}
-                    <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-
-                        <div className="min-w-[800px]">
-
-                            {/* TABLE HEADER */}
-                            <div
-                                className="
-                                    grid
-                                    grid-cols-5
-                                    gap-4
-                                    border-b
-                                    border-gray-200
-                                    bg-[#fafafa]
-                                    px-5
-                                    py-4
-                                    text-[10px]
-                                    font-bold
-                                    uppercase
-                                    tracking-[0.12em]
-                                    text-gray-800
-                                "
-                            >
-                                <div>Name & Role</div>
-                                <div>Email</div>
-                                <div>Manager</div>
-                                <div>Status</div>
-                                <div>Action</div>
-                            </div>
-
-
-                            {/* EMPLOYEE ROWS */}
-                            {departmentEmployees.map(employee => (
-
-                                <div
-                                    key={employee.id}
-                                    className="
-                                        grid
-                                        grid-cols-5
-                                        gap-4
-                                        border-b
-                                        border-gray-100
-                                        px-5
-                                        py-5
-                                        transition-colors
-                                        duration-200
-                                        last:border-b-0
-                                        hover:bg-gray-50
-                                    "
-                                >
-
-                                    {/* NAME & ROLE */}
-                                    <div className="min-w-0">
-
-                                        <div className="flex items-center gap-3">
-
-                                            <div
-                                                className="
-                                                    flex
-                                                    h-9
-                                                    w-9
-                                                    shrink-0
-                                                    items-center
-                                                    justify-center
-                                                    rounded-xl
-                                                    bg-black
-                                                    text-xs
-                                                    font-bold
-                                                    text-white
-                                                "
-                                            >
-                                                {employee.name
-                                                    .split(" ")
-                                                    .map(word => word[0])
-                                                    .join("")
-                                                    .slice(0, 2)}
-                                            </div>
-
-                                            <div className="min-w-0">
-
-                                                <p className="truncate text-sm font-semibold text-gray-900">
-                                                    {employee.name}
-                                                </p>
-
-                                                <p className="mt-0.5 text-xs text-gray-400">
-                                                    {employee.role}
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    {/* EMAIL */}
-                                    <div className="min-w-0 flex items-center">
-
-                                        <p className="truncate text-sm text-gray-600">
-                                            {employee.email}
-                                        </p>
-
-                                    </div>
-
-
-                                    {/* MANAGER */}
-                                    <div className="min-w-0 flex items-center">
-
-                                        <p className="truncate text-sm text-gray-600">
-                                            {employee.manager}
-                                        </p>
-
-                                    </div>
-
-
-                                    {/* STATUS */}
-                                    <div className="flex items-center">
-
-                                        <span
-                                            className="
-                                                inline-flex
-                                                items-center
-                                                gap-1.5
-                                                rounded-full
-                                                border
-                                                border-green-200
-                                                bg-green-50
-                                                px-3
-                                                py-1.5
-                                                text-xs
-                                                font-semibold
-                                                text-green-700
-                                            "
-                                        >
-                                            <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
-
-                                            {employee.status}
-                                        </span>
-
-                                    </div>
-
-
-                                    {/* ACTION */}
-                                    <div className="relative flex items-center">
-
-                                        <button
-                                            onClick={() =>
-                                                setOpenMenu(
-                                                    openMenu === employee.id
-                                                        ? null
-                                                        : employee.id
-                                                )
-                                            }
-                                            className="
-                                                rounded-xl
-                                                border
-                                                border-transparent
-                                                p-2
-                                                text-gray-400
-                                                transition-all
-                                                duration-200
-                                                hover:border-gray-200
-                                                hover:bg-gray-100
-                                                hover:text-black
-                                            "
-                                        >
-                                            <MoreHorizontal size={20} />
-                                        </button>
-
-
-                                        {openMenu === employee.id && (
-
-                                            <div
-                                                className="
-                                                    absolute
-                                                    right-0
-                                                    top-11
-                                                    z-20
-                                                    w-36
-                                                    overflow-hidden
-                                                    rounded-xl
-                                                    border
-                                                    border-gray-200
-                                                    bg-white
-                                                    p-1.5
-                                                    shadow-2xl
-                                                    shadow-black/10
-                                                "
-                                            >
-
-                                                {/* VIEW */}
-                                                <button
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/employees/${employee.id}`,
-                                                            {
-                                                                state: { employee }
-                                                            }
-                                                        )
-                                                    }
-                                                    className="
-                                                        flex
-                                                        w-full
-                                                        items-center
-                                                        gap-2
-                                                        rounded-lg
-                                                        px-3
-                                                        py-2.5
-                                                        text-left
-                                                        text-sm
-                                                        font-medium
-                                                        text-gray-700
-                                                        transition
-                                                        hover:bg-gray-100
-                                                        hover:text-black
-                                                    "
-                                                >
-                                                    <Eye size={16} />
-                                                    View
-                                                </button>
-
-
-                                                {/* EDIT */}
-                                                <button
-                                                    className="
-                                                        flex
-                                                        w-full
-                                                        items-center
-                                                        gap-2
-                                                        rounded-lg
-                                                        px-3
-                                                        py-2.5
-                                                        text-left
-                                                        text-sm
-                                                        font-medium
-                                                        text-gray-700
-                                                        transition
-                                                        hover:bg-gray-100
-                                                        hover:text-black
-                                                    "
-                                                >
-                                                    <Pencil size={16} />
-                                                    Edit
-                                                </button>
-
-                                            </div>
-
-                                        )}
-
-                                    </div>
-
-                                </div>
-
-                            ))}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-
-            </div>
-                {/* Pagination */}
-      <Pagination currentPage={1} totalPages={10} onPageChange={5} />
-
+      <div className='flex min-h-[60vh] items-center justify-center'>
+        <div className='h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-black' />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='px-4 py-6'>
+        <button
+          onClick={() => navigate(-1)}
+          className='mb-5 flex items-center gap-2 text-sm text-gray-600 hover:text-black'
+        >
+          <ArrowLeft size={18} />
+          Back
+        </button>
+
+        <div className='rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600'>
+          {error}
         </div>
-    );
-};
+      </div>
+    )
+  }
 
-export default DepartmentView;
+  if (!department) {
+    return (
+      <div className='px-4 py-6'>
+        <button
+          onClick={() => navigate(-1)}
+          className='flex items-center gap-2 text-sm text-gray-600 hover:text-black'
+        >
+          <ArrowLeft size={18} />
+          Back
+        </button>
+
+        <div className='mt-6 rounded-xl border border-gray-200 bg-white p-10 text-center'>
+          <p className='text-sm text-gray-500'>Department not found</p>
+        </div>
+      </div>
+    )
+  }
+
+  const isActive = department.status?.toLowerCase() === 'active'
+
+  const createdDate = department.createdAt
+    ? new Date(department.createdAt).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    : '-'
+
+  const updatedDate = department.updatedAt
+    ? new Date(department.updatedAt).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    : '-'
+
+  return (
+    <div className='min-h-screen bg-gray-50 px-1 py-3 text-black sm:px-6 lg:px-1'>
+      {/* Header */}
+      <div className='mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+        <div>
+          <button
+            onClick={() => navigate(-1)}
+            className='mb-3 flex items-center gap-2 text-sm text-gray-500 transition hover:text-black'
+          >
+            <ArrowLeft size={17} />
+            Back to Departments
+          </button>
+
+          <h1 className='text-xl font-semibold sm:text-2xl'>
+            Department Details
+          </h1>
+
+          <p className='mt-1 text-sm text-gray-500'>
+            View department information
+          </p>
+        </div>
+
+        {/* Status */}
+        <div
+          className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium ${
+            isActive
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-200 text-gray-600'
+          }`}
+        >
+          {isActive ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+
+          {isActive ? 'Active' : 'Inactive'}
+        </div>
+      </div>
+
+      {/* Main Card */}
+      <div className='rounded-xl border border-gray-200 bg-white'>
+        {/* Department Header */}
+        <div className='border-b border-gray-200 p-5 sm:p-6'>
+          <div className='flex items-start gap-4'>
+            <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-black text-white'>
+              <Building2 size={23} />
+            </div>
+
+            <div className='min-w-0'>
+              <h2 className='text-lg font-semibold sm:text-xl'>
+                {department.name}
+              </h2>
+
+              <p className='mt-1 text-sm text-gray-500'>
+                Department Code:{' '}
+                <span className='font-medium text-gray-700'>
+                  {department.code || '-'}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Information */}
+        <div className='p-5 sm:p-6'>
+          <h3 className='mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500'>
+            Department Information
+          </h3>
+
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            {/* Department Name */}
+            <div className='rounded-lg border border-gray-200 p-4'>
+              <div className='mb-2 flex items-center gap-2 text-gray-500'>
+                <Building2 size={17} />
+                <span className='text-xs font-medium'>Department Name</span>
+              </div>
+
+              <p className='text-sm font-semibold'>{department.name || '-'}</p>
+            </div>
+
+            {/* Department Code */}
+            <div className='rounded-lg border border-gray-200 p-4'>
+              <div className='mb-2 flex items-center gap-2 text-gray-500'>
+                <Hash size={17} />
+                <span className='text-xs font-medium'>Department Code</span>
+              </div>
+
+              <p className='text-sm font-semibold'>{department.code || '-'}</p>
+            </div>
+
+            {/* Department Head */}
+            <div className='rounded-lg border border-gray-200 p-4'>
+              <div className='mb-2 flex items-center gap-2 text-gray-500'>
+                <User size={17} />
+                <span className='text-xs font-medium'>Department Head</span>
+              </div>
+
+              <p className='text-sm font-semibold'>
+                {department.departmentHead?.name || 'Not Assigned'}
+              </p>
+
+              {department.departmentHead?.email && (
+                <p className='mt-1 text-xs text-gray-500'>
+                  {department.departmentHead.email}
+                </p>
+              )}
+            </div>
+
+            {/* Status */}
+            <div className='rounded-lg border border-gray-200 p-4'>
+              <div className='mb-2 flex items-center gap-2 text-gray-500'>
+                {isActive ? <CheckCircle2 size={17} /> : <XCircle size={17} />}
+
+                <span className='text-xs font-medium'>Status</span>
+              </div>
+
+              <p
+                className={`text-sm font-semibold ${
+                  isActive ? 'text-green-600' : 'text-gray-500'
+                }`}
+              >
+                {isActive ? 'Active' : 'Inactive'}
+              </p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className='mt-4 rounded-lg border border-gray-200 p-4'>
+            <div className='mb-2 flex items-center gap-2 text-gray-500'>
+              <FileText size={17} />
+
+              <span className='text-xs font-medium'>Description</span>
+            </div>
+
+            <p className='text-sm leading-6 text-gray-700'>
+              {department.description || 'No description available.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Metadata */}
+        <div className='border-t border-gray-200 bg-gray-50 p-5 sm:p-6'>
+          <h3 className='mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500'>
+            Record Information
+          </h3>
+
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+            {/* Department ID */}
+            <div>
+              <p className='mb-1 text-xs text-gray-400'>Department ID</p>
+
+              <p className='break-all text-xs font-medium text-gray-700'>
+                {department._id || '-'}
+              </p>
+            </div>
+
+            {/* Created */}
+            <div>
+              <div className='mb-1 flex items-center gap-1 text-xs text-gray-400'>
+                <CalendarDays size={13} />
+                Created On
+              </div>
+
+              <p className='text-sm font-medium text-gray-700'>{createdDate}</p>
+            </div>
+
+            {/* Updated */}
+            <div>
+              <div className='mb-1 flex items-center gap-1 text-xs text-gray-400'>
+                <CalendarDays size={13} />
+                Last Updated
+              </div>
+
+              <p className='text-sm font-medium text-gray-700'>{updatedDate}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className='flex justify-end border-t border-gray-200 p-4'>
+          <button
+            onClick={() => navigate(-1)}
+            className='rounded-lg bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-gray-800'
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default DepartmentView

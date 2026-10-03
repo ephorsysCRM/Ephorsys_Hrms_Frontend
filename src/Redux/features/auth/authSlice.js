@@ -1,20 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+    // =====================================================
+    // ADMIN
+    // =====================================================
+
     admin: null,
 
-    // Access token is kept in Redux memory.
-    // Refresh token is stored only in HTTP-only cookie.
-    accessToken: null,
+    // =====================================================
+    // STATES
+    // =====================================================
 
     loading: false,
     error: null,
     isAuthenticated: false,
-
-    // Used while checking existing session
     authChecked: false,
 
-    // Forgot Password
+    // =====================================================
+    // FORGOT PASSWORD
+    // =====================================================
+
     otpSent: false,
     otpVerified: false,
     resetEmail: null,
@@ -44,7 +49,6 @@ const authSlice = createSlice({
             state.error = null;
 
             state.admin = action.payload.admin;
-            state.accessToken = action.payload.accessToken;
 
             state.isAuthenticated = true;
             state.authChecked = true;
@@ -59,14 +63,13 @@ const authSlice = createSlice({
             state.error = null;
 
             state.admin = action.payload.admin;
-            state.accessToken = action.payload.accessToken;
 
             state.isAuthenticated = true;
             state.authChecked = true;
         },
 
         // =====================================================
-        // AUTH CHECKED BUT NOT LOGGED IN
+        // AUTH CHECKED
         // =====================================================
 
         authCheckComplete: (state) => {
@@ -75,16 +78,7 @@ const authSlice = createSlice({
         },
 
         // =====================================================
-        // ACCESS TOKEN UPDATED
-        // =====================================================
-
-        accessTokenUpdated: (state, action) => {
-            state.accessToken = action.payload;
-            state.isAuthenticated = true;
-        },
-
-        // =====================================================
-        // FAILURE
+        // AUTH FAILURE
         // =====================================================
 
         authFailure: (state, action) => {
@@ -98,7 +92,6 @@ const authSlice = createSlice({
 
         logoutSuccess: (state) => {
             state.admin = null;
-            state.accessToken = null;
 
             state.loading = false;
             state.error = null;
@@ -163,7 +156,6 @@ export const {
     loginSuccess,
     sessionRestored,
     authCheckComplete,
-    accessTokenUpdated,
     authFailure,
     logoutSuccess,
     otpSentSuccess,

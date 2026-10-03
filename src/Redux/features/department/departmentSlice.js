@@ -2,10 +2,15 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     // =====================================================
-    // DEPARTMENT DATA
+    // DEPARTMENT LIST
     // =====================================================
 
     departments: [],
+
+    // =====================================================
+    // SINGLE DEPARTMENT
+    // =====================================================
+
     department: null,
 
     // =====================================================
@@ -14,25 +19,32 @@ const initialState = {
 
     pagination: {
         currentPage: 1,
-        totalPages: 1,
-        totalDepartments: 0,
         limit: 10,
+        totalDepartments: 0,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
     },
 
     // =====================================================
-    // STATES
+    // LOADING STATES
     // =====================================================
 
     loading: false,
-    error: null,
-
-    // =====================================================
-    // ACTION STATES
-    // =====================================================
 
     creating: false,
+
     updating: false,
+
     deleting: false,
+
+    fetchingSingle: false,
+
+    // =====================================================
+    // ERROR
+    // =====================================================
+
+    error: null,
 };
 
 const departmentSlice = createSlice({
@@ -42,178 +54,164 @@ const departmentSlice = createSlice({
 
     reducers: {
 
-        // =====================================================
-        // CREATE START
-        // =====================================================
+        // =================================================
+        // CREATE DEPARTMENT
+        // =================================================
 
         createDepartmentStart: (state) => {
             state.creating = true;
             state.error = null;
         },
 
-        // =====================================================
-        // CREATE SUCCESS
-        // =====================================================
-
         createDepartmentSuccess: (state, action) => {
             state.creating = false;
             state.error = null;
 
-            state.departments.unshift(
-                action.payload
-            );
+            // Add newly created department at top
+            if (action.payload) {
+                state.departments.unshift(action.payload);
+
+                state.pagination.totalDepartments += 1;
+            }
         },
 
-        // =====================================================
-        // GET ALL START
-        // =====================================================
+
+        // =================================================
+        // GET ALL DEPARTMENTS
+        // =================================================
 
         getDepartmentsStart: (state) => {
             state.loading = true;
             state.error = null;
         },
 
-        // =====================================================
-        // GET ALL SUCCESS
-        // =====================================================
-
         getDepartmentsSuccess: (state, action) => {
             state.loading = false;
             state.error = null;
 
             state.departments =
-                action.payload.departments;
+                action.payload.departments || [];
 
             state.pagination =
-                action.payload.pagination;
+                action.payload.pagination || state.pagination;
         },
 
-        // =====================================================
-        // GET SINGLE START
-        // =====================================================
+
+        // =================================================
+        // GET SINGLE DEPARTMENT
+        // =================================================
 
         getDepartmentStart: (state) => {
-            state.loading = true;
+            state.fetchingSingle = true;
             state.error = null;
         },
-
-        // =====================================================
-        // GET SINGLE SUCCESS
-        // =====================================================
 
         getDepartmentSuccess: (state, action) => {
-            state.loading = false;
+            state.fetchingSingle = false;
             state.error = null;
 
-            state.department =
-                action.payload;
+            state.department = action.payload;
         },
 
-        // =====================================================
-        // UPDATE START
-        // =====================================================
+
+        // =================================================
+        // UPDATE DEPARTMENT
+        // =================================================
 
         updateDepartmentStart: (state) => {
             state.updating = true;
             state.error = null;
         },
 
-        // =====================================================
-        // UPDATE SUCCESS
-        // =====================================================
-
         updateDepartmentSuccess: (state, action) => {
             state.updating = false;
             state.error = null;
 
-            const updatedDepartment =
-                action.payload;
+            const updatedDepartment = action.payload;
 
-            state.department =
-                updatedDepartment;
+            // Update single department
+            state.department = updatedDepartment;
 
-            const index =
-                state.departments.findIndex(
-                    (department) =>
-                        department._id ===
-                        updatedDepartment._id
-                );
+            // Update department inside list
+            const index = state.departments.findIndex(
+                (department) =>
+                    department._id === updatedDepartment?._id
+            );
 
             if (index !== -1) {
-                state.departments[index] =
-                    updatedDepartment;
+                state.departments[index] = updatedDepartment;
             }
         },
 
-        // =====================================================
-        // DELETE START
-        // =====================================================
+
+        // =================================================
+        // DELETE DEPARTMENT
+        // =================================================
 
         deleteDepartmentStart: (state) => {
             state.deleting = true;
             state.error = null;
         },
 
-        // =====================================================
-        // DELETE SUCCESS
-        // =====================================================
-
-        deleteDepartmentSuccess: (
-            state,
-            action
-        ) => {
+        deleteDepartmentSuccess: (state, action) => {
             state.deleting = false;
             state.error = null;
+
+            const deletedDepartmentId = action.payload;
 
             state.departments =
                 state.departments.filter(
                     (department) =>
-                        department._id !==
-                        action.payload
+                        department._id !== deletedDepartmentId
                 );
 
+            // Update total count
+            if (state.pagination.totalDepartments > 0) {
+                state.pagination.totalDepartments -= 1;
+            }
+
+            // If currently viewed department is deleted
             if (
                 state.department?._id ===
-                action.payload
+                deletedDepartmentId
             ) {
                 state.department = null;
             }
         },
 
-        // =====================================================
-        // FAILURE
-        // =====================================================
 
-        departmentFailure: (
-            state,
-            action
-        ) => {
+        // =================================================
+        // COMMON FAILURE
+        // =================================================
+
+        departmentFailure: (state, action) => {
             state.loading = false;
             state.creating = false;
             state.updating = false;
             state.deleting = false;
+            state.fetchingSingle = false;
 
-            state.error =
-                action.payload;
+            state.error = action.payload;
         },
 
-        // =====================================================
-        // CLEAR ERROR
-        // =====================================================
 
-        clearDepartmentError: (
-            state
-        ) => {
+        // =================================================
+        // CLEAR ERROR
+        // =================================================
+
+        clearDepartmentError: (state) => {
             state.error = null;
         },
 
-        // =====================================================
+
+        // =================================================
         // CLEAR SINGLE DEPARTMENT
-        // =====================================================
+        // =================================================
 
         clearDepartment: (state) => {
             state.department = null;
         },
+
     },
 });
 
@@ -237,6 +235,7 @@ export const {
 
     clearDepartmentError,
     clearDepartment,
+
 } = departmentSlice.actions;
 
 export default departmentSlice.reducer;

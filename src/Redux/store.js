@@ -3,46 +3,28 @@ import {
 } from "@reduxjs/toolkit";
 
 import {
-    persistReducer,
     persistStore,
 } from "redux-persist";
-
-import createWebStorage from
-    "redux-persist/es/storage/createWebStorage";
 
 import rootReducer from "./rootReducer";
 
 
-const storage =
-    createWebStorage("local");
-
-
-const persistConfig = {
-
-    key: "root",
-
-    storage,
-
-};
-
-
-const persistedReducer =
-    persistReducer(
-        persistConfig,
-        rootReducer
-    );
-
+// =====================================================
+// STORE
+// =====================================================
 
 export const store =
     configureStore({
 
         reducer:
-            persistedReducer,
+            rootReducer,
 
         middleware:
             (getDefaultMiddleware) =>
                 getDefaultMiddleware({
 
+                    // redux-persist actions
+                    // are non-serializable
                     serializableCheck:
                         false,
 
@@ -50,6 +32,10 @@ export const store =
 
     });
 
+
+// =====================================================
+// PERSISTOR
+// =====================================================
 
 export const persistor =
     persistStore(store);
