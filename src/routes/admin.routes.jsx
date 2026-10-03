@@ -15,48 +15,53 @@ import DepartmentView from "../admin/pages/DepartmentView";
 
 const AdminRoutes = (
     <Route path="/">
-        {/* Public Route */}
+        {/* Public Login Route */}
         <Route
             index
             element={<AdminLogin />}
         />
 
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-            <Route path="admin" element={<AdminLayout />}>
-
-                {/* Dashboard */}
+        {/* Admin Protected Routes */}
+        <Route
+            element={
+                <ProtectedRoute
+                    allowedRoles={["super_admin", "admin"]}
+                />
+            }
+        >
+            <Route
+                path="admin"
+                element={<AdminLayout />}
+            >
                 <Route
                     path="dashboard"
                     element={<AdminDashboard />}
                 />
 
-                {/* Employees */}
                 <Route
                     path="all-employees"
                     element={<AllEmployee />}
                 />
 
-                {/* Add Employee */}
                 <Route
                     path="add-employee"
                     element={<AddEmployee />}
                 />
 
-                {/* Employee Profile */}
                 <Route
                     path="employees/:id"
                     element={<EmployeeProfile />}
                 />
 
                 <Route
-                     path="departments"
-                     element={<Department />} />
+                    path="departments"
+                    element={<Department />}
+                />
 
                 <Route
                     path="departments/:id"
-                    element={<DepartmentView />} />
-
+                    element={<DepartmentView />}
+                />
             </Route>
         </Route>
 

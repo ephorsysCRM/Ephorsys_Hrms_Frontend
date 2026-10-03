@@ -1,556 +1,386 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
 
-import {
-    Pencil,
-    User,
-    Phone,
-    Save,
-    X,
-} from "lucide-react";
+import { Pencil, User, Phone, Save, X } from 'lucide-react'
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux'
 
-import { updateAdminProfile } from "../../Redux/features/auth/authThunk";
-
+import { updateAdminProfile } from '../../Redux/features/auth/authThunk'
 
 const UpdateAdminProfileModal = ({ onClose }) => {
+  const dispatch = useDispatch()
 
-    const dispatch = useDispatch();
+  // =====================================================
+  // REDUX AUTH STATE
+  // =====================================================
 
-    // =====================================================
-    // REDUX
-    // =====================================================
+  const { user, admin, userType } = useSelector(state => state.auth)
 
-    const admin = useSelector(
-        (state) => state.auth.admin
-    );
+  // Support new generic user and legacy admin state
+  const currentUser = user || admin
 
-    // =====================================================
-    // STATES
-    // =====================================================
+  // =====================================================
+  // LOCAL STATES
+  // =====================================================
 
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [profileImage, setProfileImage] = useState(null)
+  const [previewImage, setPreviewImage] = useState('')
+  const [loading, setLoading] = useState(false)
 
-    const [profileImage, setProfileImage] =
-        useState(null);
+  // =====================================================
+  // USER DETAILS
+  // =====================================================
 
-    const [previewImage, setPreviewImage] =
-        useState("");
+  const userId = currentUser?._id || currentUser?.id
 
-    const [loading, setLoading] =
-        useState(false);
+  const email = currentUser?.email || currentUser?.officialEmail || ''
 
-    // =====================================================
-    // SET ADMIN DATA
-    // =====================================================
+  // =====================================================
+  // SET PROFILE DATA
+  // =====================================================
 
-    useEffect(() => {
+  useEffect(() => {
+    if (!currentUser) return
 
-        if (!admin) return;
+    const fullName =
+      currentUser.name ||
+      [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') ||
+      currentUser.fullName ||
+      ''
 
-        setName(
-            admin.name || ""
-        );
+    setName(fullName)
 
-        setPhone(
-            admin.phone || ""
-        );
+    setPhone(
+      currentUser.phone || currentUser.mobile || currentUser.phoneNumber || ''
+    )
 
-        setPreviewImage(
-            admin.profileImage || ""
-        );
+    setPreviewImage(
+      currentUser.profileImage ||
+        currentUser.profilePhoto ||
+        currentUser.avatar ||
+        ''
+    )
+  }, [currentUser])
 
-    }, [admin]);
+  // =====================================================
+  // IMAGE CHANGE
+  // =====================================================
 
-    // =====================================================
-    // IMAGE CHANGE
-    // =====================================================
+  const handleImageChange = event => {
+    const file = event.target.files?.[0]
 
-    const handleImageChange = (e) => {
+    if (!file) return
 
-        const file =
-            e.target.files?.[0];
+    if (!file.type.startsWith('image/')) {
+      console.error('Please select a valid image.')
+      return
+    }
 
-        if (!file) return;
+    // Optional client-side file size validation: 5 MB
+    if (file.size > 5 * 1024 * 1024) {
+      console.error('Image size must be less than 5 MB.')
+      return
+    }
 
-        setProfileImage(file);
+    setProfileImage(file)
 
-        const imageUrl =
-            URL.createObjectURL(file);
+    const imageUrl = URL.createObjectURL(file)
 
-        setPreviewImage(imageUrl);
-    };
+    setPreviewImage(previousPreview => {
+      if (previousPreview?.startsWith('blob:')) {
+        URL.revokeObjectURL(previousPreview)
+      }
 
-    // =====================================================
-    // UPDATE PROFILE
-    // =====================================================
+      return imageUrl
+    })
+  }
 
-    const handleSubmit = async (e) => {
+  // =====================================================
+  // CLEAN UP IMAGE PREVIEW
+  // =====================================================
 
-        e.preventDefault();
+  useEffect(() => {
+    return () => {
+      if (previewImage?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewImage)
+      }
+    }
+  }, [previewImage])
 
-        if (!admin?._id) {
+  // =====================================================
+  // UPDATE PROFILE
+  // =====================================================
 
-            console.error(
-                "Admin ID not found"
-            );
+  const handleSubmit = async event => {
+    event.preventDefault()
 
-            return;
-        }
+    if (!userId) {
+      console.error('User ID not found.')
+      return
+    }
 
-        try {
+    try {
+      setLoading(true)
 
-            setLoading(true);
+      const formData = new FormData()
 
-            const formData =
-                new FormData();
+      formData.append('name', name.trim())
+      formData.append('phone', phone.trim())
 
-            formData.append(
-                "name",
-                name
-            );
+      if (profileImage) {
+        formData.append('profileImage', profileImage)
+      }
 
-            formData.append(
-                "phone",
-                phone
-            );
+      // The thunk and backend must support both Admin
+      // and Employee/HR profile updates.
+      const result = await dispatch(updateAdminProfile(userId, formData))
 
-            if (profileImage) {
+      if (updateAdminProfile.fulfilled.match(result)) {
+        onClose()
+      }
+    } catch (error) {
+      console.error('Update profile error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-                formData.append(
-                    "profileImage",
-                    profileImage
-                );
+  // =====================================================
+  // RETURN
+  // =====================================================
 
-            }
+  return (
+    <form onSubmit={handleSubmit} className='w-full'>
+      {/* PROFILE IMAGE */}
 
-            const result =
-                await dispatch(
-                    updateAdminProfile(
-                        admin._id,
-                        formData
-                    )
-                );
-
-            if (result?.success) {
-
-                onClose();
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Update profile error:",
-                error
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-    return (
-
-        <form
-            onSubmit={handleSubmit}
-            className="w-full"
-        >
-
-            {/* =====================================================
-                PROFILE IMAGE
-            ===================================================== */}
-
-            <div
-                className="
-                    flex
-                    justify-center
-                    mb-6
-                "
-            >
-
-                <label
-                    className="
+      <div className='flex justify-center mb-6'>
+        <label
+          className='
                         relative
-                        w-24
-                        h-24
+                        w-24 h-24
                         rounded-full
                         bg-black
                         overflow-hidden
                         cursor-pointer
                         group
-                    "
-                >
+                    '
+        >
+          {previewImage ? (
+            <img
+              src={previewImage}
+              alt={name || 'Profile'}
+              className='w-full h-full object-cover'
+            />
+          ) : (
+            <div
+              className='
+                                w-full h-full
+                                flex items-center justify-center
+                                text-white text-2xl font-semibold
+                            '
+            >
+              {name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+          )}
 
-                    {previewImage ? (
+          {/* IMAGE OVERLAY */}
 
-                        <img
-                            src={previewImage}
-                            alt={name}
-                            className="
-                                w-full
-                                h-full
-                                object-cover
-                            "
-                        />
-
-                    ) : (
-
-                        <div
-                            className="
-                                w-full
-                                h-full
-                                flex
-                                items-center
-                                justify-center
-                                text-white
-                                text-2xl
-                                font-semibold
-                            "
-                        >
-                            {name
-                                ?.charAt(0)
-                                ?.toUpperCase() || "A"}
-                        </div>
-
-                    )}
-
-                    {/* IMAGE OVERLAY */}
-
-                    <div
-                        className="
-                            absolute
-                            inset-0
+          <div
+            className='
+                            absolute inset-0
                             bg-black/50
                             opacity-0
                             group-hover:opacity-100
-                            transition-all
-                            duration-200
-                            flex
-                            items-center
-                            justify-center
+                            transition-all duration-200
+                            flex items-center justify-center
                             text-white
-                        "
-                    >
+                        '
+          >
+            <Pencil size={20} />
+          </div>
 
-                        <Pencil
-                            size={20}
-                        />
+          <input
+            type='file'
+            accept='image/*'
+            className='hidden'
+            onChange={handleImageChange}
+            disabled={loading}
+          />
+        </label>
+      </div>
 
-                    </div>
+      {/* NAME */}
 
-                    <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={
-                            handleImageChange
-                        }
-                    />
+      <div className='mb-5'>
+        <label
+          className='
+                        block text-xs font-medium
+                        text-black mb-2
+                    '
+        >
+          Name
+        </label>
 
-                </label>
+        <div className='relative'>
+          <User
+            size={17}
+            className='
+                            absolute left-3 top-1/2
+                            -translate-y-1/2 text-black/40
+                        '
+          />
 
-            </div>
-
-
-            {/* =====================================================
-                NAME
-            ===================================================== */}
-
-            <div className="mb-5">
-
-                <label
-                    className="
-                        block
-                        text-xs
-                        font-medium
-                        text-black
-                        mb-2
-                    "
-                >
-                    Name
-                </label>
-
-                <div
-                    className="
-                        relative
-                    "
-                >
-
-                    <User
-                        size={17}
-                        className="
-                            absolute
-                            left-3
-                            top-1/2
-                            -translate-y-1/2
-                            text-black/40
-                        "
-                    />
-
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) =>
-                            setName(
-                                e.target.value
-                            )
-                        }
-                        placeholder="Enter your name"
-                        className="
-                            w-full
-                            h-11
-                            pl-10
-                            pr-3
-                            rounded-xl
-                            border
-                            border-black/10
-                            bg-white
-                            text-sm
-                            text-black
-                            outline-none
-                            focus:border-black
+          <input
+            type='text'
+            value={name}
+            onChange={event => setName(event.target.value)}
+            placeholder='Enter your name'
+            required
+            maxLength={100}
+            disabled={loading}
+            className='
+                            w-full h-11 pl-10 pr-3
+                            rounded-xl border border-black/10
+                            bg-white text-sm text-black
+                            outline-none focus:border-black
                             transition-all
-                        "
-                    />
+                        '
+          />
+        </div>
+      </div>
 
-                </div>
+      {/* PHONE */}
 
-            </div>
+      <div className='mb-5'>
+        <label
+          className='
+                        block text-xs font-medium
+                        text-black mb-2
+                    '
+        >
+          Phone Number
+        </label>
 
+        <div className='relative'>
+          <Phone
+            size={17}
+            className='
+                            absolute left-3 top-1/2
+                            -translate-y-1/2 text-black/40
+                        '
+          />
 
-            {/* =====================================================
-                PHONE
-            ===================================================== */}
-
-            <div className="mb-5">
-
-                <label
-                    className="
-                        block
-                        text-xs
-                        font-medium
-                        text-black
-                        mb-2
-                    "
-                >
-                    Phone Number
-                </label>
-
-                <div
-                    className="
-                        relative
-                    "
-                >
-
-                    <Phone
-                        size={17}
-                        className="
-                            absolute
-                            left-3
-                            top-1/2
-                            -translate-y-1/2
-                            text-black/40
-                        "
-                    />
-
-                    <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) =>
-                            setPhone(
-                                e.target.value
-                            )
-                        }
-                        placeholder="Enter phone number"
-                        className="
-                            w-full
-                            h-11
-                            pl-10
-                            pr-3
-                            rounded-xl
-                            border
-                            border-black/10
-                            bg-white
-                            text-sm
-                            text-black
-                            outline-none
-                            focus:border-black
+          <input
+            type='tel'
+            value={phone}
+            onChange={event => setPhone(event.target.value)}
+            placeholder='Enter phone number'
+            maxLength={20}
+            disabled={loading}
+            className='
+                            w-full h-11 pl-10 pr-3
+                            rounded-xl border border-black/10
+                            bg-white text-sm text-black
+                            outline-none focus:border-black
                             transition-all
-                        "
-                    />
+                        '
+          />
+        </div>
+      </div>
 
-                </div>
+      {/* EMAIL - READ ONLY */}
 
-            </div>
+      <div className='mb-6'>
+        <label
+          className='
+                        block text-xs font-medium
+                        text-black mb-2
+                    '
+        >
+          Email
+        </label>
 
+        <input
+          type='email'
+          value={email}
+          disabled
+          className='
+                        w-full h-11 px-3
+                        rounded-xl border border-black/10
+                        bg-black/3 text-sm text-black/50
+                        outline-none cursor-not-allowed
+                    '
+        />
 
-            {/* =====================================================
-                EMAIL - READ ONLY
-            ===================================================== */}
+        <p className='text-[10px] text-black/30 mt-1.5'>
+          Email cannot be changed from here.
+        </p>
+      </div>
 
-            <div className="mb-6">
+      {/* ACTIONS */}
 
-                <label
-                    className="
-                        block
-                        text-xs
-                        font-medium
-                        text-black
-                        mb-2
-                    "
-                >
-                    Email
-                </label>
+      <div className='grid grid-cols-2 gap-3'>
+        {/* CANCEL */}
 
-                <input
-                    type="email"
-                    value={
-                        admin?.email || ""
-                    }
-                    disabled
-                    className="
-                        w-full
-                        h-11
-                        px-3
-                        rounded-xl
-                        border
-                        border-black/10
-                        bg-black/3
-                        text-sm
-                        text-black/50
-                        outline-none
-                        cursor-not-allowed
-                    "
-                />
+        <button
+          type='button'
+          onClick={onClose}
+          disabled={loading}
+          className='
+                        h-11 rounded-xl
+                        border border-black/10
+                        bg-white text-black/60
+                        hover:bg-black/5 hover:text-black
+                        text-sm font-medium
+                        transition-all duration-200
+                        flex items-center justify-center gap-2
+                        cursor-pointer disabled:opacity-50
+                    '
+        >
+          <X size={16} />
+          Cancel
+        </button>
 
-                <p
-                    className="
-                        text-[10px]
-                        text-black/30
-                        mt-1.5
-                    "
-                >
-                    Email cannot be changed from here.
-                </p>
+        {/* UPDATE */}
 
-            </div>
-
-
-            {/* =====================================================
-                ACTIONS
-            ===================================================== */}
-
-            <div
-                className="
-                    grid
-                    grid-cols-2
-                    gap-3
-                "
-            >
-
-                {/* CANCEL */}
-
-                <button
-                    type="button"
-                    onClick={onClose}
-                    disabled={loading}
-                    className="
-                        h-11
-                        rounded-xl
-                        border
-                        border-black/10
-                        bg-white
-                        text-black/60
-                        hover:bg-black/5
-                        hover:text-black
-                        text-sm
-                        font-medium
-                        transition-all
-                        duration-200
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
-                        cursor-pointer
-                        disabled:opacity-50
-                    "
-                >
-
-                    <X
-                        size={16}
-                    />
-
-                    Cancel
-
-                </button>
-
-
-                {/* UPDATE */}
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="
-                        h-11
-                        rounded-xl
-                        bg-black
-                        text-white
-                        text-sm
-                        font-semibold
+        <button
+          type='submit'
+          disabled={loading || !userId}
+          className='
+                        h-11 rounded-xl
+                        bg-black text-white
+                        text-sm font-semibold
                         hover:bg-black/80
-                        transition-all
-                        duration-200
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
+                        transition-all duration-200
+                        flex items-center justify-center gap-2
                         cursor-pointer
                         disabled:opacity-50
                         disabled:cursor-not-allowed
-                    "
-                >
-
-                    {loading ? (
-
-                        <>
-                            <span
-                                className="
-                                    w-4
-                                    h-4
-                                    border-2
-                                    border-white/30
+                    '
+        >
+          {loading ? (
+            <>
+              <span
+                className='
+                                    w-4 h-4
+                                    border-2 border-white/30
                                     border-t-white
-                                    rounded-full
-                                    animate-spin
-                                "
-                            />
+                                    rounded-full animate-spin
+                                '
+              />
+              Updating...
+            </>
+          ) : (
+            <>
+              <Save size={16} />
+              Update Profile
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  )
+}
 
-                            Updating...
-
-                        </>
-
-                    ) : (
-
-                        <>
-                            <Save
-                                size={16}
-                            />
-
-                            Update Profile
-                        </>
-
-                    )}
-
-                </button>
-
-            </div>
-
-        </form>
-    );
-};
-
-export default UpdateAdminProfileModal;
+export default UpdateAdminProfileModal

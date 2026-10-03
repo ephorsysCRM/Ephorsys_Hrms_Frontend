@@ -1,197 +1,177 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
 
-import {
-    Menu,
-    Bell,
-    Maximize,
-    Minimize,
-    Pencil,
-} from "lucide-react";
+import { Menu, Bell, Maximize, Minimize, Pencil } from 'lucide-react'
 
-import {
-    AnimatePresence,
-    motion,
-} from "framer-motion";
+import { AnimatePresence, motion } from 'framer-motion'
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-    getAdminProfile,
-} from "../../Redux/features/auth/authThunk";
+import { getAdminProfile } from '../../Redux/features/auth/authThunk'
 
-import Modal from "../../UI/Modal";
+import Modal from '../../UI/Modal'
 
-import UpdateAdminProfileModal from "../adminModals/UpdateAdminProfileModal";
+import UpdateAdminProfileModal from '../adminModals/UpdateAdminProfileModal'
 
 const TopBar = ({ setSidebarOpen }) => {
+  const dispatch = useDispatch()
 
-    const dispatch = useDispatch();
+  // =====================================================
+  // REDUX AUTH STATE
+  // =====================================================
 
-    // =====================================================
-    // REDUX
-    // =====================================================
+  const { user, admin, userType, role, isAuthenticated, authChecked } =
+    useSelector(state => state.auth)
 
-    const admin = useSelector(
-        (state) => state.auth.admin
-    );
+  // Support both the new generic user and legacy admin state
+  const currentUser = user || admin
 
-    const accessToken = useSelector(
-        (state) => state.auth.accessToken
-    );
+  // =====================================================
+  // LOCAL STATES
+  // =====================================================
 
-    // =====================================================
-    // STATES
-    // =====================================================
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
 
-    const [profileOpen, setProfileOpen] =
-        useState(false);
+  // =====================================================
+  // USER PROFILE DATA
+  // =====================================================
 
-    const [isFullscreen, setIsFullscreen] =
-        useState(false);
+  const userName =
+    currentUser?.name ||
+    [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(' ') ||
+    currentUser?.fullName ||
+    currentUser?.username ||
+    (userType === 'employee' ? 'Employee' : 'Admin')
 
-    const [editProfileOpen, setEditProfileOpen] =
-        useState(false);
+  const userRole = role || currentUser?.role || userType || 'Admin'
 
-    // =====================================================
-    // ADMIN DATA
-    // =====================================================
+  const formattedRole = String(userRole)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, letter => letter.toUpperCase())
 
-    const adminName =
-        admin?.name || "Admin";
+  const userEmail = currentUser?.email || currentUser?.officialEmail || ''
 
-    const adminRole =
-        admin?.role || "Admin";
+  const userPhone =
+    currentUser?.phone || currentUser?.mobile || currentUser?.phoneNumber || ''
 
-    const adminInitials =
-        adminName
-            .split(" ")
-            .map((word) => word.charAt(0))
-            .join("")
-            .slice(0, 2)
-            .toUpperCase();
+  const userProfileImage =
+    currentUser?.profileImage ||
+    currentUser?.profilePhoto ||
+    currentUser?.avatar ||
+    ''
 
-    // =====================================================
-    // GET ADMIN PROFILE
-    // =====================================================
+  const userInitials =
+    userName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(word => word.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'U'
 
-    useEffect(() => {
+  // =====================================================
+  // FETCH PROFILE
+  // =====================================================
 
-        if (!accessToken) {
-            return;
-        }
+  useEffect(() => {
+    if (authChecked && isAuthenticated && !currentUser) {
+      dispatch(getAdminProfile())
+    }
+  }, [authChecked, isAuthenticated, Boolean(currentUser), dispatch])
 
-        if (!admin) {
-            dispatch(
-                getAdminProfile()
-            );
-        }
+  // =====================================================
+  // FULLSCREEN
+  // =====================================================
 
-    }, [
-        accessToken,
-        admin,
-        dispatch,
-    ]);
+  const handleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error)
+    }
+  }
 
-    // =====================================================
-    // FULLSCREEN
-    // =====================================================
+  // =====================================================
+  // FULLSCREEN CHANGE
+  // =====================================================
 
-    const handleFullscreen = async () => {
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement))
+    }
 
-        try {
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
 
-            if (!document.fullscreenElement) {
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
-                await document.documentElement.requestFullscreen();
+  // =====================================================
+  // EDIT PROFILE
+  // =====================================================
 
-                setIsFullscreen(true);
+  const handleEditProfile = event => {
+    event.stopPropagation()
+    setProfileOpen(false)
+    setEditProfileOpen(true)
+  }
 
-            } else {
+  const handleCloseEditProfile = () => {
+    setEditProfileOpen(false)
+  }
 
-                await document.exitFullscreen();
+  // =====================================================
+  // AVATAR COMPONENT
+  // =====================================================
 
-                setIsFullscreen(false);
+  const renderAvatar = (sizeClass, textClass) => (
+    <div
+      className={`
+                ${sizeClass}
+                rounded-full
+                bg-black
+                flex
+                items-center
+                justify-center
+                text-white
+                ${textClass}
+                font-semibold
+                overflow-hidden
+                shrink-0
+            `}
+    >
+      {userProfileImage ? (
+        <img
+          src={userProfileImage}
+          alt={userName}
+          className='w-full h-full object-cover'
+          onError={event => {
+            event.currentTarget.style.display = 'none'
+          }}
+        />
+      ) : (
+        userInitials
+      )}
+    </div>
+  )
 
-            }
+  // =====================================================
+  // RETURN
+  // =====================================================
 
-        } catch (error) {
+  return (
+    <>
+      {/* TOP BAR */}
 
-            console.error(
-                "Fullscreen error:",
-                error
-            );
-
-        }
-
-    };
-
-    // =====================================================
-    // FULLSCREEN CHANGE
-    // =====================================================
-
-    useEffect(() => {
-
-        const handleFullscreenChange = () => {
-
-            setIsFullscreen(
-                !!document.fullscreenElement
-            );
-
-        };
-
-        document.addEventListener(
-            "fullscreenchange",
-            handleFullscreenChange
-        );
-
-        return () => {
-
-            document.removeEventListener(
-                "fullscreenchange",
-                handleFullscreenChange
-            );
-
-        };
-
-    }, []);
-
-    // =====================================================
-    // OPEN EDIT PROFILE
-    // =====================================================
-
-    const handleEditProfile = (e) => {
-
-        e.stopPropagation();
-
-        setProfileOpen(false);
-
-        setEditProfileOpen(true);
-
-    };
-
-    // =====================================================
-    // CLOSE EDIT PROFILE
-    // =====================================================
-
-    const handleCloseEditProfile = () => {
-
-        setEditProfileOpen(false);
-
-    };
-
-    // =====================================================
-    // RETURN
-    // =====================================================
-
-    return (
-        <>
-
-            {/* =====================================================
-                TOP BAR
-            ===================================================== */}
-
-            <header
-                className="
+      <header
+        className='
                     h-16
                     w-full
                     bg-white
@@ -204,548 +184,242 @@ const TopBar = ({ setSidebarOpen }) => {
                     lg:px-6
                     relative
                     z-40
-                "
-            >
+                '
+      >
+        {/* LEFT SIDE */}
 
-                {/* =================================================
-                    LEFT SIDE
-                ================================================= */}
-
-                <div
-                    className="
-                        flex
-                        items-center
-                        gap-3
-                    "
-                >
-
-                    {/* MENU */}
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setSidebarOpen(
-                                (prev) => !prev
-                            )
-                        }
-                        className="
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={() => setSidebarOpen(previous => !previous)}
+            className='
                             lg:hidden
-                            w-9
-                            h-9
+                            w-9 h-9
                             rounded-lg
-                            flex
-                            items-center
-                            justify-center
+                            flex items-center justify-center
                             text-black/60
                             hover:bg-black/5
                             hover:text-black
                             transition-all
                             cursor-pointer
-                        "
-                    >
+                        '
+            aria-label='Toggle sidebar'
+          >
+            <Menu size={20} />
+          </button>
 
-                        <Menu
-                            size={20}
-                        />
+          <div>
+            <h1 className='text-sm lg:text-base font-semibold text-black'>
+              Dashboard
+            </h1>
 
-                    </button>
+            <p className='hidden sm:block text-[10px] text-black/40'>
+              Welcome back
+            </p>
+          </div>
+        </div>
 
+        {/* RIGHT SIDE */}
 
-                    {/* PAGE TITLE */}
+        <div className='flex items-center gap-2'>
+          {/* FULLSCREEN */}
 
-                    <div>
-
-                        <h1
-                            className="
-                                text-sm
-                                lg:text-base
-                                font-semibold
-                                text-black
-                            "
-                        >
-                            Dashboard
-                        </h1>
-
-                        <p
-                            className="
-                                hidden
-                                sm:block
-                                text-[10px]
-                                text-black/40
-                            "
-                        >
-                            Welcome back
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                {/* =================================================
-                    RIGHT SIDE
-                ================================================= */}
-
-                <div
-                    className="
-                        flex
-                        items-center
-                        gap-2
-                    "
-                >
-
-                    {/* =================================================
-                        FULLSCREEN
-                    ================================================= */}
-
-                    <button
-                        type="button"
-                        onClick={
-                            handleFullscreen
-                        }
-                        className="
-                            hidden
-                            sm:flex
-                            w-9
-                            h-9
+          <button
+            type='button'
+            onClick={handleFullscreen}
+            className='
+                            hidden sm:flex
+                            w-9 h-9
                             rounded-lg
-                            items-center
-                            justify-center
+                            items-center justify-center
                             text-black/50
                             hover:bg-black/5
                             hover:text-black
                             transition-all
                             cursor-pointer
-                        "
-                        title="Fullscreen"
-                    >
+                        '
+            title='Fullscreen'
+            aria-label='Toggle fullscreen'
+          >
+            {isFullscreen ? <Minimize size={17} /> : <Maximize size={17} />}
+          </button>
 
-                        {isFullscreen ? (
+          {/* NOTIFICATIONS */}
 
-                            <Minimize
-                                size={17}
-                            />
-
-                        ) : (
-
-                            <Maximize
-                                size={17}
-                            />
-
-                        )}
-
-                    </button>
-
-
-                    {/* =================================================
-                        NOTIFICATION
-                    ================================================= */}
-
-                    <button
-                        type="button"
-                        className="
+          <button
+            type='button'
+            className='
                             relative
-                            w-9
-                            h-9
+                            w-9 h-9
                             rounded-lg
-                            flex
-                            items-center
-                            justify-center
+                            flex items-center justify-center
                             text-black/50
                             hover:bg-black/5
                             hover:text-black
                             transition-all
                             cursor-pointer
-                        "
-                    >
+                        '
+            aria-label='Notifications'
+          >
+            <Bell size={18} />
 
-                        <Bell
-                            size={18}
-                        />
+            <span
+              className='
+                                absolute top-2 right-2
+                                w-1.5 h-1.5
+                                rounded-full bg-black
+                            '
+            />
+          </button>
 
-                        <span
-                            className="
-                                absolute
-                                top-2
-                                right-2
-                                w-1.5
-                                h-1.5
-                                rounded-full
-                                bg-black
-                            "
-                        />
+          {/* PROFILE */}
 
-                    </button>
-
-
-                    {/* =================================================
-                        PROFILE
-                    ================================================= */}
-
-                    <div
-                        className="
-                            relative
-                            ml-1
-                        "
-                    >
-
-                        {/* =================================================
-                            PROFILE BUTTON
-                        ================================================= */}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setProfileOpen(
-                                    (prev) =>
-                                        !prev
-                                )
-                            }
-                            className="
-                                flex
-                                items-center
-                                gap-2
-                                rounded-lg
-                                px-1.5
-                                py-1
+          <div className='relative ml-1'>
+            <button
+              type='button'
+              onClick={() => setProfileOpen(previous => !previous)}
+              className='
+                                flex items-center gap-2
+                                rounded-lg px-1.5 py-1
                                 hover:bg-black/5
                                 transition-all
                                 cursor-pointer
-                            "
-                        >
+                            '
+              aria-expanded={profileOpen}
+              aria-label='Open profile menu'
+            >
+              {renderAvatar('w-9 h-9', 'text-[11px]')}
 
-                            {/* AVATAR */}
+              <div className='hidden md:block text-left'>
+                <p className='text-[12px] font-semibold text-black'>
+                  {userName}
+                </p>
 
-                            <div
-                                className="
-                                    w-9
-                                    h-9
-                                    rounded-full
-                                    bg-black
-                                    flex
-                                    items-center
-                                    justify-center
-                                    text-white
-                                    text-[11px]
-                                    font-semibold
-                                    overflow-hidden
-                                    shrink-0
-                                "
-                            >
+                <p className='text-[10px] text-black/40 capitalize'>
+                  {formattedRole}
+                </p>
+              </div>
+            </button>
 
-                                {admin?.profileImage ? (
+            {/* PROFILE DROPDOWN */}
 
-                                    <img
-                                        src={
-                                            admin.profileImage
-                                        }
-                                        alt={
-                                            adminName
-                                        }
-                                        className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
-
-                                ) : (
-
-                                    adminInitials
-
-                                )}
-
-                            </div>
-
-
-                            {/* NAME */}
-
-                            <div
-                                className="
-                                    hidden
-                                    md:block
-                                    text-left
-                                "
-                            >
-
-                                <p
-                                    className="
-                                        text-[12px]
-                                        font-semibold
-                                        text-black
-                                    "
-                                >
-                                    {adminName}
-                                </p>
-
-                                <p
-                                    className="
-                                        text-[10px]
-                                        text-black/40
-                                        capitalize
-                                    "
-                                >
-                                    {adminRole}
-                                </p>
-
-                            </div>
-
-                        </button>
-
-
-                        {/* =================================================
-                            PROFILE DROPDOWN
-                        ================================================= */}
-
-                        <AnimatePresence>
-
-                            {profileOpen && (
-
-                                <motion.div
-                                    initial={{
-                                        opacity: 0,
-                                        y: -8,
-                                        scale: 0.96,
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        y: 0,
-                                        scale: 1,
-                                    }}
-                                    exit={{
-                                        opacity: 0,
-                                        y: -8,
-                                        scale: 0.96,
-                                    }}
-                                    transition={{
-                                        duration: 0.2,
-                                        ease: "easeOut",
-                                    }}
-                                    className="
-                                        absolute
-                                        right-0
-                                        mt-2.5
-                                        w-56
+            <AnimatePresence>
+              {profileOpen && (
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    y: -8,
+                    scale: 0.96
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -8,
+                    scale: 0.96
+                  }}
+                  transition={{
+                    duration: 0.2,
+                    ease: 'easeOut'
+                  }}
+                  className='
+                                        absolute right-0 mt-2.5
+                                        w-64 max-w-[calc(100vw-2rem)]
                                         bg-white
-                                        border
-                                        border-black/10
+                                        border border-black/10
                                         rounded-xl
                                         shadow-lg
                                         overflow-hidden
                                         z-50
-                                    "
-                                >
+                                    '
+                >
+                  {/* PROFILE HEADER */}
 
-                                    {/* =================================================
-                                        PROFILE HEADER
-                                    ================================================= */}
-
-                                    <div
-                                        className="
+                  <div
+                    className='
                                             relative
-                                            flex
-                                            items-center
-                                            gap-3
-                                            px-4
-                                            py-3.5
-                                            border-b
-                                            border-black/10
-                                        "
-                                    >
+                                            flex items-center gap-3
+                                            px-4 py-3.5
+                                            border-b border-black/10
+                                        '
+                  >
+                    {/* EDIT PROFILE BUTTON */}
 
-                                        {/* =================================================
-                                            EDIT BUTTON
-                                        ================================================= */}
-
-                                        <motion.button
-                                            type="button"
-                                            whileTap={{
-                                                scale: 0.9,
-                                            }}
-                                            whileHover={{
-                                                scale: 1.05,
-                                            }}
-                                            onClick={
-                                                handleEditProfile
-                                            }
-                                            className="
-                                                absolute
-                                                top-2.5
-                                                right-2.5
-                                                w-7
-                                                h-7
+                    <motion.button
+                      type='button'
+                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      onClick={handleEditProfile}
+                      className='
+                                                absolute top-2.5 right-2.5
+                                                w-7 h-7
                                                 rounded-lg
-                                                border
-                                                border-black/10
+                                                border border-black/10
                                                 bg-white
-                                                flex
-                                                items-center
-                                                justify-center
+                                                flex items-center justify-center
                                                 text-black/50
                                                 hover:bg-black
                                                 hover:text-white
                                                 hover:border-black
-                                                transition-all
-                                                duration-200
+                                                transition-all duration-200
                                                 cursor-pointer
-                                            "
-                                            aria-label="Edit profile"
-                                            title="Edit Profile"
-                                        >
+                                            '
+                      aria-label='Edit profile'
+                      title='Edit Profile'
+                    >
+                      <Pencil size={13} />
+                    </motion.button>
 
-                                            <Pencil
-                                                size={13}
-                                            />
+                    {/* AVATAR */}
 
-                                        </motion.button>
+                    {renderAvatar('w-10 h-10', 'text-[12px]')}
 
+                    {/* USER DETAILS */}
 
-                                        {/* =================================================
-                                            AVATAR
-                                        ================================================= */}
+                    <div className='min-w-0 pr-5'>
+                      <p className='text-[13px] font-semibold text-black break-words'>
+                        {userName}
+                      </p>
 
-                                        <div
-                                            className="
-                                                w-9
-                                                h-9
-                                                rounded-full
-                                                bg-black
-                                                flex
-                                                items-center
-                                                justify-center
-                                                text-white
-                                                text-[12px]
-                                                font-semibold
-                                                shrink-0
-                                                overflow-hidden
-                                            "
-                                        >
+                      <p className='text-[11px] text-black/40 capitalize mt-0.5'>
+                        {formattedRole}
+                      </p>
 
-                                            {admin?.profileImage ? (
+                      {userEmail && (
+                        <p className='text-[10px] text-black/50 mt-1 break-all'>
+                          {userEmail}
+                        </p>
+                      )}
 
-                                                <img
-                                                    src={
-                                                        admin.profileImage
-                                                    }
-                                                    alt={
-                                                        adminName
-                                                    }
-                                                    className="
-                                                        w-full
-                                                        h-full
-                                                        object-cover
-                                                    "
-                                                />
-
-                                            ) : (
-
-                                                adminInitials
-
-                                            )}
-
-                                        </div>
-
-
-                                        {/* =================================================
-                                            USER DETAILS
-                                        ================================================= */}
-
-                                        <div
-                                            className="
-                                                pr-7
-                                            "
-                                        >
-
-                                            <p
-                                                className="
-                                                    text-[13px]
-                                                    font-semibold
-                                                    text-black
-                                                "
-                                            >
-                                                {adminName}
-                                            </p>
-
-                                            <p
-                                                className="
-                                                    text-[11px]
-                                                    text-black/40
-                                                    capitalize
-                                                    mt-0.5
-                                                "
-                                            >
-                                                {adminRole}
-                                            </p>
-
-                                            {admin?.email && (
-
-                                                <p
-                                                    className="
-                                                        text-[10px]
-                                                        text-black/30
-                                                        mt-1
-                                                    "
-                                                >
-                                                    {admin.email}
-                                                </p>
-
-                                            )}
-
-                                            {admin?.phone && (
-
-                                                <p
-                                                    className="
-                                                        text-[10px]
-                                                        text-black/30
-                                                        mt-0.5
-                                                    "
-                                                >
-                                                    {admin.phone}
-                                                </p>
-
-                                            )}
-
-                                        </div>
-
-                                    </div>
-
-                                </motion.div>
-
-                            )}
-
-                        </AnimatePresence>
-
+                      {userPhone && (
+                        <p className='text-[10px] text-black/50 mt-0.5'>
+                          {userPhone}
+                        </p>
+                      )}
                     </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </header>
 
-                </div>
+      {/* UPDATE PROFILE MODAL */}
 
-            </header>
+      <Modal
+        isOpen={editProfileOpen}
+        onClose={handleCloseEditProfile}
+        title={userType === 'admin' ? 'Update Admin Profile' : 'Update Profile'}
+        size='md'
+      >
+        <UpdateAdminProfileModal onClose={handleCloseEditProfile} />
+      </Modal>
+    </>
+  )
+}
 
-
-            {/* =====================================================
-                UPDATE PROFILE MODAL
-            ===================================================== */}
-
-            <Modal
-                isOpen={editProfileOpen}
-                onClose={
-                    handleCloseEditProfile
-                }
-                title="Update Admin Profile"
-                size="md"
-            >
-
-                <UpdateAdminProfileModal
-                    onClose={
-                        handleCloseEditProfile
-                    }
-                />
-
-            </Modal>
-
-        </>
-    );
-
-};
-
-export default TopBar;
+export default TopBar

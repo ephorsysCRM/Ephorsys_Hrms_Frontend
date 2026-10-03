@@ -1,90 +1,34 @@
-import {
-    combineReducers,
-} from "@reduxjs/toolkit";
+import { combineReducers } from "@reduxjs/toolkit";
+import { persistReducer } from "redux-persist";
+import createWebStorage from "redux-persist/es/storage/createWebStorage";
 
-import {
-    persistReducer,
-} from "redux-persist";
+import authReducer from "./features/auth/authSlice";
+import departmentReducer from "./features/department/departmentSlice";
 
-import createWebStorage from
-    "redux-persist/es/storage/createWebStorage";
-
-import authReducer from
-    "./features/auth/authSlice";
-
-import departmentReducer from
-    "./features/department/departmentSlice";
-
-
-// =====================================================
-// LOCAL STORAGE
-// =====================================================
-
-const storage =
-    createWebStorage("local");
-
-
-// =====================================================
-// AUTH PERSIST CONFIG
-// =====================================================
-//
-// Only admin information will be persisted.
-//
-// JWT is NOT stored in:
-// - Redux
-// - localStorage
-// - sessionStorage
-//
-// JWT is stored in HTTP-only cookie by backend.
-// =====================================================
+const storage = createWebStorage("local");
 
 const authPersistConfig = {
-
     key: "auth",
-
     storage,
 
+    // Persist user identity only.
+    // Authentication is revalidated through the HTTP-only cookie.
     whitelist: [
         "admin",
+        "user",
+        "userType",
+        "role",
     ],
-
 };
 
+const persistedAuthReducer = persistReducer(
+    authPersistConfig,
+    authReducer
+);
 
-// =====================================================
-// PERSIST AUTH REDUCER
-// =====================================================
-
-const persistedAuthReducer =
-    persistReducer(
-        authPersistConfig,
-        authReducer
-    );
-
-
-// =====================================================
-// ROOT REDUCER
-// =====================================================
-
-const rootReducer =
-    combineReducers({
-
-        // =================================================
-        // AUTH
-        // =================================================
-
-        auth:
-            persistedAuthReducer,
-
-
-        // =================================================
-        // DEPARTMENT
-        // =================================================
-
-        department:
-            departmentReducer,
-
-    });
-
+const rootReducer = combineReducers({
+    auth: persistedAuthReducer,
+    department: departmentReducer,
+});
 
 export default rootReducer;
