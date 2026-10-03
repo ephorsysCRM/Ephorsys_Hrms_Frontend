@@ -15,6 +15,7 @@ import {
   getAllDepartments,
   updateDepartment
 } from '../../Redux/features/department/departmentThunk'
+import DeleteDepartmentModal from '../adminModals/DeleteDepartmentModal'
 
 const Department = () => {
   // =====================================================
@@ -51,6 +52,9 @@ const Department = () => {
 
   const [deleteLoading, setDeleteLoading] = useState(null)
 
+  const [deleteDepartmentOpen, setDeleteDepartmentOpen] = useState(false)
+
+  const [departmentToDelete, setDepartmentToDelete] = useState(null)
   // =====================================================
   // PAGINATION SETTINGS
   // =====================================================
@@ -179,16 +183,19 @@ const Department = () => {
   // DELETE DEPARTMENT
   // =====================================================
 
-  const handleDeleteDepartment = async department => {
-    const departmentId = department._id
+  const handleDeleteDepartment = department => {
+    setDepartmentToDelete(department)
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${department.name}"?`
-    )
+    setDeleteDepartmentOpen(true)
 
-    if (!confirmed) {
+    setOpenMenu(null)
+  }
+  const confirmDeleteDepartment = async () => {
+    if (!departmentToDelete?._id) {
       return
     }
+
+    const departmentId = departmentToDelete._id
 
     if (deleteLoading === departmentId) {
       return
@@ -200,9 +207,10 @@ const Department = () => {
       const result = await dispatch(deleteDepartment(departmentId))
 
       if (result.success) {
-        setOpenMenu(null)
+        setDeleteDepartmentOpen(false)
 
-        // Refresh current page
+        setDepartmentToDelete(null)
+
         dispatch(getAllDepartments(currentPage, LIMIT))
       }
     } finally {
@@ -492,10 +500,9 @@ const Department = () => {
                           transition
                           disabled:cursor-not-allowed
                           disabled:opacity-60
-                          ${
-                            currentStatus === 'Active'
-                              ? 'bg-black'
-                              : 'bg-gray-300'
+                          ${currentStatus === 'Active'
+                            ? 'bg-black'
+                            : 'bg-gray-300'
                           }
                         `}
                       >
@@ -526,8 +533,7 @@ const Department = () => {
                               rounded-full
                               bg-white
                               transition
-                              ${
-                                currentStatus === 'Active' ? 'left-6' : 'left-1'
+                              ${currentStatus === 'Active' ? 'left-6' : 'left-1'
                               }
                             `}
                           />
@@ -568,17 +574,17 @@ const Department = () => {
                       {openMenu === department._id && (
                         <div
                           className='
-                            absolute
-                            right-10
-                            top-4
-                            z-20
-                            w-32
-                            rounded-lg
-                            border
-                            border-gray-200
-                            bg-white
-                            p-1
-                            shadow-lg
+                           absolute 
+    right-10 
+    bottom-[-25px]
+    z-50 
+    w-32 
+    rounded-lg 
+    border 
+    border-gray-200 
+    bg-white 
+    p-1 
+    shadow-lg 
                           '
                         >
                           {/* =================================================
@@ -708,6 +714,29 @@ const Department = () => {
           </div>
         </div>
       </div>
+
+      {/* =====================================================
+    DELETE DEPARTMENT MODAL
+===================================================== */}
+      <Modal
+        isOpen={deleteDepartmentOpen}
+        onClose={() => {
+          setDeleteDepartmentOpen(false)
+          setDepartmentToDelete(null)
+        }}
+        title='Delete Department'
+        size='md'
+      >
+        <DeleteDepartmentModal
+          department={departmentToDelete}
+          deleting={deleteLoading === departmentToDelete?._id}
+          onClose={() => {
+            setDeleteDepartmentOpen(false)
+            setDepartmentToDelete(null)
+          }}
+          onConfirm={confirmDeleteDepartment}
+        />
+      </Modal>
 
       {/* =====================================================
           PAGINATION

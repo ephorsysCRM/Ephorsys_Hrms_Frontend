@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { updateDepartment } from '../../Redux/features/department/departmentThunk'
+import { employeesData } from '../data/employeesData'
 
 const DepartmentEditModal = ({ department, onClose }) => {
   // =====================================================
@@ -20,6 +21,8 @@ const DepartmentEditModal = ({ department, onClose }) => {
 
   const [code, setCode] = useState('')
 
+  const [departmentHead, setDepartmentHead] = useState('')
+
   const [description, setDescription] = useState('')
 
   const [status, setStatus] = useState('active')
@@ -34,6 +37,8 @@ const DepartmentEditModal = ({ department, onClose }) => {
     setName(department.name || '')
 
     setCode(department.code || '')
+
+    setDepartmentHead(department.departmentHead?._id || '')
 
     setDescription(department.description || '')
 
@@ -70,6 +75,7 @@ const DepartmentEditModal = ({ department, onClose }) => {
     const departmentData = {
       name,
       code,
+      departmentHead,
       description,
       status
     }
@@ -195,6 +201,38 @@ const DepartmentEditModal = ({ department, onClose }) => {
             </div>
 
             {/* =================================================
+                HEAD / MANAGER
+            ================================================= */}
+
+            <div>
+              <label className='mb-2 block text-sm font-medium text-gray-700'>
+                Department Head
+              </label>
+
+              <select
+                value={departmentHead}
+                onChange={e => setDepartmentHead(e.target.value)}
+                className='
+      w-full
+      rounded-xl
+      border
+      border-gray-200
+      bg-gray-50
+      px-4
+      py-3
+      text-sm
+      text-black
+      outline-none
+      transition
+      focus:border-black
+      focus:bg-white
+    '
+              >
+                <option value=''>Select Department Head</option>
+              </select>
+            </div>
+
+            {/* =================================================
                             DESCRIPTION
                         ================================================= */}
 
@@ -276,16 +314,14 @@ const DepartmentEditModal = ({ department, onClose }) => {
                                         rounded-full
                                         transition-colors
                                         duration-200
-                                        ${
-                                          status === 'active'
-                                            ? 'bg-black'
-                                            : 'bg-gray-300'
-                                        }
-                                        ${
-                                          updating
-                                            ? 'cursor-not-allowed opacity-60'
-                                            : 'cursor-pointer'
-                                        }
+                                        ${status === 'active'
+                      ? 'bg-black'
+                      : 'bg-gray-300'
+                    }
+                                        ${updating
+                      ? 'cursor-not-allowed opacity-60'
+                      : 'cursor-pointer'
+                    }
                                     `}
                 >
                   <span
@@ -299,11 +335,10 @@ const DepartmentEditModal = ({ department, onClose }) => {
                                             shadow-sm
                                             transition-all
                                             duration-200
-                                            ${
-                                              status === 'active'
-                                                ? 'left-6'
-                                                : 'left-1'
-                                            }
+                                            ${status === 'active'
+                        ? 'left-6'
+                        : 'left-1'
+                      }
                                         `}
                   />
                 </button>
@@ -320,11 +355,10 @@ const DepartmentEditModal = ({ department, onClose }) => {
                                         py-1
                                         text-xs
                                         font-medium
-                                        ${
-                                          status === 'active'
-                                            ? 'bg-gray-100 text-black'
-                                            : 'bg-gray-100 text-gray-500'
-                                        }
+                                        ${status === 'active'
+                      ? 'bg-gray-100 text-black'
+                      : 'bg-gray-100 text-gray-500'
+                    }
                                     `}
                 >
                   {status === 'active' ? 'Active' : 'Inactive'}
