@@ -5,14 +5,61 @@ const api = axios.create({
         import.meta.env.VITE_API_URL ||
         "http://localhost:5506/api/v1",
 
-    // IMPORTANT:
-    // Browser will automatically send the HTTP-only
-    // authentication cookie with API requests.
     withCredentials: true,
-
-    headers: {
-        "Content-Type": "application/json",
-    },
 });
+
+
+// =====================================================
+// REQUEST INTERCEPTOR
+// =====================================================
+
+api.interceptors.request.use(
+    (config) => {
+
+        /*
+         * For normal JSON requests
+         */
+        if (
+            config.data &&
+            !(config.data instanceof FormData)
+        ) {
+
+            config.headers[
+                "Content-Type"
+            ] = "application/json";
+
+        }
+
+
+        /*
+         * For FormData requests
+         *
+         * IMPORTANT:
+         * Do not manually set multipart/form-data.
+         *
+         * Browser/Axios will automatically add
+         * the correct boundary.
+         */
+
+        if (
+            config.data instanceof FormData
+        ) {
+
+            delete config.headers[
+                "Content-Type"
+            ];
+
+        }
+
+
+        return config;
+
+    },
+
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 
 export default api;
