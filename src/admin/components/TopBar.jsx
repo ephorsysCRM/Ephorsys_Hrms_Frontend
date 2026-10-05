@@ -1,408 +1,425 @@
-import {
-    Menu,
-    User,
-    Maximize,
-    Minimize,
-    Bell,
-} from "lucide-react";
+import React, { useEffect, useState } from 'react'
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Menu, Bell, Maximize, Minimize, Pencil } from 'lucide-react'
+
+import { AnimatePresence, motion } from 'framer-motion'
+
+import { useDispatch, useSelector } from 'react-redux'
+
+import { getAdminProfile } from '../../Redux/features/auth/authThunk'
+
+import Modal from '../../UI/Modal'
+
+import UpdateAdminProfileModal from '../adminModals/UpdateAdminProfileModal'
 
 const TopBar = ({ setSidebarOpen }) => {
-    const [profileOpen, setProfileOpen] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
+  const dispatch = useDispatch()
 
-    // =========================================================
-    // FULLSCREEN
-    // =========================================================
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    };
+  // =====================================================
+  // REDUX AUTH STATE
+  // =====================================================
 
-    // =========================================================
-    // DETECT FULLSCREEN CHANGE
-    // =========================================================
-    useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
+  const { user, admin, userType, role, isAuthenticated, authChecked } =
+    useSelector(state => state.auth)
 
-        document.addEventListener(
-            "fullscreenchange",
-            handleFullscreenChange
-        );
+  // Support both the new generic user and legacy admin state
+  const currentUser = user || admin
 
-        return () => {
-            document.removeEventListener(
-                "fullscreenchange",
-                handleFullscreenChange
-            );
-        };
-    }, []);
+  // =====================================================
+  // LOCAL STATES
+  // =====================================================
 
-    // =========================================================
-    // CLOSE PROFILE DROPDOWN WHEN CLICKING OUTSIDE
-    // =========================================================
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (!e.target.closest(".profile-dropdown")) {
-                setProfileOpen(false);
-            }
-        };
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
 
-        document.addEventListener(
-            "mousedown",
-            handleClickOutside
-        );
+  // =====================================================
+  // USER PROFILE DATA
+  // =====================================================
 
-        return () => {
-            document.removeEventListener(
-                "mousedown",
-                handleClickOutside
-            );
-        };
-    }, []);
+  const userName =
+    currentUser?.name ||
+    [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(' ') ||
+    currentUser?.fullName ||
+    currentUser?.username ||
+    (userType === 'employee' ? 'Employee' : 'Admin')
 
-    return (
-        <motion.header
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-                duration: 0.4,
-                ease: "easeOut",
-            }}
-            className="
-                relative
-                z-10
-                bg-white
-                border-b
-                border-black/10
-                px-4
-                sm:px-6
-                h-16
+  const userRole = role || currentUser?.role || userType || 'Admin'
+
+  const formattedRole = String(userRole)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, letter => letter.toUpperCase())
+
+  const userEmail = currentUser?.email || currentUser?.officialEmail || ''
+
+  const userPhone =
+    currentUser?.phone || currentUser?.mobile || currentUser?.phoneNumber || ''
+
+  const userProfileImage =
+    currentUser?.profileImage ||
+    currentUser?.profilePhoto ||
+    currentUser?.avatar ||
+    ''
+
+  const userInitials =
+    userName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(word => word.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'U'
+
+  // =====================================================
+  // FETCH PROFILE
+  // =====================================================
+
+  useEffect(() => {
+    if (authChecked && isAuthenticated && !currentUser) {
+      dispatch(getAdminProfile())
+    }
+  }, [authChecked, isAuthenticated, Boolean(currentUser), dispatch])
+
+  // =====================================================
+  // FULLSCREEN
+  // =====================================================
+
+  const handleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error)
+    }
+  }
+
+  // =====================================================
+  // FULLSCREEN CHANGE
+  // =====================================================
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement))
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
+
+  // =====================================================
+  // EDIT PROFILE
+  // =====================================================
+
+  const handleEditProfile = event => {
+    event.stopPropagation()
+    setProfileOpen(false)
+    setEditProfileOpen(true)
+  }
+
+  const handleCloseEditProfile = () => {
+    setEditProfileOpen(false)
+  }
+
+  // =====================================================
+  // AVATAR COMPONENT
+  // =====================================================
+
+  const renderAvatar = (sizeClass, textClass) => (
+    <div
+      className={`
+                ${sizeClass}
+                rounded-full
+                bg-black
                 flex
                 items-center
-                justify-between
+                justify-center
+                text-white
+                ${textClass}
+                font-semibold
+                overflow-hidden
                 shrink-0
-            "
-        >
-            {/* =====================================================
-                LEFT SECTION
-            ===================================================== */}
-            <div className="flex items-center gap-3">
+            `}
+    >
+      {userProfileImage ? (
+        <img
+          src={userProfileImage}
+          alt={userName}
+          className='w-full h-full object-cover'
+          onError={event => {
+            event.currentTarget.style.display = 'none'
+          }}
+        />
+      ) : (
+        userInitials
+      )}
+    </div>
+  )
 
-                {/* Mobile Sidebar Button */}
-                <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    className="
-                        lg:hidden
-                        w-9
-                        h-9
-                        flex
-                        items-center
-                        justify-center
-                        rounded-lg
-                        border
-                        border-black/10
-                        text-black/70
-                        hover:bg-black
-                        hover:text-white
-                        transition-all
-                        duration-200
-                        cursor-pointer
-                    "
-                    onClick={() => setSidebarOpen(true)}
-                    aria-label="Open sidebar"
-                >
-                    <Menu size={18} />
-                </motion.button>
+  // =====================================================
+  // RETURN
+  // =====================================================
 
-                {/* Brand */}
-                <motion.div
-                    initial={{
-                        opacity: 0,
-                        x: -10,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        x: 0,
-                    }}
-                    transition={{
-                        duration: 0.4,
-                        delay: 0.1,
-                        ease: "easeOut",
-                    }}
-                >
-                    <h1
-                        className="
-                            text-[15px]
-                            sm:text-[16px]
-                            font-semibold
-                            tracking-[0.18em]
-                            text-black
-                        "
-                    >
-                        EPHORSYS
-                    </h1>
+  return (
+    <>
+      {/* TOP BAR */}
 
-                    <p
-                        className="
-                            hidden
-                            sm:block
-                            text-[9px]
-                            uppercase
-                            tracking-[0.25em]
-                            text-black/40
-                            mt-0.5
-                        "
-                    >
-                        HRMS
-                    </p>
-                </motion.div>
-            </div>
+      <header
+        className='
+                    h-16
+                    w-full
+                    bg-white
+                    border-b
+                    border-black/10
+                    flex
+                    items-center
+                    justify-between
+                    px-4
+                    lg:px-6
+                    relative
+                    z-40
+                '
+      >
+        {/* LEFT SIDE */}
 
-            {/* =====================================================
-                RIGHT SECTION
-            ===================================================== */}
-            <div className="flex items-center gap-2 sm:gap-3">
-
-                {/* =================================================
-                    FULLSCREEN BUTTON
-                ================================================= */}
-                <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={toggleFullscreen}
-                    className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        border
-                        border-black/10
-                        flex
-                        items-center
-                        justify-center
-                        text-black/60
-                        hover:bg-black
-                        hover:text-white
-                        transition-all
-                        duration-200
-                        cursor-pointer
-                    "
-                    aria-label="Toggle fullscreen"
-                >
-                    {isFullscreen ? (
-                        <Minimize size={18} />
-                    ) : (
-                        <Maximize size={18} />
-                    )}
-                </motion.button>
-
-                {/* =================================================
-                    NOTIFICATION BUTTON
-                ================================================= */}
-                <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        border
-                        border-black/10
-                        flex
-                        items-center
-                        justify-center
-                        text-black/60
-                        hover:bg-black
-                        hover:text-white
-                        transition-all
-                        duration-200
-                        cursor-pointer
-                    "
-                    aria-label="Notifications"
-                >
-                    <Bell size={18} />
-                </motion.button>
-
-                {/* =================================================
-                    PROFILE
-                ================================================= */}
-                <div className="relative profile-dropdown">
-
-                    {/* Profile Button */}
-                    <motion.button
-                        onClick={() =>
-                            setProfileOpen((prev) => !prev)
-                        }
-                        whileTap={{ scale: 0.97 }}
-                        className="
-                            flex
-                            items-center
-                            gap-2
-                            px-1.5
-                            sm:px-2
-                            py-1
-                            rounded-xl
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={() => setSidebarOpen(previous => !previous)}
+            className='
+                            lg:hidden
+                            w-9 h-9
+                            rounded-lg
+                            flex items-center justify-center
+                            text-black/60
                             hover:bg-black/5
+                            hover:text-black
                             transition-all
-                            duration-200
                             cursor-pointer
-                        "
+                        '
+            aria-label='Toggle sidebar'
+          >
+            <Menu size={20} />
+          </button>
+
+          <div>
+            <h1 className='text-sm lg:text-base font-semibold text-black'>
+              Dashboard
+            </h1>
+
+            <p className='hidden sm:block text-[10px] text-black/40'>
+              Welcome back
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+
+        <div className='flex items-center gap-2'>
+          {/* FULLSCREEN */}
+
+          <button
+            type='button'
+            onClick={handleFullscreen}
+            className='
+                            hidden sm:flex
+                            w-9 h-9
+                            rounded-lg
+                            items-center justify-center
+                            text-black/50
+                            hover:bg-black/5
+                            hover:text-black
+                            transition-all
+                            cursor-pointer
+                        '
+            title='Fullscreen'
+            aria-label='Toggle fullscreen'
+          >
+            {isFullscreen ? <Minimize size={17} /> : <Maximize size={17} />}
+          </button>
+
+          {/* NOTIFICATIONS */}
+
+          <button
+            type='button'
+            className='
+                            relative
+                            w-9 h-9
+                            rounded-lg
+                            flex items-center justify-center
+                            text-black/50
+                            hover:bg-black/5
+                            hover:text-black
+                            transition-all
+                            cursor-pointer
+                        '
+            aria-label='Notifications'
+          >
+            <Bell size={18} />
+
+            <span
+              className='
+                                absolute top-2 right-2
+                                w-1.5 h-1.5
+                                rounded-full bg-black
+                            '
+            />
+          </button>
+
+          {/* PROFILE */}
+
+          <div className='relative ml-1'>
+            <button
+              type='button'
+              onClick={() => setProfileOpen(previous => !previous)}
+              className='
+                                flex items-center gap-2
+                                rounded-lg px-1.5 py-1
+                                hover:bg-black/5
+                                transition-all
+                                cursor-pointer
+                            '
+              aria-expanded={profileOpen}
+              aria-label='Open profile menu'
+            >
+              {renderAvatar('w-9 h-9', 'text-[11px]')}
+
+              <div className='hidden md:block text-left'>
+                <p className='text-[12px] font-semibold text-black'>
+                  {userName}
+                </p>
+
+                <p className='text-[10px] text-black/40 capitalize'>
+                  {formattedRole}
+                </p>
+              </div>
+            </button>
+
+            {/* PROFILE DROPDOWN */}
+
+            <AnimatePresence>
+              {profileOpen && (
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    y: -8,
+                    scale: 0.96
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -8,
+                    scale: 0.96
+                  }}
+                  transition={{
+                    duration: 0.2,
+                    ease: 'easeOut'
+                  }}
+                  className='
+                                        absolute right-0 mt-2.5
+                                        w-64 max-w-[calc(100vw-2rem)]
+                                        bg-white
+                                        border border-black/10
+                                        rounded-xl
+                                        shadow-lg
+                                        overflow-hidden
+                                        z-50
+                                    '
+                >
+                  {/* PROFILE HEADER */}
+
+                  <div
+                    className='
+                                            relative
+                                            flex items-center gap-3
+                                            px-4 py-3.5
+                                            border-b border-black/10
+                                        '
+                  >
+                    {/* EDIT PROFILE BUTTON */}
+
+                    <motion.button
+                      type='button'
+                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      onClick={handleEditProfile}
+                      className='
+                                                absolute top-2.5 right-2.5
+                                                w-7 h-7
+                                                rounded-lg
+                                                border border-black/10
+                                                bg-white
+                                                flex items-center justify-center
+                                                text-black/50
+                                                hover:bg-black
+                                                hover:text-white
+                                                hover:border-black
+                                                transition-all duration-200
+                                                cursor-pointer
+                                            '
+                      aria-label='Edit profile'
+                      title='Edit Profile'
                     >
-                        {/* User Information */}
-                        <div className="hidden sm:block text-right">
-
-                            <p
-                                className="
-                                    text-[13px]
-                                    font-medium
-                                    text-black
-                                    leading-tight
-                                "
-                            >
-                                Admin
-                            </p>
-
-                            <p
-                                className="
-                                    text-[10px]
-                                    uppercase
-                                    tracking-wider
-                                    text-black/40
-                                    leading-tight
-                                    mt-0.5
-                                "
-                            >
-                                Administrator
-                            </p>
-
-                        </div>
-
-                        {/* User Icon */}
-                        <div
-                            className="
-                                w-9
-                                h-9
-                                rounded-full
-                                bg-black
-                                border
-                                border-black
-                                flex
-                                items-center
-                                justify-center
-                                text-white
-                            "
-                        >
-                            <User size={18} />
-                        </div>
+                      <Pencil size={13} />
                     </motion.button>
 
-                    {/* =================================================
-                        PROFILE DROPDOWN
-                    ================================================= */}
-                    <AnimatePresence>
-                        {profileOpen && (
-                            <motion.div
-                                initial={{
-                                    opacity: 0,
-                                    y: -8,
-                                    scale: 0.96,
-                                }}
-                                animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                    scale: 1,
-                                }}
-                                exit={{
-                                    opacity: 0,
-                                    y: -8,
-                                    scale: 0.96,
-                                }}
-                                transition={{
-                                    duration: 0.2,
-                                    ease: "easeOut",
-                                }}
-                                className="
-                                    absolute
-                                    right-0
-                                    mt-2.5
-                                    w-56
-                                    bg-white
-                                    border
-                                    border-black/10
-                                    rounded-xl
-                                    shadow-lg
-                                    overflow-hidden
-                                    z-50
-                                "
-                            >
+                    {/* AVATAR */}
 
-                                {/* Identity */}
-                                <div
-                                    className="
-                                        flex
-                                        items-center
-                                        gap-3
-                                        px-4
-                                        py-3.5
-                                        border-b
-                                        border-black/10
-                                    "
-                                >
-                                    {/* Avatar */}
-                                    <div
-                                        className="
-                                            w-9
-                                            h-9
-                                            rounded-full
-                                            bg-black
-                                            flex
-                                            items-center
-                                            justify-center
-                                            text-white
-                                            text-[12px]
-                                            font-semibold
-                                            shrink-0
-                                        "
-                                    >
-                                        AD
-                                    </div>
+                    {renderAvatar('w-10 h-10', 'text-[12px]')}
 
-                                    {/* User Details */}
-                                    <div>
-                                        <p
-                                            className="
-                                                text-[13px]
-                                                font-semibold
-                                                text-black
-                                            "
-                                        >
-                                            Admin
-                                        </p>
+                    {/* USER DETAILS */}
 
-                                        <p
-                                            className="
-                                                text-[11px]
-                                                text-black/40
-                                                capitalize
-                                                mt-0.5
-                                            "
-                                        >
-                                            Administrator
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-        </motion.header>
-    );
-};
+                    <div className='min-w-0 pr-5'>
+                      <p className='text-[13px] font-semibold text-black break-words'>
+                        {userName}
+                      </p>
 
-export default TopBar;
+                      <p className='text-[11px] text-black/40 capitalize mt-0.5'>
+                        {formattedRole}
+                      </p>
+
+                      {userEmail && (
+                        <p className='text-[10px] text-black/50 mt-1 break-all'>
+                          {userEmail}
+                        </p>
+                      )}
+
+                      {userPhone && (
+                        <p className='text-[10px] text-black/50 mt-0.5'>
+                          {userPhone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </header>
+
+      {/* UPDATE PROFILE MODAL */}
+
+      <Modal
+        isOpen={editProfileOpen}
+        onClose={handleCloseEditProfile}
+        title={userType === 'admin' ? 'Update Admin Profile' : 'Update Profile'}
+        size='md'
+      >
+        <UpdateAdminProfileModal onClose={handleCloseEditProfile} />
+      </Modal>
+    </>
+  )
+}
+
+export default TopBar
