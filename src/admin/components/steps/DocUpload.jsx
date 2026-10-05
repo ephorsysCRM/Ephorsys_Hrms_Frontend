@@ -1,3 +1,4 @@
+import { Trash } from "lucide-react";
 
 const documentTypes = [
   {
@@ -227,7 +228,7 @@ export default function DocUpload({
                           }
                           className="ml-3 shrink-0 text-sm font-medium text-red-600 hover:text-red-700"
                         >
-                          Remove
+                          <Trash/>
                         </button>
                       </div>
                     )
