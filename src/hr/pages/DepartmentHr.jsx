@@ -375,7 +375,7 @@ const Department = () => {
               className='
                 grid
                 grid-cols-5
-                gap-4
+                gap-16
                 border-b
                 border-gray-200
                 bg-gray-50
@@ -447,7 +447,7 @@ const Department = () => {
                     className='
                       grid
                       grid-cols-5
-                      gap-4
+                      gap-15
                       border-b
                       border-gray-200
                       p-4
@@ -575,10 +575,14 @@ const Department = () => {
                         <div
                           className='
                            absolute 
-    right-10 
-    bottom-[-25px]
+    lg:right-10 
+    right-0
+    bottom-[-15px]
+    
     z-50 
-    w-32 
+    w-25
+    lg:text-sm
+    text-xs
     rounded-lg 
     border 
     border-gray-200 
