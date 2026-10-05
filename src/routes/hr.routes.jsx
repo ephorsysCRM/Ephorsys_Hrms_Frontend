@@ -5,11 +5,11 @@ import HrLayout from "../layout/HrLayout";
 import Login from "../admin/pages/Login";
 import HrDashboard from "../hr/pages/HrDashboard";
 
-import AllEmployee from "../admin/pages/AllEmployee";
+import AllEmployee from "../hr/pages/AllEmployee";
 import AddEmployee from "../admin/pages/AddEmployee";
-import EmployeeProfile from "../admin/pages/EmployeeProfile";
-import Department from "../admin/pages/Department";
-import DepartmentView from "../admin/pages/DepartmentView";
+import EmployeeProfileHr from "../hr/pages/EmployProfileHr";
+import DepartmentHr from "../hr/pages/DepartmentHr";
+import DepartmentViewHr from "../hr/pages/DepartmentViewHr";
 import ProtectedRoute from "./protected.routes";
 
 const HrRoutes = (
@@ -42,17 +42,17 @@ const HrRoutes = (
 
                 <Route
                     path="employees/:id"
-                    element={<EmployeeProfile />}
+                    element={<EmployeeProfileHr />}
                 />
 
                 <Route
                     path="departments"
-                    element={<Department />}
+                    element={<DepartmentHr />}
                 />
 
                 <Route
                     path="departments/:id"
-                    element={<DepartmentView />}
+                    element={<DepartmentViewHr />}
                 />
             </Route>
         </Route>

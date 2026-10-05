@@ -2,7 +2,7 @@ import { Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../../UI/Pagination'
-import { employeesData } from '../data/employeesData'
+import { employeesData } from '../../admin/data/employeesData'
 
 
 
@@ -303,7 +303,7 @@ const AllEmployee = () => {
                       <div className='absolute right-0 top-10 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
                         <button
                           onClick={() =>
-                            navigate(`/employees/${employee.id}`)
+                            navigate(`/hr/employees/${employee.id}`)
                           }
                           className='flex w-full items-center gap-2  rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
                         >
