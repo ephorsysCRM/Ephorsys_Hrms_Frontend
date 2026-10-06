@@ -97,14 +97,6 @@ const DepartmentView = () => {
       {/* Header */}
       <div className='mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <button
-            onClick={() => navigate(-1)}
-            className='mb-3 flex items-center gap-2 text-sm text-gray-500 transition hover:text-black'
-          >
-            <ArrowLeft size={17} />
-            Back to Departments
-          </button>
-
           <h1 className='text-xl font-semibold sm:text-2xl'>
             Department Details
           </h1>
