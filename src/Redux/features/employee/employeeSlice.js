@@ -1,15 +1,51 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+    // =====================================================
+    // EMPLOYEE LIST
+    // =====================================================
+
     employees: [],
+
+    // =====================================================
+    // SINGLE EMPLOYEE
+    // =====================================================
+
     employee: null,
 
-    loading: false,
-    error: null,
+    getEmployeeByIdLoading: false,
+    getEmployeeByIdError: null,
+
+    // =====================================================
+    // GET ALL EMPLOYEES
+    // =====================================================
+
+    getAllEmployeesLoading: false,
+    getAllEmployeesError: null,
+
+    pagination: {
+        currentPage: 1,
+        limit: 10,
+        totalEmployees: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+    },
+
+    // =====================================================
+    // CREATE EMPLOYEE
+    // =====================================================
 
     createEmployeeLoading: false,
     createEmployeeError: null,
     createEmployeeSuccess: false,
+
+    // =====================================================
+    // COMMON
+    // =====================================================
+
+    loading: false,
+    error: null,
 };
 
 const employeeSlice = createSlice({
@@ -18,9 +54,83 @@ const employeeSlice = createSlice({
     initialState,
 
     reducers: {
+        // =================================================
+        // GET ALL EMPLOYEES
+        // =================================================
+
+        getAllEmployeesRequest: (state) => {
+            state.getAllEmployeesLoading = true;
+            state.getAllEmployeesError = null;
+        },
+
+        getAllEmployeesSuccess: (
+            state,
+            action
+        ) => {
+            state.getAllEmployeesLoading = false;
+            state.getAllEmployeesError = null;
+
+            state.employees =
+                action.payload?.data?.employees ||
+                [];
+
+            state.pagination =
+                action.payload?.data?.pagination || {
+                    currentPage: 1,
+                    limit: 10,
+                    totalEmployees: 0,
+                    totalPages: 0,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                };
+        },
+
+        getAllEmployeesFailure: (
+            state,
+            action
+        ) => {
+            state.getAllEmployeesLoading = false;
+
+            state.getAllEmployeesError =
+                action.payload ||
+                "Failed to fetch employees";
+        },
 
         // =================================================
-        // CREATE EMPLOYEE REQUEST
+        // GET SINGLE EMPLOYEE
+        // =================================================
+
+        getEmployeeByIdRequest: (state) => {
+            state.getEmployeeByIdLoading = true;
+            state.getEmployeeByIdError = null;
+            state.employee = null;
+        },
+
+        getEmployeeByIdSuccess: (
+            state,
+            action
+        ) => {
+            state.getEmployeeByIdLoading = false;
+            state.getEmployeeByIdError = null;
+
+            state.employee =
+                action.payload?.data?.employee ||
+                null;
+        },
+
+        getEmployeeByIdFailure: (
+            state,
+            action
+        ) => {
+            state.getEmployeeByIdLoading = false;
+
+            state.getEmployeeByIdError =
+                action.payload ||
+                "Failed to fetch employee";
+        },
+
+        // =================================================
+        // CREATE EMPLOYEE
         // =================================================
 
         createEmployeeRequest: (state) => {
@@ -29,53 +139,56 @@ const employeeSlice = createSlice({
             state.createEmployeeSuccess = false;
         },
 
-        // =================================================
-        // CREATE EMPLOYEE SUCCESS
-        // =================================================
-
-        createEmployeeSuccess: (state, action) => {
+        createEmployeeSuccess: (
+            state,
+            action
+        ) => {
             state.createEmployeeLoading = false;
             state.createEmployeeError = null;
             state.createEmployeeSuccess = true;
 
-            const response = action.payload;
+            const employee =
+                action.payload?.data?.employee;
 
-            // API response:
-            // {
-            //     success: true,
-            //     message: "...",
-            //     data: employee
-            // }
+            state.employee = employee || null;
 
-            if (response?.data) {
-                state.employee = response.data;
-
-                state.employees.unshift(
-                    response.data
-                );
+            if (employee) {
+                state.employees.unshift(employee);
             }
         },
 
-        // =================================================
-        // CREATE EMPLOYEE FAILURE
-        // =================================================
-
-        createEmployeeFailure: (state, action) => {
+        createEmployeeFailure: (
+            state,
+            action
+        ) => {
             state.createEmployeeLoading = false;
-            state.createEmployeeError =
-                action.payload || "Failed to create employee";
-
             state.createEmployeeSuccess = false;
+
+            state.createEmployeeError =
+                action.payload ||
+                "Failed to create employee";
         },
 
         // =================================================
         // CLEAR CREATE EMPLOYEE STATE
         // =================================================
 
-        clearCreateEmployeeState: (state) => {
+        clearCreateEmployeeState: (
+            state
+        ) => {
             state.createEmployeeLoading = false;
             state.createEmployeeError = null;
             state.createEmployeeSuccess = false;
+        },
+
+        // =================================================
+        // CLEAR SINGLE EMPLOYEE
+        // =================================================
+
+        clearEmployee: (state) => {
+            state.employee = null;
+            state.getEmployeeByIdLoading = false;
+            state.getEmployeeByIdError = null;
         },
 
         // =================================================
@@ -84,7 +197,15 @@ const employeeSlice = createSlice({
 
         clearEmployeeError: (state) => {
             state.error = null;
-            state.createEmployeeError = null;
+
+            state.getAllEmployeesError =
+                null;
+
+            state.getEmployeeByIdError =
+                null;
+
+            state.createEmployeeError =
+                null;
         },
 
         // =================================================
@@ -98,10 +219,20 @@ const employeeSlice = createSlice({
 });
 
 export const {
+    getAllEmployeesRequest,
+    getAllEmployeesSuccess,
+    getAllEmployeesFailure,
+
+    getEmployeeByIdRequest,
+    getEmployeeByIdSuccess,
+    getEmployeeByIdFailure,
+
     createEmployeeRequest,
     createEmployeeSuccess,
     createEmployeeFailure,
+
     clearCreateEmployeeState,
+    clearEmployee,
     clearEmployeeError,
     resetEmployeeState,
 } = employeeSlice.actions;
