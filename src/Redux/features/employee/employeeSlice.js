@@ -41,6 +41,16 @@ const initialState = {
     createEmployeeSuccess: false,
 
     // =====================================================
+    // UPDATE EMPLOYEE
+    // =====================================================
+
+    updateEmployeeLoading: false,
+    updateEmployeeError: null,
+    updateEmployeeSuccess: false,
+
+    updatedEmployee: null,
+
+    // =====================================================
     // COMMON
     // =====================================================
 
@@ -182,13 +192,91 @@ const employeeSlice = createSlice({
         },
 
         // =================================================
+        // UPDATE EMPLOYEE
+        // =================================================
+
+        updateEmployeeRequest: (state) => {
+            state.updateEmployeeLoading = true;
+            state.updateEmployeeError = null;
+            state.updateEmployeeSuccess = false;
+            state.updatedEmployee = null;
+        },
+
+        updateEmployeeSuccess: (
+            state,
+            action
+        ) => {
+            state.updateEmployeeLoading = false;
+            state.updateEmployeeError = null;
+            state.updateEmployeeSuccess = true;
+
+            const employee =
+                action.payload?.data?.employee || null;
+
+            state.updatedEmployee = employee;
+
+            // ---------------------------------------------
+            // Update currently selected employee
+            // ---------------------------------------------
+
+            if (employee) {
+                state.employee = employee;
+            }
+
+            // ---------------------------------------------
+            // Update employee inside employee list
+            // ---------------------------------------------
+
+            if (employee?._id) {
+                const index =
+                    state.employees.findIndex(
+                        (item) =>
+                            item._id === employee._id
+                    );
+
+                if (index !== -1) {
+                    state.employees[index] =
+                        employee;
+                }
+            }
+        },
+
+        updateEmployeeFailure: (
+            state,
+            action
+        ) => {
+            state.updateEmployeeLoading = false;
+            state.updateEmployeeSuccess = false;
+
+            state.updateEmployeeError =
+                action.payload ||
+                "Failed to update employee";
+        },
+
+        // =================================================
+        // CLEAR UPDATE EMPLOYEE STATE
+        // =================================================
+
+        clearUpdateEmployeeState: (
+            state
+        ) => {
+            state.updateEmployeeLoading = false;
+            state.updateEmployeeError = null;
+            state.updateEmployeeSuccess = false;
+            state.updatedEmployee = null;
+        },
+
+        // =================================================
         // CLEAR SINGLE EMPLOYEE
         // =================================================
 
         clearEmployee: (state) => {
             state.employee = null;
+
             state.getEmployeeByIdLoading = false;
             state.getEmployeeByIdError = null;
+
+            state.updatedEmployee = null;
         },
 
         // =================================================
@@ -198,14 +286,13 @@ const employeeSlice = createSlice({
         clearEmployeeError: (state) => {
             state.error = null;
 
-            state.getAllEmployeesError =
-                null;
+            state.getAllEmployeesError = null;
 
-            state.getEmployeeByIdError =
-                null;
+            state.getEmployeeByIdError = null;
 
-            state.createEmployeeError =
-                null;
+            state.createEmployeeError = null;
+
+            state.updateEmployeeError = null;
         },
 
         // =================================================
@@ -219,21 +306,33 @@ const employeeSlice = createSlice({
 });
 
 export const {
+    // GET ALL
     getAllEmployeesRequest,
     getAllEmployeesSuccess,
     getAllEmployeesFailure,
 
+    // GET SINGLE
     getEmployeeByIdRequest,
     getEmployeeByIdSuccess,
     getEmployeeByIdFailure,
 
+    // CREATE
     createEmployeeRequest,
     createEmployeeSuccess,
     createEmployeeFailure,
 
+    // UPDATE
+    updateEmployeeRequest,
+    updateEmployeeSuccess,
+    updateEmployeeFailure,
+
+    // CLEAR
     clearCreateEmployeeState,
+    clearUpdateEmployeeState,
     clearEmployee,
     clearEmployeeError,
+
+    // RESET
     resetEmployeeState,
 } = employeeSlice.actions;
 

@@ -483,14 +483,21 @@ const AllEmployee = () => {
                     {openMenu === employee._id && (
                       <div className='absolute right-0 top-10 z-20 w-28 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
                         <button
-                          onClick={() => navigate(`/admin/employees/${employee._id}`)}
+                          onClick={() =>
+                            navigate(`/admin/employees/${employee._id}`)
+                          }
                           className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
                         >
                           <Eye size={16} />
                           View
                         </button>
 
-                        <button className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'>
+                        <button
+                          onClick={() =>
+                            navigate(`/admin/edit-employees/${employee._id}`)
+                          }
+                          className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
+                        >
                           <Pencil size={16} />
                           Edit
                         </button>

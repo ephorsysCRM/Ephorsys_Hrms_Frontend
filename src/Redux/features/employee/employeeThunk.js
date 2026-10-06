@@ -1,4 +1,3 @@
-
 import api from "../../services/api";
 
 // =====================================================
@@ -26,7 +25,7 @@ export const createEmployee = (employeeData) => {
             if (!data?.success) {
                 throw new Error(
                     data?.message ||
-                        "Failed to create employee"
+                    "Failed to create employee"
                 );
             }
 
@@ -55,6 +54,7 @@ export const createEmployee = (employeeData) => {
     };
 };
 
+
 // =====================================================
 // GET ALL EMPLOYEES
 // =====================================================
@@ -82,7 +82,7 @@ export const getAllEmployees = (
             if (!data?.success) {
                 throw new Error(
                     data?.message ||
-                        "Failed to fetch employees"
+                    "Failed to fetch employees"
                 );
             }
 
@@ -111,6 +111,7 @@ export const getAllEmployees = (
     };
 };
 
+
 // =====================================================
 // GET SINGLE EMPLOYEE
 // =====================================================
@@ -131,7 +132,7 @@ export const getEmployeeById = (
             if (!data?.success) {
                 throw new Error(
                     data?.message ||
-                        "Failed to fetch employee"
+                    "Failed to fetch employee"
                 );
             }
 
@@ -149,6 +150,64 @@ export const getEmployeeById = (
 
             dispatch({
                 type: "employee/getEmployeeByIdFailure",
+                payload: message,
+            });
+
+            return {
+                success: false,
+                message,
+            };
+        }
+    };
+};
+
+
+// =====================================================
+// UPDATE EMPLOYEE
+// =====================================================
+
+export const updateEmployee = (
+    employeeId,
+    employeeData
+) => {
+    return async (dispatch) => {
+        try {
+            dispatch({
+                type: "employee/updateEmployeeRequest",
+            });
+
+            const { data } = await api.put(
+                `/employee/${employeeId}`,
+                employeeData,
+                {
+                    headers: {
+                        "Content-Type":
+                            "multipart/form-data",
+                    },
+                }
+            );
+
+            if (!data?.success) {
+                throw new Error(
+                    data?.message ||
+                    "Failed to update employee"
+                );
+            }
+
+            dispatch({
+                type: "employee/updateEmployeeSuccess",
+                payload: data,
+            });
+
+            return data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to update employee";
+
+            dispatch({
+                type: "employee/updateEmployeeFailure",
                 payload: message,
             });
 
