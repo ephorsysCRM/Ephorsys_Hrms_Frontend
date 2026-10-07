@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-
+import { useEffect, useState } from 'react'
 import { Pencil, User, Phone, Save, X } from 'lucide-react'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,19 +12,23 @@ const UpdateAdminProfileModal = ({ onClose }) => {
   // REDUX AUTH STATE
   // =====================================================
 
-  const { user, admin, userType } = useSelector(state => state.auth)
+  const { user, admin } = useSelector(state => state.auth)
 
-  // Support new generic user and legacy admin state
+  // Support both:
+  // 1. Generic user state
+  // 2. Legacy admin state
   const currentUser = user || admin
 
   // =====================================================
-  // LOCAL STATES
+  // LOCAL STATE
   // =====================================================
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+
   const [profileImage, setProfileImage] = useState(null)
   const [previewImage, setPreviewImage] = useState('')
+
   const [loading, setLoading] = useState(false)
 
   // =====================================================
@@ -37,23 +40,37 @@ const UpdateAdminProfileModal = ({ onClose }) => {
   const email = currentUser?.email || currentUser?.officialEmail || ''
 
   // =====================================================
-  // SET PROFILE DATA
+  // SET USER DATA
   // =====================================================
 
   useEffect(() => {
     if (!currentUser) return
 
+    // ===================================================
+    // NAME
+    // ===================================================
+
     const fullName =
       currentUser.name ||
-      [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') ||
+      [currentUser.firstName, currentUser.middleName, currentUser.lastName]
+        .filter(Boolean)
+        .join(' ') ||
       currentUser.fullName ||
       ''
 
     setName(fullName)
 
+    // ===================================================
+    // PHONE
+    // ===================================================
+
     setPhone(
       currentUser.phone || currentUser.mobile || currentUser.phoneNumber || ''
     )
+
+    // ===================================================
+    // PROFILE IMAGE
+    // ===================================================
 
     setPreviewImage(
       currentUser.profileImage ||
@@ -72,18 +89,33 @@ const UpdateAdminProfileModal = ({ onClose }) => {
 
     if (!file) return
 
+    // ===================================================
+    // IMAGE TYPE VALIDATION
+    // ===================================================
+
     if (!file.type.startsWith('image/')) {
-      console.error('Please select a valid image.')
+      alert('Please select a valid image.')
       return
     }
 
-    // Optional client-side file size validation: 5 MB
+    // ===================================================
+    // IMAGE SIZE VALIDATION
+    // ===================================================
+
     if (file.size > 5 * 1024 * 1024) {
-      console.error('Image size must be less than 5 MB.')
+      alert('Image size must be less than 5 MB.')
       return
     }
+
+    // ===================================================
+    // SET FILE
+    // ===================================================
 
     setProfileImage(file)
+
+    // ===================================================
+    // CREATE PREVIEW
+    // ===================================================
 
     const imageUrl = URL.createObjectURL(file)
 
@@ -97,7 +129,7 @@ const UpdateAdminProfileModal = ({ onClose }) => {
   }
 
   // =====================================================
-  // CLEAN UP IMAGE PREVIEW
+  // CLEANUP IMAGE PREVIEW
   // =====================================================
 
   useEffect(() => {
@@ -109,38 +141,105 @@ const UpdateAdminProfileModal = ({ onClose }) => {
   }, [previewImage])
 
   // =====================================================
-  // UPDATE PROFILE
+  // UPDATE PROFILE IMAGE
   // =====================================================
 
   const handleSubmit = async event => {
     event.preventDefault()
 
+    // ===================================================
+    // USER ID CHECK
+    // ===================================================
+
     if (!userId) {
       console.error('User ID not found.')
+
+      alert('User information not found.')
+
+      return
+    }
+
+    // ===================================================
+    // IMAGE CHECK
+    // ===================================================
+
+    if (!profileImage) {
+      alert('Please select a new profile image.')
+
       return
     }
 
     try {
       setLoading(true)
 
+      // =================================================
+      // FORM DATA
+      // =================================================
+
       const formData = new FormData()
 
-      formData.append('name', name.trim())
-      formData.append('phone', phone.trim())
+      // IMPORTANT:
+      // ONLY PROFILE IMAGE IS SENT.
+      //
+      // Name ❌
+      // Phone ❌
+      // Email ❌
 
-      if (profileImage) {
-        formData.append('profileImage', profileImage)
+      formData.append('profileImage', profileImage)
+
+      // =================================================
+      // DEBUG
+      // =================================================
+
+      console.log('================================')
+      console.log('UPDATE PROFILE IMAGE')
+      console.log('================================')
+
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(key, {
+            name: value.name,
+            type: value.type,
+            size: value.size
+          })
+        } else {
+          console.log(key, value)
+        }
       }
 
-      // The thunk and backend must support both Admin
-      // and Employee/HR profile updates.
+      // =================================================
+      // API
+      // =================================================
+
       const result = await dispatch(updateAdminProfile(userId, formData))
 
-      if (updateAdminProfile.fulfilled.match(result)) {
+      console.log('UPDATE PROFILE RESULT:', result)
+
+      // =================================================
+      // SUCCESS
+      // =================================================
+
+      if (result?.success) {
+        alert(result.message || 'Profile image updated successfully.')
+
         onClose()
+
+        return
       }
+
+      // =================================================
+      // FAILURE
+      // =================================================
+
+      alert(result?.message || 'Failed to update profile image.')
     } catch (error) {
-      console.error('Update profile error:', error)
+      console.error('Update profile image error:', error)
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          'Something went wrong while updating profile image.'
+      )
     } finally {
       setLoading(false)
     }
@@ -152,53 +251,73 @@ const UpdateAdminProfileModal = ({ onClose }) => {
 
   return (
     <form onSubmit={handleSubmit} className='w-full'>
-      {/* PROFILE IMAGE */}
+      {/* =================================================
+          PROFILE IMAGE
+      ================================================= */}
 
-      <div className='flex justify-center mb-6'>
+      <div className='mb-6 flex justify-center'>
         <label
           className='
-                        relative
-                        w-24 h-24
-                        rounded-full
-                        bg-black
-                        overflow-hidden
-                        cursor-pointer
-                        group
-                    '
+            group
+            relative
+            h-24
+            w-24
+            cursor-pointer
+            overflow-hidden
+            rounded-full
+            bg-black
+          '
         >
+          {/* IMAGE */}
+
           {previewImage ? (
             <img
               src={previewImage}
               alt={name || 'Profile'}
-              className='w-full h-full object-cover'
+              className='
+                h-full
+                w-full
+                object-cover
+              '
             />
           ) : (
             <div
               className='
-                                w-full h-full
-                                flex items-center justify-center
-                                text-white text-2xl font-semibold
-                            '
+                flex
+                h-full
+                w-full
+                items-center
+                justify-center
+                text-2xl
+                font-semibold
+                text-white
+              '
             >
               {name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
           )}
 
-          {/* IMAGE OVERLAY */}
+          {/* IMAGE HOVER */}
 
           <div
             className='
-                            absolute inset-0
-                            bg-black/50
-                            opacity-0
-                            group-hover:opacity-100
-                            transition-all duration-200
-                            flex items-center justify-center
-                            text-white
-                        '
+              absolute
+              inset-0
+              flex
+              items-center
+              justify-center
+              bg-black/50
+              text-white
+              opacity-0
+              transition-all
+              duration-200
+              group-hover:opacity-100
+            '
           >
             <Pencil size={20} />
           </div>
+
+          {/* FILE INPUT */}
 
           <input
             type='file'
@@ -210,14 +329,29 @@ const UpdateAdminProfileModal = ({ onClose }) => {
         </label>
       </div>
 
-      {/* NAME */}
+      {/* =================================================
+          IMAGE INFORMATION
+      ================================================= */}
+
+      <p className='mb-6 text-center text-xs text-black/40'>
+        Click the image to change your profile photo.
+        <br />
+        Maximum file size: 5 MB.
+      </p>
+
+      {/* =================================================
+          NAME
+      ================================================= */}
 
       <div className='mb-5'>
         <label
           className='
-                        block text-xs font-medium
-                        text-black mb-2
-                    '
+            mb-2
+            block
+            text-xs
+            font-medium
+            text-black
+          '
         >
           Name
         </label>
@@ -226,38 +360,54 @@ const UpdateAdminProfileModal = ({ onClose }) => {
           <User
             size={17}
             className='
-                            absolute left-3 top-1/2
-                            -translate-y-1/2 text-black/40
-                        '
+              absolute
+              left-3
+              top-1/2
+              -translate-y-1/2
+              text-black/40
+            '
           />
 
           <input
             type='text'
             value={name}
-            onChange={event => setName(event.target.value)}
-            placeholder='Enter your name'
-            required
-            maxLength={100}
-            disabled={loading}
+            disabled
+            readOnly
             className='
-                            w-full h-11 pl-10 pr-3
-                            rounded-xl border border-black/10
-                            bg-white text-sm text-black
-                            outline-none focus:border-black
-                            transition-all
-                        '
+              h-11
+              w-full
+              cursor-not-allowed
+              rounded-xl
+              border
+              border-black/10
+              bg-black/[0.03]
+              pl-10
+              pr-3
+              text-sm
+              text-black/50
+              outline-none
+            '
           />
         </div>
+
+        <p className='mt-1.5 text-[10px] text-black/30'>
+          Name cannot be changed from here.
+        </p>
       </div>
 
-      {/* PHONE */}
+      {/* =================================================
+          PHONE
+      ================================================= */}
 
       <div className='mb-5'>
         <label
           className='
-                        block text-xs font-medium
-                        text-black mb-2
-                    '
+            mb-2
+            block
+            text-xs
+            font-medium
+            text-black
+          '
         >
           Phone Number
         </label>
@@ -266,37 +416,54 @@ const UpdateAdminProfileModal = ({ onClose }) => {
           <Phone
             size={17}
             className='
-                            absolute left-3 top-1/2
-                            -translate-y-1/2 text-black/40
-                        '
+              absolute
+              left-3
+              top-1/2
+              -translate-y-1/2
+              text-black/40
+            '
           />
 
           <input
             type='tel'
             value={phone}
-            onChange={event => setPhone(event.target.value)}
-            placeholder='Enter phone number'
-            maxLength={20}
-            disabled={loading}
+            disabled
+            readOnly
             className='
-                            w-full h-11 pl-10 pr-3
-                            rounded-xl border border-black/10
-                            bg-white text-sm text-black
-                            outline-none focus:border-black
-                            transition-all
-                        '
+              h-11
+              w-full
+              cursor-not-allowed
+              rounded-xl
+              border
+              border-black/10
+              bg-black/[0.03]
+              pl-10
+              pr-3
+              text-sm
+              text-black/50
+              outline-none
+            '
           />
         </div>
+
+        <p className='mt-1.5 text-[10px] text-black/30'>
+          Phone number cannot be changed from here.
+        </p>
       </div>
 
-      {/* EMAIL - READ ONLY */}
+      {/* =================================================
+          EMAIL
+      ================================================= */}
 
       <div className='mb-6'>
         <label
           className='
-                        block text-xs font-medium
-                        text-black mb-2
-                    '
+            mb-2
+            block
+            text-xs
+            font-medium
+            text-black
+          '
         >
           Email
         </label>
@@ -305,20 +472,30 @@ const UpdateAdminProfileModal = ({ onClose }) => {
           type='email'
           value={email}
           disabled
+          readOnly
           className='
-                        w-full h-11 px-3
-                        rounded-xl border border-black/10
-                        bg-black/3 text-sm text-black/50
-                        outline-none cursor-not-allowed
-                    '
+            h-11
+            w-full
+            cursor-not-allowed
+            rounded-xl
+            border
+            border-black/10
+            bg-black/[0.03]
+            px-3
+            text-sm
+            text-black/50
+            outline-none
+          '
         />
 
-        <p className='text-[10px] text-black/30 mt-1.5'>
+        <p className='mt-1.5 text-[10px] text-black/30'>
           Email cannot be changed from here.
         </p>
       </div>
 
-      {/* ACTIONS */}
+      {/* =================================================
+          ACTIONS
+      ================================================= */}
 
       <div className='grid grid-cols-2 gap-3'>
         {/* CANCEL */}
@@ -328,15 +505,25 @@ const UpdateAdminProfileModal = ({ onClose }) => {
           onClick={onClose}
           disabled={loading}
           className='
-                        h-11 rounded-xl
-                        border border-black/10
-                        bg-white text-black/60
-                        hover:bg-black/5 hover:text-black
-                        text-sm font-medium
-                        transition-all duration-200
-                        flex items-center justify-center gap-2
-                        cursor-pointer disabled:opacity-50
-                    '
+            flex
+            h-11
+            items-center
+            justify-center
+            gap-2
+            rounded-xl
+            border
+            border-black/10
+            bg-white
+            text-sm
+            font-medium
+            text-black/60
+            transition-all
+            duration-200
+            hover:bg-black/5
+            hover:text-black
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+          '
         >
           <X size={16} />
           Cancel
@@ -346,35 +533,44 @@ const UpdateAdminProfileModal = ({ onClose }) => {
 
         <button
           type='submit'
-          disabled={loading || !userId}
+          disabled={loading || !userId || !profileImage}
           className='
-                        h-11 rounded-xl
-                        bg-black text-white
-                        text-sm font-semibold
-                        hover:bg-black/80
-                        transition-all duration-200
-                        flex items-center justify-center gap-2
-                        cursor-pointer
-                        disabled:opacity-50
-                        disabled:cursor-not-allowed
-                    '
+            flex
+            h-11
+            items-center
+            justify-center
+            gap-2
+            rounded-xl
+            bg-black
+            text-sm
+            font-semibold
+            text-white
+            transition-all
+            duration-200
+            hover:bg-black/80
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+          '
         >
           {loading ? (
             <>
               <span
                 className='
-                                    w-4 h-4
-                                    border-2 border-white/30
-                                    border-t-white
-                                    rounded-full animate-spin
-                                '
+                  h-4
+                  w-4
+                  animate-spin
+                  rounded-full
+                  border-2
+                  border-white/30
+                  border-t-white
+                '
               />
               Updating...
             </>
           ) : (
             <>
               <Save size={16} />
-              Update Profile
+              Update Image
             </>
           )}
         </button>
