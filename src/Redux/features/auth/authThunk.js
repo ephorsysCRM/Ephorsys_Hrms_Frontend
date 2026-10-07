@@ -165,7 +165,7 @@ export const updateAdminProfile =
             dispatch(authStart());
 
             const { data } = await api.put(
-                `/ admin / profile / ${ userId } `,
+                `/admin/profile/${ userId } `,
                 formData,
                 {
                     headers: {
