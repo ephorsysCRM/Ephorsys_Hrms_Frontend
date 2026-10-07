@@ -285,12 +285,12 @@ const EmployeeProfile = () => {
 
     return Boolean(
       experience.companyName ||
-        experience.designation ||
-        experience.totalExperience ||
-        experience.skills ||
-        experience.startDate ||
-        experience.endDate ||
-        experience.reasonForLeaving
+      experience.designation ||
+      experience.totalExperience ||
+      experience.skills ||
+      experience.startDate ||
+      experience.endDate ||
+      experience.reasonForLeaving
     )
   }
 
@@ -455,7 +455,10 @@ const EmployeeProfile = () => {
               {/* Header Edit */}
 
               <div className='flex justify-center sm:justify-end'>
-                <button type='button' className={editButtonClass}>
+                <button type='button' className={editButtonClass}
+                  onClick={() =>
+                    navigate(`/admin/edit-employees/${employee._id}`)
+                  }>
                   <Pencil size={14} />
                   Edit Profile
                 </button>
@@ -485,11 +488,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='grid gap-x-10 gap-y-7 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-6'>
@@ -542,10 +540,6 @@ const EmployeeProfile = () => {
               </div>
             </div>
 
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -648,10 +642,6 @@ const EmployeeProfile = () => {
               </div>
             </div>
 
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -759,10 +749,6 @@ const EmployeeProfile = () => {
               </div>
             </div>
 
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -953,10 +939,6 @@ const EmployeeProfile = () => {
               </div>
             </div>
 
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -1046,10 +1028,6 @@ const EmployeeProfile = () => {
               </div>
             </div>
 
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='space-y-4 p-5 sm:p-6'>
@@ -1176,16 +1154,11 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='space-y-4 p-5 sm:p-6'>
             {experienceList.length === 0 ||
-            !experienceList.some(hasExperienceData) ? (
+              !experienceList.some(hasExperienceData) ? (
               <div className='rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500'>
                 No experience details available.
               </div>
@@ -1281,11 +1254,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
-            <button type='button' className={editButtonClass}>
-              <Pencil size={13} />
-              Edit
-            </button>
           </div>
 
           <div className='grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-3'>
