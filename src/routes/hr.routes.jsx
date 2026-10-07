@@ -11,6 +11,7 @@ import EmployeeProfileHr from "../hr/pages/EmployProfileHr";
 import DepartmentHr from "../hr/pages/DepartmentHr";
 import DepartmentViewHr from "../hr/pages/DepartmentViewHr";
 import ProtectedRoute from "./protected.routes";
+import EditEmployee from "../hr/pages/EditEmployee";
 
 const HrRoutes = (
     <Route path="hr">
@@ -54,6 +55,7 @@ const HrRoutes = (
                     path="departments/:id"
                     element={<DepartmentViewHr />}
                 />
+                <Route path='edit-employees/:id' element={<EditEmployee />} />
             </Route>
         </Route>
     </Route>
