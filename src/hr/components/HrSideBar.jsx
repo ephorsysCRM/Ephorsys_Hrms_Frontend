@@ -11,10 +11,11 @@ import {
   FileText,
   Settings,
   ChevronDown,
-  ClipboardList
+  ClipboardList,
+  User
 } from 'lucide-react'
 
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 // import LogoutModal from '../adminModals/LogoutModal'
 import { useState } from 'react'
@@ -70,6 +71,12 @@ const NAV_ITEMS = [
   },
 
   {
+    label: 'Announcements',
+    path: '/hr/announcements',
+    icon: FileText
+  },
+
+  {
     label: 'Payroll',
     icon: WalletCards,
     children: [
@@ -99,9 +106,34 @@ const NAV_ITEMS = [
   }
 ]
 
+const PROFILE_ITEMS = [
+  {
+    label: 'My Profile',
+    path: '/hr/profile',
+    icon: User
+  },
+  {
+    label: 'Personal Information',
+    path: '/hr/profile/personal-information',
+    icon: UserRound
+  },
+  {
+    label: 'Change Password',
+    path: '/hr/profile/change-password',
+    icon: Settings
+  }
+]
+
 const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
   const [logoutview, setLogoutView] = useState(false)
   const [openMenus, setOpenMenus] = useState({})
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isProfileSection = location.pathname.startsWith('/hr/profile')
+  const activeSection = isProfileSection ? 'profile' : 'manage'
+  const currentMenuItems =
+    activeSection === 'profile' ? PROFILE_ITEMS : NAV_ITEMS
 
   const toggleMenu = label => {
     setOpenMenus(prev => ({
@@ -185,11 +217,48 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* =======================================================
+            SECTION SWITCHER
+        ======================================================= */}
+        <div className='border-y border-black/10 px-2 py-3'>
+          <div className='grid grid-cols-2 gap-1 rounded-lg bg-black/5 p-1'>
+            <button
+              type='button'
+              onClick={() => navigate('/hr/dashboard')}
+              className={`
+                rounded-md px-1 py-1 text-[11px] font-medium
+                transition-all duration-200
+                ${activeSection === 'manage'
+                  ? 'bg-black text-white shadow-sm'
+                  : 'text-black/50 hover:text-black'
+                }
+              `}
+            >
+              Manage Employee
+            </button>
+
+            <button
+              type='button'
+              onClick={() => navigate('/hr/profile')}
+              className={`
+                rounded-md px-2 py-2 text-[11px] font-medium
+                transition-all duration-200
+                ${activeSection === 'profile'
+                  ? 'bg-black text-white shadow-sm'
+                  : 'text-black/50 hover:text-black'
+                }
+              `}
+            >
+              My Profile
+            </button>
+          </div>
+        </div>
+
+        {/* =======================================================
             NAVIGATION
         ======================================================= */}
         <nav className='flex-1 overflow-y-auto px-3 py-5'>
           <div className='space-y-1'>
-            {NAV_ITEMS.map(item => {
+            {currentMenuItems.map(item => {
               const Icon = item.icon
 
               {
@@ -279,10 +348,9 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                                     rounded-lg
                                     transition-all
                                     duration-200
-                                    ${
-                                      isActive
-                                        ? 'bg-black !text-white font-medium'
-                                        : 'text-black/60 hover:bg-black/5 hover:text-black'
+                                    ${isActive
+                                      ? 'bg-black text-white! font-medium'
+                                      : 'text-black/60 hover:bg-black/5 hover:text-black'
                                     }
                                   `}
                                 >
@@ -319,11 +387,10 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
     rounded-lg
     transition-all
     duration-200
-    ${
-      isActive
-        ? 'bg-black !text-white shadow-sm'
-        : 'text-black/70 hover:bg-black/5 hover:text-black'
-    }
+    ${isActive
+                      ? 'bg-black text-white! shadow-sm'
+                      : 'text-black/70 hover:bg-black/5 hover:text-black'
+                    }
   `}
                 >
                   <Icon size={19} strokeWidth={1.8} className='currentColor' />
