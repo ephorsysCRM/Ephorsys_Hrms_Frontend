@@ -6,7 +6,9 @@ import {
   Check,
   X,
   ArrowLeft,
+  Plus,
 } from "lucide-react";
+import ManageLeaveModal from "../hrModals/ManageLeaveModal";
 
 const leaveRequestsData = [
   {
@@ -112,6 +114,7 @@ const LeaveManagement = () => {
   const navigate = useNavigate();
 
   const [openMenu, setOpenMenu] = useState(null);
+  const [manageLeaveOpen, setManageLeaveOpen] = useState(false);
 
   const [leaveRequests, setLeaveRequests] = useState(
     leaveRequestsData
@@ -195,9 +198,9 @@ const LeaveManagement = () => {
       prev.map((leave) =>
         leave.id === id
           ? {
-              ...leave,
-              status: "Approved",
-            }
+            ...leave,
+            status: "Approved",
+          }
           : leave
       )
     );
@@ -212,12 +215,22 @@ const LeaveManagement = () => {
       prev.map((leave) =>
         leave.id === id
           ? {
-              ...leave,
-              status: "Rejected",
-            }
+            ...leave,
+            status: "Rejected",
+          }
           : leave
       )
     );
+  };
+
+  const handleAddLeave = (newLeave) => {
+    setLeaveRequests((prev) => [
+      ...prev,
+      {
+        ...newLeave,
+        id: `LV-${1001 + prev.length}`,
+      },
+    ]);
   };
 
   // ----------------------------------
@@ -244,60 +257,60 @@ const LeaveManagement = () => {
   };
 
   // ==========================================
-// STAT COMPONENT
-// ==========================================
+  // STAT COMPONENT
+  // ==========================================
 
-const Stat = ({ label, value }) => {
-  return (
-    <div
-      className="
+  const Stat = ({ label, value }) => {
+    return (
+      <div
+        className="
         rounded-xl
         border border-gray-200
         bg-white p-5
       "
-    >
+      >
 
-      <p className="text-sm text-gray-500">
-        {label}
-      </p>
+        <p className="text-sm text-gray-500">
+          {label}
+        </p>
 
-      <p
-        className="
+        <p
+          className="
           mt-2 text-2xl
           font-semibold text-gray-900
         "
-      >
-        {value}
-      </p>
+        >
+          {value}
+        </p>
 
-    </div>
-  );
-};
+      </div>
+    );
+  };
 
-// ==========================================
-// DATE FORMATTER
-// ==========================================
+  // ==========================================
+  // DATE FORMATTER
+  // ==========================================
 
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString(
-    "en-GB",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }
-  );
-};
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
 
   return (
     <div className="space-y-6">
 
       {/* ================= HEADER ================= */}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between py-2">
 
         <div>
-          <button
+          {/* <button
             type="button"
             onClick={() =>
               navigate("/hr/dashboard")
@@ -320,7 +333,7 @@ const formatDate = (date) => {
             />
 
             Back to dashboard
-          </button>
+          </button> */}
 
           <h1 className="text-2xl font-semibold text-gray-900">
             Leave Management
@@ -332,15 +345,17 @@ const formatDate = (date) => {
         </div>
 
         <button
+          type="button"
+          onClick={() => setManageLeaveOpen(true)}
           className="
-            w-full rounded-lg bg-black
+            flex gap-2 justify-center items-center w-full rounded-lg bg-black
             px-4 py-2.5 text-sm font-medium
             text-white transition
             hover:bg-gray-800
             sm:w-auto
           "
         >
-          + Manage Leave
+          <Plus size={17} /> Manage Leave
         </button>
 
       </div>
@@ -503,39 +518,39 @@ const formatDate = (date) => {
                 className="
                   text-left text-xs
                   font-medium uppercase
-                  text-gray-500 
+                  text-gray-500
                 "
               >
 
-                <th className=" px-6 py-4">
+                <th className="px-5 py-4">
                   Employee
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-5 py-4">
                   Department
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-5 py-4">
                   Leave Type
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-5 py-4">
                   From
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-5 py-4">
                   To
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-5 py-4">
                   Days
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-8 py-4">
                   Status
                 </th>
 
-                <th className="px-6 py-4 ">
+                <th className="px-15 py-4 ">
                   Action
                 </th>
 
@@ -607,8 +622,8 @@ const formatDate = (date) => {
                           px-2.5 py-1
                           text-xs font-medium
                           ${getStatusClass(
-                            leave.status
-                          )}
+                          leave.status
+                        )}
                         `}
                       >
                         {leave.status}
@@ -635,7 +650,7 @@ const formatDate = (date) => {
                           title="Actions"
                           aria-label={`Actions for ${leave.employee}`}
                         >
-                          <span className="text-xl text-left font-semibold leading-none">
+                          <span className="text-xl font-semibold leading-none">
                             ⋯
                           </span>
                         </button>
@@ -734,6 +749,12 @@ const formatDate = (date) => {
         </div>
 
       </div>
+
+      <ManageLeaveModal
+        isOpen={manageLeaveOpen}
+        onClose={() => setManageLeaveOpen(false)}
+        onSubmit={handleAddLeave}
+      />
 
     </div>
   );

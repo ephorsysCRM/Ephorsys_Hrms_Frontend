@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import Modal from "./Modal";
-
+import Modal from "../../UI/Modal" 
+import { Save } from "lucide-react";
 const employees = [
   {
     id: "EMP-1024",
@@ -290,11 +290,13 @@ const ManageLeaveModal = ({
           <button
             type="submit"
             className="
+            flex gap-2 justify-center items-center
               rounded-lg bg-black px-4 py-2.5
               text-sm font-medium text-white
               transition hover:bg-gray-800
             "
           >
+             <Save size={15} />
             Save Leave
           </button>
         </div>

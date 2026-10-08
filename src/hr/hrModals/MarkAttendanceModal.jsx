@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, Clock, CalendarDays, User } from "lucide-react";
+import { Check, Clock, CalendarDays, User, Save } from "lucide-react";
 
 const employees = [
   {
@@ -320,7 +320,7 @@ function MarkAttendanceModal({ onClose, onSave }) {
             hover:bg-gray-800 sm:w-auto
           "
         >
-          <Check size={16} />
+           <Save size={15} />
           Save Attendance
         </button>
 

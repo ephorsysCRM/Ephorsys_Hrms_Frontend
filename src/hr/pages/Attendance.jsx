@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MarkAttendanceModal from "../hrModals/MarkAttendanceModal";
 import Modal from "../../UI/Modal";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, Plus, View } from "lucide-react";
 
 const employees = [
   {
@@ -93,8 +93,8 @@ function Attendance() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-black">
-      <div className="mx-auto w-full max-w-7xl px-3 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-8">
-        <button
+      <div className="mx-auto w-full max-w-7xl  py-2 px-1  sm:py-2 lg:py-2">
+        {/* <button
           type='button'
           onClick={() => navigate('/hr/dashboard')}
           className='group inline-flex items-center gap-2 rounded-lg py-1.5 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-white hover:text-black'
@@ -104,7 +104,7 @@ function Attendance() {
             className='transition-transform duration-200 group-hover:-translate-x-0.5'
           />
           Back to dashboard
-        </button>
+        </button> */}
 
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
@@ -133,13 +133,13 @@ function Attendance() {
             <button
               onClick={() => setMarkAttendanceOpen(true)}
               className="
-                w-full rounded-lg bg-black px-4 py-2.5
+                flex gap-2 justify-center items-center w-full rounded-lg bg-black px-4 py-2.5
                 text-sm text-white transition
                 hover:bg-gray-800
                 sm:w-auto
               "
             >
-              + Mark Attendance
+              <Plus size={17}/> Mark Attendance
             </button>
           </div>
         </div>
@@ -251,7 +251,7 @@ function Attendance() {
                     Status
                   </th>
 
-                  <th className="px-4 py-3 sm:px-5"></th>
+                  <th className="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500 sm:px-5">Action</th>
                 </tr>
               </thead>
 
@@ -332,7 +332,7 @@ function Attendance() {
                             hover:bg-gray-100 hover:text-black
                           "
                         >
-                          ⋮
+                         <Eye size={16}/>
                         </button>
                       </td>
 
