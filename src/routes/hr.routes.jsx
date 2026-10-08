@@ -12,6 +12,12 @@ import DepartmentHr from "../hr/pages/DepartmentHr";
 import DepartmentViewHr from "../hr/pages/DepartmentViewHr";
 import ProtectedRoute from "./protected.routes";
 import EditEmployee from "../hr/pages/EditEmployee";
+import Announcements from "../hr/pages/Announcements";
+import Attendance from "../hr/pages/Attendance";
+import LeaveManagement from "../hr/pages/LeaveManagement";
+import PayRoll from "../hr/pages/PayRoll";
+import PaySlips from "../hr/pages/PaySlips";
+import Reports from "../hr/pages/Reports";
 
 const HrRoutes = (
     <Route path="hr">
@@ -56,6 +62,30 @@ const HrRoutes = (
                     element={<DepartmentViewHr />}
                 />
                 <Route path='edit-employees/:id' element={<EditEmployee />} />
+                <Route
+                    path="announcements"
+                    element={<Announcements />}
+                />
+                <Route
+                    path="attendance"
+                    element={<Attendance />}
+                />
+                <Route
+                    path="leave-management"
+                    element={<LeaveManagement />}
+                />
+                <Route
+                    path="payroll"
+                    element={<PayRoll />}
+                />
+                <Route
+                    path="payslips"
+                    element={<PaySlips />}
+                />
+                <Route
+                    path="reports"
+                    element={<Reports />}
+                />
             </Route>
         </Route>
     </Route>

@@ -70,6 +70,12 @@ const NAV_ITEMS = [
   },
 
   {
+    label: 'Announcements',
+    path: '/hr/announcements',
+    icon: FileText
+  },
+
+  {
     label: 'Payroll',
     icon: WalletCards,
     children: [
@@ -281,7 +287,7 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                                     duration-200
                                     ${
                                       isActive
-                                        ? 'bg-black !text-white font-medium'
+                                        ? 'bg-black text-white! font-medium'
                                         : 'text-black/60 hover:bg-black/5 hover:text-black'
                                     }
                                   `}
@@ -321,7 +327,7 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
     duration-200
     ${
       isActive
-        ? 'bg-black !text-white shadow-sm'
+        ? 'bg-black text-white! shadow-sm'
         : 'text-black/70 hover:bg-black/5 hover:text-black'
     }
   `}
