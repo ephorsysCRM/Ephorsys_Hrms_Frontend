@@ -24,77 +24,51 @@ import LogoutModal from '../../admin/adminModals/LogoutModal'
 const NAV_ITEMS = [
   {
     label: 'Dashboard',
-    path: '/hr/dashboard',
+    path: '/employee/dashboard',
     icon: LayoutDashboard
   },
 
   {
-    label: 'Departments',
+    label: 'My Profile',
     icon: Building2,
-    children: [
-      {
-        label: 'Departments',
-        path: '/hr/departments',
-        icon: Building2
-      }
-    ]
+    path: '/employee/profile',
+   
   },
 
   {
-    label: 'Employees',
+    label: 'My Leave',
     icon: Users,
-    children: [
-      {
-        label: 'All Employees',
-        path: '/hr/all-employees',
-        icon: UserRound
-      }
-    ]
+    path: '/employee/leave',
+    
   },
 
   {
-    label: 'Attendance',
+    label: 'My Salary',
     icon: CalendarCheck,
     children: [
       {
-        label: 'Attendance',
-        path: '/hr/attendance',
+        label: 'Pay Slips',
+        path: '/employee/salary',
         icon: CalendarDays
-      },
-      {
-        label: 'Leave Management',
-        path: '/hr/leave-management',
-        icon: ClipboardList
       }
     ]
   },
 
   {
-    label: 'Payroll',
+    label: 'My Document',
     icon: WalletCards,
-    children: [
-      {
-        label: 'Payroll',
-        path: '/hr/payroll',
-        icon: WalletCards
-      },
-      {
-        label: 'Payslips',
-        path: '/hr/payslips',
-        icon: FileText
-      }
-    ]
+    path: '/employee/document',
   },
 
   {
-    label: 'Reports',
-    path: '/hr/reports',
+    label: 'Announcement',
+    path: '/employee/announcement',
     icon: FileText
   },
 
   {
-    label: 'Settings',
-    path: '/hr/settings',
+    label: 'Notification',
+    path: '/employee/notification',
     icon: Settings
   }
 ]
@@ -141,7 +115,7 @@ const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
           border-r border-black/10
           shadow-xl
           transform transition-transform duration-300
-          lg:relative lg:translate-x-0 lg:shrink-0
+          lg:relative lg:translate-x-0 lg:semployeeink-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
@@ -161,7 +135,7 @@ const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
               </h1>
 
               <p className='text-[10px] uppercase tracking-[0.2em] text-black/50'>
-                HRMS
+                employeeMS
               </p>
             </div>
           </div>
