@@ -16,7 +16,8 @@ import {
   Wallet,
   Folder,
   Megaphone,
-  BellRing
+  BellRing,
+  FileCheck2
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -71,6 +72,11 @@ const NAV_ITEMS = [
         label: 'Attendance',
         path: '/hr/attendance',
         icon: CalendarDays
+      },
+      {
+        label: 'Attendance Requests',
+        path: '/hr/attendance-requests',
+        icon: FileCheck2
       },
       {
         label: 'Leave Management',
@@ -320,7 +326,7 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
 
         <div className='border-y border-black/10 px-2 py-3'>
 
-          <div className='grid grid-cols-2 gap-1 rounded-lg bg-black/5 p-1'>
+          <div className='grid grid-cols-2 gap-1 rounded-lg bg-black/5 '>
 
             {/* =================================================
                 MANAGE EMPLOYEE
@@ -344,7 +350,7 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                 }
               `}
             >
-              Manage Employee
+            Employee
             </button>
 
 
@@ -554,7 +560,7 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                     duration-200
 
                     ${isActive
-                      ? 'bg-black !text-white shadow-sm'
+                      ? 'bg-black text-white! shadow-sm'
                       : 'text-black/70 hover:bg-black/5 hover:text-black'
                     }
                   `}

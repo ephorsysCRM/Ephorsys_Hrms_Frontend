@@ -18,6 +18,7 @@ import LeaveManagement from "../hr/pages/LeaveManagement";
 import PayRoll from "../hr/pages/PayRoll";
 import PaySlips from "../hr/pages/PaySlips";
 import Reports from "../hr/pages/Reports";
+import AttendanceRequests from "../hr/pages/AttendanceRequests";
 
 const HrRoutes = (
     <Route path="hr">
@@ -69,6 +70,10 @@ const HrRoutes = (
                 <Route
                     path="attendance"
                     element={<Attendance />}
+                />
+                <Route
+                    path="attendance-requests"
+                    element={<AttendanceRequests />}
                 />
                 <Route
                     path="leave-management"

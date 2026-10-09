@@ -128,16 +128,20 @@ const HRDashboard = () => {
 
   const announcements = [
     {
-      title: "Office holiday notice",
-      date: "Oct 22, 2026",
+      title: "Time Table Update Notice",
+      date: "Oct 13, 2026",
     },
     {
       title: "Policy update",
-      date: "Oct 20, 2026",
+      date: "Oct 17, 2026",
     },
     {
       title: "Team meeting",
       date: "Oct 18, 2026",
+    },
+    {
+      title: "Dussehra",
+      date: "Oct 18 - Oct 20, 2026",
     },
   ];
 
@@ -146,8 +150,8 @@ const HRDashboard = () => {
   // --------------------------------
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-[1500px]">
+    <div className="min-h-screen bg-gray-50 px-2 py-3">
+      <div className="mx-auto max-w-375">
 
         {/* ==============================
             Header
@@ -256,7 +260,7 @@ const HRDashboard = () => {
 
               {/* Add Employee */}
               <button
-                onClick={() => navigate("/hr/all-employees")}
+                onClick={() => navigate('/hr/add-employee')}
                 className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
@@ -432,7 +436,7 @@ const HRDashboard = () => {
 
           <div className="hidden overflow-x-auto md:block">
 
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-175">
 
               <thead>
                 <tr className="border-b border-gray-100">
