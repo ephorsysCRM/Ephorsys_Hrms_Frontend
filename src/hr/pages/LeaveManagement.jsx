@@ -9,6 +9,8 @@ import {
   Plus,
 } from "lucide-react";
 import ManageLeaveModal from "../hrModals/ManageLeaveModal";
+import Modal from "../../UI/Modal";
+import LeaveModal from "../hrModals/LeaveModal";
 
 const leaveRequestsData = [
   {
@@ -40,7 +42,7 @@ const leaveRequestsData = [
     employeeId: "EMP-1026",
     employee: "Amit Sharma",
     department: "Marketing",
-    leaveType: "Earned Leave",
+    leaveType: "Sick Leave",
     from: "2026-10-15",
     to: "2026-10-18",
     days: 4,
@@ -64,7 +66,7 @@ const leaveRequestsData = [
     employeeId: "EMP-1028",
     employee: "Arjun Mehta",
     department: "Engineering",
-    leaveType: "Sick Leave",
+    leaveType: "Paid Leave",
     from: "2026-10-05",
     to: "2026-10-06",
     days: 2,
@@ -98,7 +100,7 @@ const leaveTypes = [
   "All Leave Types",
   "Casual Leave",
   "Sick Leave",
-  "Earned Leave",
+  "Paid Leave",
   "Unpaid Leave",
 ];
 
@@ -112,6 +114,7 @@ const statuses = [
 
 const LeaveManagement = () => {
   const navigate = useNavigate();
+  const [selectedLeave, setSelectedLeave] = useState(null);
 
   const [openMenu, setOpenMenu] = useState(null);
   const [manageLeaveOpen, setManageLeaveOpen] = useState(false);
@@ -510,7 +513,7 @@ const LeaveManagement = () => {
 
         <div className="overflow-x-auto">
 
-          <table className="min-w-[1000px] w-full text-sm">
+          <table className="min-w-250 w-full text-sm">
 
             <thead className="border-b border-gray-200 bg-gray-50">
 
@@ -658,7 +661,7 @@ const LeaveManagement = () => {
                         {openMenu === leave.id && (
                           <div
                             className="
-                              absolute right-0 top-10 z-50 w-36
+                              absolute right-0 top-7 z-50 w-36
                               rounded-lg border border-gray-200
                               bg-white p-1 shadow-lg
                             "
@@ -668,7 +671,7 @@ const LeaveManagement = () => {
                               type="button"
                               onClick={() => {
                                 setOpenMenu(null);
-                                console.log("View leave:", leave);
+                                setSelectedLeave(leave);
                               }}
                               className="
                                 flex w-full items-center rounded-md
@@ -755,6 +758,20 @@ const LeaveManagement = () => {
         onClose={() => setManageLeaveOpen(false)}
         onSubmit={handleAddLeave}
       />
+
+      <Modal
+        isOpen={Boolean(selectedLeave)}
+        onClose={() => setSelectedLeave(null)}
+        title="Employee Leave Details"
+        size="lg"
+      >
+        {selectedLeave && (
+          <LeaveModal
+            leave={selectedLeave}
+            onClose={() => setSelectedLeave(null)}
+          />
+        )}
+      </Modal>
 
     </div>
   );
