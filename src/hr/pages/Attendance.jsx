@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import MarkAttendanceModal from "../hrModals/MarkAttendanceModal";
-import Modal from "../../UI/Modal";
-import { ArrowLeft, Eye, Plus, View } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 
 const employees = [
   {
@@ -51,7 +49,6 @@ const statusStyles = {
 };
 
 function Attendance() {
-
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All Departments");
@@ -59,8 +56,6 @@ function Attendance() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-
-  const [markAttendanceOpen, setMarkAttendanceOpen] = useState(false);
 
   const filteredEmployees = employees.filter((employee) => {
     const matchesDate = employee.date === selectedDate;
@@ -90,22 +85,9 @@ function Attendance() {
     (employee) => employee.status === "Late"
   ).length;
 
-
   return (
     <div className="min-h-screen bg-gray-50 text-black">
-      <div className="mx-auto w-full max-w-7xl  py-2 px-1  sm:py-2 lg:py-2">
-        {/* <button
-          type='button'
-          onClick={() => navigate('/hr/dashboard')}
-          className='group inline-flex items-center gap-2 rounded-lg py-1.5 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-white hover:text-black'
-        >
-          <ArrowLeft
-            size={17}
-            className='transition-transform duration-200 group-hover:-translate-x-0.5'
-          />
-          Back to dashboard
-        </button> */}
-
+      <div className="mx-auto w-full max-w-7xl py-2 px-1 sm:py-2 lg:py-2">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -117,31 +99,13 @@ function Attendance() {
               Manage employee attendance
             </p>
           </div>
-
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            {/* <button
-              className="
-                w-full rounded-lg border border-gray-300 bg-white
-                px-4 py-2.5 text-sm transition
-                hover:bg-gray-50
-                sm:w-auto
-              "
-            >
-              Export
-            </button> */}
-
-            <button
-              onClick={() => setMarkAttendanceOpen(true)}
-              className="
-                flex gap-2 justify-center items-center w-full rounded-lg bg-black px-4 py-2.5
-                text-sm text-white transition
-                hover:bg-gray-800
-                sm:w-auto
-              "
-            >
-              <Plus size={17}/> Mark Attendance
-            </button>
-          </div>
+          <button
+          onClick={() => navigate('/hr/dashboard')}
+          className='mb-5 flex items-center gap-2 text-sm text-gray-600 hover:text-black lg:px-2'
+        >
+          <ArrowLeft size={18} />
+          Back to Dashboard
+        </button>
         </div>
 
         {/* Date */}
@@ -156,12 +120,12 @@ function Attendance() {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="
-      w-full rounded-lg border border-gray-200
-      bg-white px-3 py-2.5 text-sm
-      outline-none transition
-      focus:border-black
-      sm:w-auto
-    "
+                w-full rounded-lg border border-gray-200
+                bg-white px-3 py-2.5 text-sm
+                outline-none transition
+                focus:border-black
+                sm:w-auto
+              "
             />
           </div>
         </div>
@@ -176,10 +140,8 @@ function Attendance() {
 
         {/* Employee Table */}
         <div className="mt-5 overflow-hidden rounded-xl border border-gray-200 bg-white sm:mt-6">
-
           {/* Table Header */}
           <div className="flex flex-col gap-4 border-b border-gray-100 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-
             <div>
               <h2 className="text-sm font-medium sm:text-base">
                 Employee Attendance
@@ -192,7 +154,6 @@ function Attendance() {
 
             {/* Filters */}
             <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
-
               <input
                 type="text"
                 placeholder="Search employee..."
@@ -228,7 +189,6 @@ function Attendance() {
           {/* Table */}
           <div className="w-full overflow-x-auto">
             <table className="min-w-[750px] w-full text-left">
-
               <thead className="bg-gray-50">
                 <tr>
                   <th className="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500 sm:px-5">
@@ -251,22 +211,22 @@ function Attendance() {
                     Status
                   </th>
 
-                  <th className="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500 sm:px-5">Action</th>
+                  <th className="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500 sm:px-5">
+                    Action
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100">
                 {filteredEmployees.length > 0 ? (
-                  filteredEmployees.map((employee) => (
+                  filteredEmployees.map((employee, index) => (
                     <tr
-                      key={employee.id}
+                      key={`${employee.id}-${employee.date}-${index}`}
                       className="hover:bg-gray-50"
                     >
-
                       {/* Employee */}
                       <td className="px-4 py-4 sm:px-5">
                         <div className="flex items-center gap-3">
-
                           <div
                             className="
                               flex h-8 w-8 shrink-0 items-center
@@ -290,7 +250,6 @@ function Attendance() {
                               {employee.id}
                             </p>
                           </div>
-
                         </div>
                       </td>
 
@@ -326,16 +285,16 @@ function Attendance() {
                       {/* Action */}
                       <td className="px-4 py-4 sm:px-5">
                         <button
+                          type="button"
                           className="
                             flex h-8 w-8 items-center justify-center
                             rounded-md text-lg text-gray-400
                             hover:bg-gray-100 hover:text-black
                           "
                         >
-                         <Eye size={16}/>
+                          <Eye size={16} />
                         </button>
                       </td>
-
                     </tr>
                   ))
                 ) : (
@@ -353,37 +312,8 @@ function Attendance() {
           </div>
 
           {/* Pagination */}
-          {/* <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-
-            <p className="text-xs text-gray-500">
-              Showing {filteredEmployees.length} of 248 employees
-            </p>
-
-            {totalPages > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </div> */}
+          {/* Existing pagination remains commented out */}
         </div>
-        <Modal
-          isOpen={markAttendanceOpen}
-          onClose={() => setMarkAttendanceOpen(false)}
-          title="Mark Attendance"
-          size="md"
-        >
-          <MarkAttendanceModal
-            onClose={() => setMarkAttendanceOpen(false)}
-            onSave={(attendanceData) => {
-              console.log("Attendance saved:", attendanceData);
-
-              // API call / state update will go here
-              setMarkAttendanceOpen(false);
-            }}
-          />
-        </Modal>
       </div>
     </div>
   );
@@ -399,14 +329,11 @@ function Stat({ title, value }) {
         bg-white p-4 sm:p-5
       "
     >
-      <p className="text-xs text-gray-500">
-        {title}
-      </p>
+      <p className="text-xs text-gray-500">{title}</p>
 
       <p className="mt-2 text-xl font-semibold sm:text-2xl">
         {value}
       </p>
-
     </div>
   );
 }
