@@ -7,6 +7,12 @@ import {
   User,
   ArrowUpRight,
   Plus,
+  CalendarCheck,
+  UserPlus,
+  ClipboardList,
+  Megaphone,
+  Building2,
+  ArrowUpLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -163,29 +169,10 @@ const HRDashboard = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-
-            {/* Notification */}
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100"
-              title="Notifications"
-            >
-              <Bell size={18} />
-            </button>
-
-            {/* Profile */}
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100"
-              title="Profile"
-            >
-              <User size={18} />
-            </button>
-
-          </div>
         </div>
 
         {/* ==============================
-            KPI CARDS
+            CARDS
         ============================== */}
 
         <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
@@ -230,86 +217,142 @@ const HRDashboard = () => {
 
         <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
 
-          {/* Attendance Overview */}
-
+          {/* Quick Actions */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5 xl:col-span-2">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Quick Actions
+              </h2>
 
-            <div className="mb-6 flex items-center justify-between">
-
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Attendance Overview
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-500">
-                  Employee attendance for today
-                </p>
-              </div>
-
-              <span className="rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white">
-                87.9%
-              </span>
-
+              <p className="mt-1 text-sm text-gray-500">
+                Common HR tasks, all in one place
+              </p>
             </div>
 
-            {/* Attendance Stats */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Manage Attendance */}
+              <button
+                onClick={() => navigate("/hr/attendance")}
+                className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
+                  <CalendarCheck size={20} />
+                </div>
 
-            <div className="grid grid-cols-3 gap-3">
-
-              {attendance.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-xl border border-gray-200 p-4"
-                >
-                  <p className="text-sm text-gray-500">
-                    {item.label}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    Manage Attendance
                   </p>
-
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
-                    {item.value}
+                  <p className="mt-1 text-xs text-gray-500">
+                    View employee attendance
                   </p>
                 </div>
-              ))}
 
-            </div>
-
-            {/* Attendance Bar */}
-
-            <div className="mt-7">
-
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  Attendance rate
-                </span>
-
-                <span className="text-sm font-medium text-gray-900">
-                  218 / 248
-                </span>
-              </div>
-
-              <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                <div
-                  className="h-full rounded-full bg-black"
-                  style={{ width: "87.9%" }}
+                <ArrowUpRight
+                  size={17}
+                  className="shrink-0 text-gray-400 transition group-hover:text-black"
                 />
-              </div>
+              </button>
 
-              {/* View Attendance Button */}
+              {/* Add Employee */}
+              <button
+                onClick={() => navigate("/hr/all-employees")}
+                className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
+                  <UserPlus size={20} />
+                </div>
 
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => navigate("/hr/attendance")}
-                  className="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-black hover:text-white"
-                >
-                  View Attendance
-                  <ArrowUpRight size={15} />
-                </button>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    Add Employee
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Register a new employee
+                  </p>
+                </div>
 
+                <ArrowUpRight
+                  size={17}
+                  className="shrink-0 text-gray-400 transition group-hover:text-black"
+                />
+              </button>
+
+              {/* Add Department */}
+              <button
+                onClick={() => navigate("/hr/departments")}
+                className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
+                  <Building2 size={20} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    Add Department
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Create a new department
+                  </p>
+                </div>
+
+                <ArrowUpRight
+                  size={17}
+                  className="shrink-0 text-gray-400 transition group-hover:text-black"
+                />
+              </button>
+
+              {/* Review Leave Requests */}
+              <button
+                onClick={() => navigate("/hr/leave-management")}
+                className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
+                  <ClipboardList size={20} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    Review Leave Requests
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Review pending approvals
+                  </p>
+                </div>
+
+                <ArrowUpRight
+                  size={17}
+                  className="shrink-0 text-gray-400 transition group-hover:text-black"
+                />
+              </button>
+
+              {/* Create Announcement */}
+              <button
+                onClick={() => navigate("/hr/announcements")}
+                className="group flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left transition hover:border-black hover:bg-gray-50"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 transition group-hover:bg-black group-hover:text-white">
+                  <Megaphone size={20} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    Create Announcement
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Share company updates
+                  </p>
+                </div>
+
+                <ArrowUpRight
+                  size={17}
+                  className="shrink-0 text-gray-400 transition group-hover:text-black"
+                />
+              </button>
             </div>
-
           </div>
+
+
 
           {/* Leave Requests Summary */}
 
@@ -340,10 +383,9 @@ const HRDashboard = () => {
                     className={`
                       flex h-8 min-w-8 items-center justify-center
                       rounded-full px-2 text-xs font-semibold
-                      ${
-                        item.label === "Pending"
-                          ? "bg-black text-white"
-                          : "bg-gray-100 text-gray-700"
+                      ${item.label === "Pending"
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700"
                       }
                     `}
                   >
@@ -364,7 +406,7 @@ const HRDashboard = () => {
 
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white">
 
-          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+          <div className="flex flex-col  gap-3 sm:flex-row sm:justify-between  border-b border-gray-200 px-5 py-4">
 
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
@@ -377,7 +419,7 @@ const HRDashboard = () => {
             </div>
 
             <button
-              className="flex items-center gap-1 text-sm font-medium text-gray-600 transition hover:text-black"
+              className="flex items-center gap-1  text-sm font-medium text-gray-600 transition hover:text-black"
               onClick={() => navigate("/hr/leave-management")}
             >
               View all
@@ -440,10 +482,9 @@ const HRDashboard = () => {
                         className={`
                           inline-flex rounded-full px-3 py-1
                           text-xs font-medium
-                          ${
-                            leave.status === "Pending"
-                              ? "bg-black text-white"
-                              : "bg-gray-100 text-gray-700"
+                          ${leave.status === "Pending"
+                            ? "bg-black text-white"
+                            : "bg-gray-100 text-gray-700"
                           }
                         `}
                       >
@@ -491,10 +532,9 @@ const HRDashboard = () => {
                     className={`
                       shrink-0 rounded-full px-3 py-1
                       text-xs font-medium
-                      ${
-                        leave.status === "Pending"
-                          ? "bg-black text-white"
-                          : "bg-gray-100 text-gray-700"
+                      ${leave.status === "Pending"
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700"
                       }
                     `}
                   >
@@ -520,7 +560,8 @@ const HRDashboard = () => {
 
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
 
-            <div className="mb-5">
+           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Departments
               </h2>
@@ -528,6 +569,14 @@ const HRDashboard = () => {
               <p className="mt-1 text-sm text-gray-500">
                 Employee distribution
               </p>
+            </div>
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 rounded-lg bg-black px-3 py-2 text-xs font-medium text-white transition hover:bg-gray-800"
+                onClick={() => navigate("/hr/departments")}
+              >
+                <ArrowUpLeft size={15} /> View Departments
+              </button>
             </div>
 
             <div className="space-y-4">
@@ -568,7 +617,7 @@ const HRDashboard = () => {
 
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
 
-            <div className="mb-5 flex items-center justify-between">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
 
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -584,10 +633,10 @@ const HRDashboard = () => {
 
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-lg bg-black px-3 py-2 text-xs font-medium text-white transition hover:bg-gray-800"
-                onClick={()=>navigate("/hr/announcements")}
+                className="flex items-center justify-center gap-2 rounded-lg bg-black px-3 py-2 text-xs font-medium text-white transition hover:bg-gray-800"
+                onClick={() => navigate("/hr/announcements")}
               >
-                <Plus size={15}/> Add Announcement
+                <Plus size={15} /> Add Announcement
               </button>
 
             </div>

@@ -12,7 +12,11 @@ import {
   Settings,
   ChevronDown,
   ClipboardList,
-  User
+  User,
+  Wallet,
+  Folder,
+  Megaphone,
+  BellRing
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -79,7 +83,7 @@ const NAV_ITEMS = [
   {
     label: 'Announcements',
     path: '/hr/announcements',
-    icon: FileText
+    icon: Megaphone
   },
 
   {
@@ -119,21 +123,53 @@ const NAV_ITEMS = [
 
 const PROFILE_ITEMS = [
   {
+    label: 'Dashboard',
+    path: '/employee/dashboard',
+    icon: LayoutDashboard
+  },
+
+  {
     label: 'My Profile',
-    path: '/hr/profile',
-    icon: User
+    icon: User,
+    path: '/employee/profile',
+   
   },
 
   {
-    label: 'Personal Information',
-    path: '/hr/profile/personal-information',
-    icon: UserRound
+    label: 'My Leave',
+    icon:   CalendarDays,
+    path: '/employee/leave',
+    
   },
 
   {
-    label: 'Change Password',
-    path: '/hr/profile/change-password',
-    icon: Settings
+    label: 'My Salary',
+    icon: Wallet,
+    children: [
+      {
+        label: 'Pay Slips',
+        path: '/employee/salary',
+        icon: FileText
+      }
+    ]
+  },
+
+  {
+    label: 'My Document',
+    icon: Folder,
+    path: '/employee/document',
+  },
+
+  {
+    label: 'Announcement',
+    path: '/employee/announcement',
+    icon: Megaphone
+  },
+
+  {
+    label: 'Notification',
+    path: '/employee/notification',
+    icon: BellRing
   }
 ]
 
@@ -143,10 +179,6 @@ const PROFILE_ITEMS = [
 // =========================================================
 
 const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
-
-  // =======================================================
-  // STATE
-  // =======================================================
 
   const [logoutview, setLogoutView] = useState(false)
 
@@ -178,26 +210,15 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
   }
 
 
-  // =======================================================
-  // SWITCH TO MANAGE EMPLOYEE
-  // =======================================================
-
   const handleManageEmployee = () => {
     setActiveSection('manage')
-
-    // Close any previously opened submenu
     setOpenMenus({})
   }
 
 
-  // =======================================================
-  // SWITCH TO MY PROFILE
-  // =======================================================
 
   const handleMyProfile = () => {
     setActiveSection('profile')
-
-    // Close any previously opened submenu
     setOpenMenus({})
   }
 

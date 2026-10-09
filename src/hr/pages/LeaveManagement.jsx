@@ -307,7 +307,7 @@ const LeaveManagement = () => {
 
       {/* ================= HEADER ================= */}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between py-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1 py-2">
 
         <div>
           {/* <button
@@ -335,7 +335,7 @@ const LeaveManagement = () => {
             Back to dashboard
           </button> */}
 
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-gray-900 ">
             Leave Management
           </h1>
 
