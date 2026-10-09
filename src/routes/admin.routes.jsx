@@ -13,6 +13,7 @@ import AddEmployee from '../admin/pages/AddEmployee'
 import Department from '../admin/pages/Department'
 import DepartmentView from '../admin/pages/DepartmentView'
 import EditEmployee from '../admin/pages/EditEmployee'
+import ManageHr from '../admin/pages/ManageHr'
 
 const AdminRoutes = (
   <Route path='/'>
@@ -23,6 +24,7 @@ const AdminRoutes = (
     <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin']} />}>
       <Route path='admin' element={<AdminLayout />}>
         <Route path='dashboard' element={<AdminDashboard />} />
+        <Route path='manage-hr' element={<ManageHr />} />
 
         <Route path='all-employees' element={<AllEmployee />} />
 
