@@ -258,8 +258,8 @@ const EmployeePayslip = () => {
   }
 
   return (
-    <div className='min-h-screen bg-[#f7f7f7] px-4 py-6 text-gray-900 sm:px-6 lg:px-8'>
-      <div className='mx-auto max-w-7xl'>
+    <div className='min-h-screen bg-[#f7f7f7] px-4 py-2 text-gray-900 sm:px-6 lg:px-2'>
+      <div className='mx-auto '>
 
         {/* Page Heading */}
         <div className='mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
