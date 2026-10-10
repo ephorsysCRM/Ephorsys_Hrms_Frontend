@@ -2,275 +2,249 @@ import api from "../../services/api";
 import toast from "react-hot-toast";
 
 import {
-    // CREATE
     createDepartmentStart,
     createDepartmentSuccess,
-
-    // GET ALL
     getDepartmentsStart,
     getDepartmentsSuccess,
-
-    // GET SINGLE
     getDepartmentStart,
     getDepartmentSuccess,
-
-    // UPDATE
     updateDepartmentStart,
     updateDepartmentSuccess,
-
-    // DELETE
     deleteDepartmentStart,
     deleteDepartmentSuccess,
-
-    // ERROR
+    getDepartmentEmployeesStart,
+    getDepartmentEmployeesSuccess,
+    getDepartmentEmployeesFailure,
     departmentFailure,
 } from "./departmentSlice";
 
-
 // =========================================================
 // CREATE DEPARTMENT
-// POST /department/create
 // =========================================================
 
-export const createDepartment =
-    (departmentData) =>
-        async (dispatch) => {
+export const createDepartment = (departmentData) => async (dispatch) => {
+    try {
+        dispatch(createDepartmentStart());
 
-            try {
+        const { data } = await api.post(
+            "/department/create",
+            departmentData
+        );
 
-                dispatch(createDepartmentStart());
+        dispatch(createDepartmentSuccess(data.data));
 
-                const { data } = await api.post(
-                    "/department/create",
-                    departmentData
-                );
+        toast.success(data.message || "Department created successfully");
 
-                dispatch(
-                    createDepartmentSuccess(data.data)
-                );
+        return { success: true, data: data.data };
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Failed to create department";
 
-                toast.success(
-                    data.message ||
-                    "Department created successfully"
-                );
+        dispatch(departmentFailure(message));
+        toast.error(message);
 
-                return {
-                    success: true,
-                    data: data.data,
-                };
-
-            } catch (error) {
-
-                const message =
-                    error.response?.data?.message ||
-                    "Failed to create department";
-
-                dispatch(
-                    departmentFailure(message)
-                );
-
-                toast.error(message);
-
-                return {
-                    success: false,
-                    message,
-                };
-            }
-        };
-
+        return { success: false, message };
+    }
+};
 
 // =========================================================
 // GET ALL DEPARTMENTS
-// GET /department/all?page=1&limit=10
 // =========================================================
 
 export const getAllDepartments =
     (page = 1, limit = 10) =>
         async (dispatch) => {
-
             try {
-
                 dispatch(getDepartmentsStart());
 
                 const { data } = await api.get(
-                    `/department/all?page=${page}&limit=${limit}`
+                    `/department/all?page=${page}& limit=${limit} `
                 );
 
                 dispatch(
                     getDepartmentsSuccess({
-                        departments:
-                            data.data?.departments || [],
-
-                        pagination:
-                            data.data?.pagination || {},
+                        departments: data.data?.departments || [],
+                        pagination: data.data?.pagination || {},
                     })
                 );
 
-                return {
-                    success: true,
-                    data: data.data,
-                };
-
+                return { success: true, data: data.data };
             } catch (error) {
-
                 const message =
                     error.response?.data?.message ||
                     "Failed to load departments";
 
-                dispatch(
-                    departmentFailure(message)
-                );
-
-                toast.error(message);
-
-                return {
-                    success: false,
-                    message,
-                };
-            }
-        };
-
-
-// =========================================================
-// GET SINGLE DEPARTMENT
-// GET /department/:id
-// =========================================================
-
-// GET SINGLE
-export const getDepartment =
-    (departmentId) =>
-        async (dispatch) => {
-            try {
-                dispatch(getDepartmentStart());
-
-                const { data } = await api.get(
-                    `/department/${departmentId}`
-                );
-
-                dispatch(
-                    getDepartmentSuccess(
-                        data.data?.department || null
-                    )
-                );
-
-                return {
-                    success: true,
-                    data: data.data,
-                };
-            } catch (error) {
-                const message =
-                    error.response?.data?.message ||
-                    "Failed to load department";
-
                 dispatch(departmentFailure(message));
                 toast.error(message);
 
-                return {
-                    success: false,
-                    message,
-                };
+                return { success: false, message };
             }
         };
 
+// =========================================================
+// GET SINGLE DEPARTMENT
+// =========================================================
+
+export const getDepartment = (departmentId) => async (dispatch) => {
+    try {
+        dispatch(getDepartmentStart());
+
+        const { data } = await api.get(`/department/${departmentId} `);
+
+        const department = data.data?.department || null;
+
+        dispatch(getDepartmentSuccess(department));
+
+        return {
+            success: true,
+            data: data.data,
+        };
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Failed to load department";
+
+        dispatch(departmentFailure(message));
+        toast.error(message);
+
+        return { success: false, message };
+    }
+};
 
 // =========================================================
 // UPDATE DEPARTMENT
-// PUT /department/:id
+// Supports assigning / changing / removing Department Head
 // =========================================================
 
 export const updateDepartment =
     (departmentId, departmentData) =>
         async (dispatch) => {
-
             try {
-
                 dispatch(updateDepartmentStart());
 
+                // Normalize the Department Head value.
+                // It must be an Employee MongoDB ObjectId or null.
+                const payload = {
+                    ...departmentData,
+                    ...(departmentData.departmentHead !== undefined && {
+                        departmentHead:
+                            departmentData.departmentHead || null,
+                    }),
+                };
+
+                console.log("Updating Department ID:", departmentId);
+                console.log("Department Update Payload:", payload);
+
                 const { data } = await api.put(
-                    `/department/${departmentId}`,
-                    departmentData
+                    `/department/${departmentId} `,
+                    payload
                 );
 
-                dispatch(
-                    updateDepartmentSuccess(data.data)
+                console.log("Department Update API Response:", data);
+                console.log(
+                    "Saved Department Head:",
+                    data.data?.departmentHead
                 );
+
+                dispatch(updateDepartmentSuccess(data.data));
 
                 toast.success(
-                    data.message ||
-                    "Department updated successfully"
+                    data.message || "Department updated successfully"
                 );
 
                 return {
                     success: true,
                     data: data.data,
                 };
-
             } catch (error) {
+                console.error(
+                    "Update Department Error:",
+                    error.response?.data || error
+                );
 
                 const message =
                     error.response?.data?.message ||
                     "Failed to update department";
 
-                dispatch(
-                    departmentFailure(message)
-                );
-
+                dispatch(departmentFailure(message));
                 toast.error(message);
 
-                return {
-                    success: false,
-                    message,
-                };
+                return { success: false, message };
             }
         };
 
-
 // =========================================================
 // DELETE DEPARTMENT
-// DELETE /department/:id
 // =========================================================
 
-export const deleteDepartment =
+export const deleteDepartment = (departmentId) => async (dispatch) => {
+    try {
+        dispatch(deleteDepartmentStart());
+
+        const { data } = await api.delete(`/department/${departmentId} `);
+
+        dispatch(deleteDepartmentSuccess(departmentId));
+
+        toast.success(data.message || "Department deleted successfully");
+
+        return { success: true, data: data.data };
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Failed to delete department";
+
+        dispatch(departmentFailure(message));
+        toast.error(message);
+
+        return { success: false, message };
+    }
+};
+
+// =========================================================
+// GET EMPLOYEES BY DEPARTMENT
+// Used for Department Head dropdown
+// =========================================================
+
+export const getEmployeesByDepartment =
     (departmentId) =>
         async (dispatch) => {
-
             try {
+                if (!departmentId) {
+                    const message = "Department ID is required";
 
-                dispatch(deleteDepartmentStart());
+                    dispatch(getDepartmentEmployeesFailure(message));
 
-                const { data } = await api.delete(
-                    `/department/${departmentId}`
+                    return { success: false, message };
+                }
+
+                dispatch(getDepartmentEmployeesStart());
+
+                const { data } = await api.get(
+                    `/employee/department/${departmentId} `
                 );
 
-                dispatch(
-                    deleteDepartmentSuccess(departmentId)
-                );
+                const employees =
+                    data.data?.employees ||
+                    data.employees ||
+                    [];
 
-                toast.success(
-                    data.message ||
-                    "Department deleted successfully"
-                );
+                console.log("Department Employees:", employees);
+
+                dispatch(getDepartmentEmployeesSuccess(employees));
 
                 return {
                     success: true,
-                    data: data.data,
+                    data: employees,
                 };
-
             } catch (error) {
-
                 const message =
                     error.response?.data?.message ||
-                    "Failed to delete department";
+                    "Failed to load department employees";
 
-                dispatch(
-                    departmentFailure(message)
-                );
-
+                dispatch(getDepartmentEmployeesFailure(message));
                 toast.error(message);
 
-                return {
-                    success: false,
-                    message,
-                };
+                return { success: false, message };
             }
         };

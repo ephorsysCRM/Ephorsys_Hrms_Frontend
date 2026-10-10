@@ -187,12 +187,26 @@ const DepartmentView = () => {
               </div>
 
               <p className='text-sm font-semibold'>
-                {department.departmentHead?.name || 'Not Assigned'}
+                {department.departmentHead
+                  ? [
+                      department.departmentHead.firstName,
+                      department.departmentHead.middleName,
+                      department.departmentHead.lastName
+                    ]
+                      .filter(Boolean)
+                      .join(' ') || 'Not Assigned'
+                  : 'Not Assigned'}
               </p>
 
-              {department.departmentHead?.email && (
+              {department.departmentHead?.employeeId && (
                 <p className='mt-1 text-xs text-gray-500'>
-                  {department.departmentHead.email}
+                  Employee ID: {department.departmentHead.employeeId}
+                </p>
+              )}
+
+              {department.departmentHead?.officialEmail && (
+                <p className='mt-1 break-all text-xs text-gray-500'>
+                  {department.departmentHead.officialEmail}
                 </p>
               )}
             </div>
