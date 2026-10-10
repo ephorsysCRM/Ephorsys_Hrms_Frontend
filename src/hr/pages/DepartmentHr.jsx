@@ -472,7 +472,7 @@ const DepartmentHr = () => {
                             onClick={() => {
                               setOpenMenu(null)
 
-                              navigate(`/admin/departments/${department._id}`)
+                              navigate(`/hr/departments/${department._id}`)
                             }}
                             className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100'
                           >
