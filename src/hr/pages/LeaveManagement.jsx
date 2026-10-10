@@ -5,7 +5,6 @@ import {
   Eye,
   Check,
   X,
-  ArrowLeft,
   Plus,
 } from "lucide-react";
 import ManageLeaveModal from "../hrModals/ManageLeaveModal";
@@ -338,7 +337,7 @@ const LeaveManagement = () => {
             Back to dashboard
           </button> */}
 
-          <h1 className="text-xl font-semibold text-gray-900 ">
+          <h1 className="text-xl font-semibold sm:text-2xl ">
             Leave Management
           </h1>
 
