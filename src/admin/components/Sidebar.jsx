@@ -5,7 +5,6 @@ import {
   Users,
   UserRound,
   Building2,
-  BriefcaseBusiness,
   CalendarCheck,
   CalendarDays,
   WalletCards,
@@ -13,7 +12,9 @@ import {
   Settings,
   ChevronDown,
   ClipboardList,
-  UserRoundCog
+  UserRoundCog,
+  FileCheck2,
+  Megaphone
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -68,11 +69,21 @@ const NAV_ITEMS = [
         icon: CalendarDays
       },
       {
+        label: 'Attendance Requests',
+        path: '/admin/attendance-requests',
+        icon: FileCheck2
+      },
+      {
         label: 'Leave Management',
         path: '/admin/leave-management',
         icon: ClipboardList
       }
     ]
+  },
+  {
+    label: 'Announcements',
+    path: '/admin/announcements',
+    icon: Megaphone
   },
 
   {
@@ -115,7 +126,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       [label]: !prev[label]
     }))
   }
-
   return (
     <>
       {/* =========================================================
@@ -285,10 +295,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                     rounded-lg
                                     transition-all
                                     duration-200
-                                    ${
-                                      isActive
-                                        ? 'bg-black !text-white font-medium'
-                                        : 'text-black/60 hover:bg-black/5 hover:text-black'
+                                    ${isActive
+                                      ? 'bg-black text-white! font-medium'
+                                      : 'text-black/60 hover:bg-black/5 hover:text-black'
                                     }
                                   `}
                                 >
@@ -325,11 +334,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     rounded-lg
     transition-all
     duration-200
-    ${
-      isActive
-        ? 'bg-black !text-white shadow-sm'
-        : 'text-black/70 hover:bg-black/5 hover:text-black'
-    }
+    ${isActive
+                      ? 'bg-black text-white! shadow-sm'
+                      : 'text-black/70 hover:bg-black/5 hover:text-black'
+                    }
   `}
                 >
                   <Icon size={19} strokeWidth={1.8} className='currentColor' />
