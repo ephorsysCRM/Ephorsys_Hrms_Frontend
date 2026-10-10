@@ -3,8 +3,6 @@ import {
   UserCheck,
   CalendarOff,
   UserX,
-  Bell,
-  User,
   ArrowUpRight,
   Plus,
   CalendarCheck,
@@ -157,14 +155,14 @@ const HRDashboard = () => {
             Header
         ============================== */}
 
-        <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1 py-2">
 
           <div>
             <p className="text-sm font-medium text-gray-500">
               HR Dashboard
             </p>
 
-            <h1 className="mt-1 text-2xl font-semibold text-gray-900 sm:text-3xl">
+            <h1 className="mt-1 text-xl font-semibold sm:text-2xl">
               Good morning, HR
             </h1>
 

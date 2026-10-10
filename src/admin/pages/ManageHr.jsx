@@ -9,12 +9,11 @@ import {
   Filter,
   MoreVertical,
   Eye,
-  Pencil,
-  UserRoundCog,
-  X
 } from 'lucide-react';
 
 import Pagination from '../../UI/Pagination';
+import CreateHRModal from '../adminModals/CreateHrModal';
+import ViewHRDetailsModal from '../adminModals/ViewHrDetailsModal';
 
 const initialHrList = [
   {
@@ -239,9 +238,9 @@ const ManageHr = () => {
       prev.map((hr) =>
         hr.id === id
           ? {
-              ...hr,
-              status: hr.status === 'Active' ? 'Inactive' : 'Active'
-            }
+            ...hr,
+            status: hr.status === 'Active' ? 'Inactive' : 'Active'
+          }
           : hr
       )
     );
@@ -249,47 +248,9 @@ const ManageHr = () => {
     setActiveMenu(null);
   };
 
-  // Open Edit HR modal
-  const handleEdit = (hr) => {
-    setSelectedHr(hr);
-
-    setFormData({
-      name: hr.name,
-      email: hr.email,
-      department: hr.department,
-      designation: hr.designation
-    });
-
-    setShowCreateModal(true);
-    setActiveMenu(null);
-  };
-
-  // Save HR edits - local demo only
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-
-    if (!selectedHr) return;
-
-    setHrList((prev) =>
-      prev.map((hr) =>
-        hr.id === selectedHr.id
-          ? {
-              ...hr,
-              ...formData,
-              name: formData.name.trim(),
-              email: formData.email.trim(),
-              department: formData.department.trim()
-            }
-          : hr
-      )
-    );
-
-    closeModal();
-  };
 
   const closeModal = () => {
     setShowCreateModal(false);
-    setSelectedHr(null);
     setFormData(initialFormData);
   };
 
@@ -307,14 +268,13 @@ const ManageHr = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50 px-1 py-2">
       {/* Page Header */}
       <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <UserRoundCog size={24} className="text-slate-800" />
 
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-xl font-semibold text-slate-900">
               Manage HR
             </h1>
           </div>
@@ -484,18 +444,16 @@ const ManageHr = () => {
 
                   <td className="px-5 py-4">
                     <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                        hr.status === 'Active'
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${hr.status === 'Active'
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'bg-slate-100 text-slate-600'
-                      }`}
+                        }`}
                     >
                       <span
-                        className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
-                          hr.status === 'Active'
+                        className={`mr-1.5 h-1.5 w-1.5 rounded-full ${hr.status === 'Active'
                             ? 'bg-emerald-500'
                             : 'bg-slate-400'
-                        }`}
+                          }`}
                       />
 
                       {hr.status}
@@ -529,15 +487,6 @@ const ManageHr = () => {
                           >
                             <Eye size={16} />
                             View Details
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(hr)}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            <Pencil size={16} />
-                            Edit HR
                           </button>
 
                           <button
@@ -592,201 +541,19 @@ const ManageHr = () => {
         />
       </div>
 
-      {/* Create / Edit HR Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
-          <div className="my-auto w-full max-w-lg rounded-2xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  {selectedHr ? 'Edit HR' : 'Create HR'}
-                </h2>
+      <CreateHRModal
+        isOpen={showCreateModal}
+        onClose={closeModal}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleCreateHr}
+      />
 
-                <p className="mt-1 text-sm text-slate-500">
-                  {selectedHr
-                    ? 'Update HR details.'
-                    : 'Enter the details to add a new HR.'}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={closeModal}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-                aria-label="Close modal"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form
-              onSubmit={selectedHr ? handleSaveEdit : handleCreateHr}
-              className="space-y-4 p-6"
-            >
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Full Name
-                </label>
-
-                <input
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      name: e.target.value
-                    })
-                  }
-                  placeholder="Enter full name"
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Official Email
-                </label>
-
-                <input
-                  required
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      email: e.target.value
-                    })
-                  }
-                  placeholder="name@company.com"
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Department
-                </label>
-
-                <input
-                  required
-                  value={formData.department}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      department: e.target.value
-                    })
-                  }
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Designation
-                </label>
-
-                <select
-                  value={formData.designation}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      designation: e.target.value
-                    })
-                  }
-                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-                >
-                  <option value="HR Executive">HR Executive</option>
-                  <option value="Senior HR Executive">
-                    Senior HR Executive
-                  </option>
-                  <option value="HR Manager">HR Manager</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  {selectedHr ? 'Save Changes' : 'Create HR'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* View HR Details Modal */}
-      {selectedHr && !showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                HR Details
-              </h2>
-
-              <button
-                type="button"
-                onClick={() => setSelectedHr(null)}
-                className="rounded-lg p-2 hover:bg-slate-100"
-                aria-label="Close details"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-700">
-                {selectedHr.name
-                  .split(' ')
-                  .map((part) => part[0])
-                  .slice(0, 2)
-                  .join('')
-                  .toUpperCase()}
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">
-                  {selectedHr.name}
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  {selectedHr.designation}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <DetailRow label="Email" value={selectedHr.email} />
-              <DetailRow
-                label="Department"
-                value={selectedHr.department}
-              />
-              <DetailRow
-                label="Joining Date"
-                value={formatDate(selectedHr.joiningDate)}
-              />
-              <DetailRow label="Status" value={selectedHr.status} />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSelectedHr(null)}
-              className="mt-6 w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <ViewHRDetailsModal
+        hr={selectedHr}
+        onClose={() => setSelectedHr(null)}
+        formatDate={formatDate}
+      />
     </div>
   );
 };

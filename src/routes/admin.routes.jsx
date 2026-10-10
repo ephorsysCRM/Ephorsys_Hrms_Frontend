@@ -14,6 +14,10 @@ import Department from '../admin/pages/Department'
 import DepartmentView from '../admin/pages/DepartmentView'
 import EditEmployee from '../admin/pages/EditEmployee'
 import ManageHr from '../admin/pages/ManageHr'
+import Attendance from '../admin/pages/Attendance'
+import LeaveManagement from '../admin/pages/LeaveManagement'
+import AttendanceRequests from '../admin/pages/AttendanceRequests'
+import Announcements from '../admin/pages/Announcements'
 
 const AdminRoutes = (
   <Route path='/'>
@@ -36,6 +40,14 @@ const AdminRoutes = (
         <Route path='departments' element={<Department />} />
 
         <Route path='departments/:id' element={<DepartmentView />} />
+
+        <Route path='attendance' element={<Attendance/>} />
+
+        <Route path='attendance-requests' element={<AttendanceRequests/>} />
+
+        <Route path='leave-management' element={<LeaveManagement/>} />
+
+        <Route path='announcements' element={<Announcements/>} />
       </Route>
     </Route>
 
