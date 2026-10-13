@@ -163,7 +163,7 @@ const EmpTopBar = ({ setSidebarOpen }) => {
             type='button'
             onClick={handleFullscreen}
             className='
-                            hidden sm:flex w-9 h-9 rounded-lg
+                             sm:flex w-9 h-9 rounded-lg
                             items-center justify-center text-black/50
                             hover:bg-black/5 hover:text-black
                             transition-all cursor-pointer
