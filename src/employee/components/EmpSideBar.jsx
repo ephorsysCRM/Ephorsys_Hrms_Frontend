@@ -36,6 +36,13 @@ const NAV_ITEMS = [
   },
 
   {
+    label: 'My Attendance',
+    icon: Users,
+    path: '/employee/attendance',
+    
+  },
+
+  {
     label: 'My Leave',
     icon: Users,
     path: '/employee/leave',

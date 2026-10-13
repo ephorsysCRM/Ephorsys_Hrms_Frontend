@@ -10,6 +10,7 @@ import EmpSalary from '../employee/pages/EmpSalary'
 import EmpAnnouncement from '../employee/pages/EmpAnnouncement'
 import EmpDocument from '../employee/pages/EmpDocument'
 import EmpNotification from '../employee/pages/EmpNotification'
+import EmpAttendance from '../employee/pages/EmpAttendance'
 
 const EmpRoutes = (
   <Route path='employee'>
@@ -26,6 +27,7 @@ const EmpRoutes = (
         <Route path='announcement' element={<EmpAnnouncement />} />
         <Route path='document' element={<EmpDocument />} />
         <Route path='notification' element={<EmpNotification />} />
+        <Route path='attendance' element={<EmpAttendance />} />
         
       </Route>
     </Route>
