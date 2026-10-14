@@ -340,7 +340,7 @@ const DepartmentHr = () => {
 
       <div className='mt-5 pb-6'>
         <div className='w-full overflow-x-auto rounded-xl border border-gray-200'>
-          <div className='min-w-[800px] bg-white'>
+          <div className='min-w-200 bg-white'>
             {/* TABLE HEADER */}
 
             <div className='grid grid-cols-5 gap-4 border-b border-gray-200 bg-gray-50 p-4 text-sm font-medium text-gray-500'>
@@ -465,7 +465,7 @@ const DepartmentHr = () => {
                       {/* ACTION MENU */}
 
                       {openMenu === department._id && (
-                        <div className='absolute right-10 bottom-[-25px] z-50 w-32 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
+                        <div className='absolute right-10 -bottom-6.25 z-50 w-32 rounded-lg border border-gray-200 bg-white p-1 shadow-lg'>
                           {/* VIEW */}
 
                           <button
