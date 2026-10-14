@@ -188,7 +188,7 @@ function Attendance() {
 
           {/* Table */}
           <div className="w-full overflow-x-auto">
-            <table className="min-w-[750px] w-full text-left">
+            <table className="min-w-187.5 w-full text-left">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500 sm:px-5">

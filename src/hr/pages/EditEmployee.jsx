@@ -2058,7 +2058,7 @@ export default function EditEmployee () {
               </button>
             </div>
 
-            <div className='flex min-h-[500px] items-center justify-center overflow-auto bg-gray-100 p-4'>
+            <div className='flex min-h-125 items-center justify-center overflow-auto bg-gray-100 p-4'>
               {selectedDocument.url.toLowerCase().includes('.pdf') ? (
                 <iframe
                   src={selectedDocument.url}
