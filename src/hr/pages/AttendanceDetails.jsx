@@ -20,10 +20,9 @@ import {
   LogOut
 } from 'lucide-react'
 
-// import { getAttendanceDetails } from '../../redux/features/attendance/attendanceThunk'
-// import { clearAttendanceDetails } from '../../redux/features/attendance/attendanceSlice'
-import { getAttendanceDetails } from '../../Redux/features/attendance/attendanceThunk'
-import { clearAttendanceDetails } from '../../Redux/features/attendance/attendanceSlice'
+import { getAttendanceDetails } from '../../redux/features/attendance/attendanceThunk'
+import { clearAttendanceDetails } from '../../redux/features/attendance/attendanceSlice'
+
 
 // --------------------------------------------------
 // HELPERS
