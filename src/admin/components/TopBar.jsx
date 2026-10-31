@@ -228,7 +228,7 @@ const TopBar = ({ setSidebarOpen }) => {
             type='button'
             onClick={handleFullscreen}
             className='
-                            hidden sm:flex
+                            sm:flex
                             w-9 h-9
                             rounded-lg
                             items-center justify-center
@@ -380,7 +380,7 @@ const TopBar = ({ setSidebarOpen }) => {
                     {/* USER DETAILS */}
 
                     <div className='min-w-0 pr-5'>
-                      <p className='text-[13px] font-semibold text-black break-words'>
+                      <p className='text-[13px] font-semibold text-black wrap-break-word'>
                         {userName}
                       </p>
 

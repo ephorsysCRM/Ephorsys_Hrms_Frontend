@@ -705,7 +705,11 @@ export default function AddEmployee () {
       if (result?.success) {
         alert(result.message || 'Employee created successfully!')
 
-        navigate('/admin/all-employees')
+        if (location.pathname.startsWith('/hr/')) {
+          navigate('/hr/all-employees')
+        } else {
+          navigate('/admin/all-employees')
+        }
 
         return
       }

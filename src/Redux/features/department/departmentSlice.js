@@ -14,6 +14,12 @@ const initialState = {
     department: null,
 
     // =====================================================
+    // EMPLOYEES FOR DEPARTMENT HEAD DROPDOWN
+    // =====================================================
+
+    departmentEmployees: [],
+
+    // =====================================================
     // PAGINATION
     // =====================================================
 
@@ -31,14 +37,11 @@ const initialState = {
     // =====================================================
 
     loading: false,
-
     creating: false,
-
     updating: false,
-
     deleting: false,
-
     fetchingSingle: false,
+    fetchingDepartmentEmployees: false,
 
     // =====================================================
     // ERROR
@@ -53,7 +56,6 @@ const departmentSlice = createSlice({
     initialState,
 
     reducers: {
-
         // =================================================
         // CREATE DEPARTMENT
         // =================================================
@@ -67,7 +69,6 @@ const departmentSlice = createSlice({
             state.creating = false;
             state.error = null;
 
-            // Add newly created department at top
             if (action.payload) {
                 state.departments.unshift(action.payload);
 
@@ -92,8 +93,10 @@ const departmentSlice = createSlice({
             state.departments =
                 action.payload.departments || [];
 
-            state.pagination =
-                action.payload.pagination || state.pagination;
+            state.pagination = {
+                ...state.pagination,
+                ...(action.payload.pagination || {}),
+            };
         },
 
 
@@ -129,10 +132,8 @@ const departmentSlice = createSlice({
 
             const updatedDepartment = action.payload;
 
-            // Update single department
             state.department = updatedDepartment;
 
-            // Update department inside list
             const index = state.departments.findIndex(
                 (department) =>
                     department._id === updatedDepartment?._id
@@ -159,24 +160,44 @@ const departmentSlice = createSlice({
 
             const deletedDepartmentId = action.payload;
 
-            state.departments =
-                state.departments.filter(
-                    (department) =>
-                        department._id !== deletedDepartmentId
-                );
+            state.departments = state.departments.filter(
+                (department) =>
+                    department._id !== deletedDepartmentId
+            );
 
-            // Update total count
             if (state.pagination.totalDepartments > 0) {
                 state.pagination.totalDepartments -= 1;
             }
 
-            // If currently viewed department is deleted
             if (
-                state.department?._id ===
-                deletedDepartmentId
+                state.department?._id === deletedDepartmentId
             ) {
                 state.department = null;
             }
+        },
+
+
+        // =================================================
+        // GET EMPLOYEES BY DEPARTMENT
+        // =================================================
+
+        getDepartmentEmployeesStart: (state) => {
+            state.fetchingDepartmentEmployees = true;
+            state.departmentEmployees = [];
+            state.error = null;
+        },
+
+        getDepartmentEmployeesSuccess: (state, action) => {
+            state.fetchingDepartmentEmployees = false;
+
+            state.departmentEmployees =
+                action.payload || [];
+        },
+
+        getDepartmentEmployeesFailure: (state, action) => {
+            state.fetchingDepartmentEmployees = false;
+            state.departmentEmployees = [];
+            state.error = action.payload;
         },
 
 
@@ -212,30 +233,49 @@ const departmentSlice = createSlice({
             state.department = null;
         },
 
+
+        // =================================================
+        // CLEAR DEPARTMENT EMPLOYEES
+        // =================================================
+
+        clearDepartmentEmployees: (state) => {
+            state.departmentEmployees = [];
+            state.fetchingDepartmentEmployees = false;
+        },
     },
 });
 
 export const {
+    // CREATE
     createDepartmentStart,
     createDepartmentSuccess,
 
+    // GET ALL
     getDepartmentsStart,
     getDepartmentsSuccess,
 
+    // GET SINGLE
     getDepartmentStart,
     getDepartmentSuccess,
 
+    // UPDATE
     updateDepartmentStart,
     updateDepartmentSuccess,
 
+    // DELETE
     deleteDepartmentStart,
     deleteDepartmentSuccess,
 
-    departmentFailure,
+    // GET EMPLOYEES BY DEPARTMENT
+    getDepartmentEmployeesStart,
+    getDepartmentEmployeesSuccess,
+    getDepartmentEmployeesFailure,
+    clearDepartmentEmployees,
 
+    // ERROR
+    departmentFailure,
     clearDepartmentError,
     clearDepartment,
-
 } = departmentSlice.actions;
 
 export default departmentSlice.reducer;

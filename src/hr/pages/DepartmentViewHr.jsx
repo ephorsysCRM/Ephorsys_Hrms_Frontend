@@ -12,10 +12,9 @@ import {
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { getDepartment } from '../../Redux/features/department/departmentThunk'
 
-const DepartmentView = () => {
+const DepartmentViewHr = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -168,7 +167,6 @@ const DepartmentView = () => {
 
               <p className='text-sm font-semibold'>{department.name || '-'}</p>
             </div>
-
             {/* Department Code */}
             <div className='rounded-lg border border-gray-200 p-4'>
               <div className='mb-2 flex items-center gap-2 text-gray-500'>
@@ -178,7 +176,6 @@ const DepartmentView = () => {
 
               <p className='text-sm font-semibold'>{department.code || '-'}</p>
             </div>
-
             {/* Department Head */}
             <div className='rounded-lg border border-gray-200 p-4'>
               <div className='mb-2 flex items-center gap-2 text-gray-500'>
@@ -186,17 +183,37 @@ const DepartmentView = () => {
                 <span className='text-xs font-medium'>Department Head</span>
               </div>
 
-              <p className='text-sm font-semibold'>
-                {department.departmentHead?.name || 'Not Assigned'}
-              </p>
+              {department.departmentHead &&
+              typeof department.departmentHead === 'object' ? (
+                <>
+                  <p className='text-sm font-semibold'>
+                    {[
+                      department.departmentHead.firstName,
+                      department.departmentHead.middleName,
+                      department.departmentHead.lastName
+                    ]
+                      .filter(Boolean)
+                      .join(' ') || 'Name not available'}
+                  </p>
 
-              {department.departmentHead?.email && (
-                <p className='mt-1 text-xs text-gray-500'>
-                  {department.departmentHead.email}
+                  {department.departmentHead.employeeId && (
+                    <p className='mt-1 text-xs text-gray-500'>
+                      Employee ID: {department.departmentHead.employeeId}
+                    </p>
+                  )}
+
+                  {department.departmentHead.officialEmail && (
+                    <p className='mt-1 break-all text-xs text-gray-500'>
+                      {department.departmentHead.officialEmail}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className='text-sm font-semibold text-gray-500'>
+                  Not Assigned
                 </p>
               )}
             </div>
-
             {/* Status */}
             <div className='rounded-lg border border-gray-200 p-4'>
               <div className='mb-2 flex items-center gap-2 text-gray-500'>
@@ -281,4 +298,4 @@ const DepartmentView = () => {
   )
 }
 
-export default DepartmentView
+export default DepartmentViewHr
