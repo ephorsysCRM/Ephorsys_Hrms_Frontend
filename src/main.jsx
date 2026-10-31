@@ -10,7 +10,7 @@ import { registerSW } from 'virtual:pwa-register'
 
 import App from './App.jsx'
 
-import { store, persistor } from './Redux/store'
+import { store, persistor } from './redux/store'
 
 // Register PWA Service Worker
 registerSW({

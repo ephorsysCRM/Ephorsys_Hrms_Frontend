@@ -24,7 +24,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   getEmployeeById,
   updateEmployee
-} from '../../Redux/features/employee/employeeThunk'
+} from '../../redux/features/employee/employeeThunk'
 
 const documentNames = {
   aadhaar: 'Aadhaar',

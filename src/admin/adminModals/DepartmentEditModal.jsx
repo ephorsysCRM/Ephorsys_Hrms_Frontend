@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   updateDepartment,
   getEmployeesByDepartment
-} from '../../Redux/features/department/departmentThunk'
+} from '../../redux/features/department/departmentThunk'
 
-import { clearDepartmentEmployees } from '../../Redux/features/department/departmentSlice'
+import { clearDepartmentEmployees } from '../../redux/features/department/departmentSlice'
 
 const DepartmentEditModal = ({ department, onClose }) => {
   // =====================================================

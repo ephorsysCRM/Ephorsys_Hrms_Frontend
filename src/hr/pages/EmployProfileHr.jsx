@@ -21,7 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import DocumentModal from '../../admin/adminModals/DocumentModal'
 import Modal from '../../UI/Modal'
-import { getEmployeeById } from '../../Redux/features/employee/employeeThunk'
+import { getEmployeeById } from '../../redux/features/employee/employeeThunk'
 
 const EmployeeProfile = () => {
   const { id } = useParams()

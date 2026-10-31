@@ -11,7 +11,7 @@ import {
   updateDepartment,
   deleteDepartment,
   getAllDepartments
-} from '../../Redux/features/department/departmentThunk'
+} from '../../redux/features/department/departmentThunk'
 import AddDepartment from '../../admin/adminModals/AddDepartment'
 import DepartmentEditModal from '../../admin/adminModals/DepartmentEditModal'
 import DeleteDepartmentModal from '../../admin/adminModals/DeleteDepartmentModal'

@@ -3,7 +3,7 @@ import { Pencil, User, Phone, Save, X } from 'lucide-react'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { updateAdminProfile } from '../../Redux/features/auth/authThunk'
+import { updateAdminProfile } from '../../redux/features/auth/authThunk'
 
 const UpdateAdminProfileModal = ({ onClose }) => {
   const dispatch = useDispatch()

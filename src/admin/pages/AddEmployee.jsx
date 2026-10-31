@@ -21,7 +21,7 @@ import { validateEducation } from '../utils/ValidateEducation'
 import { validateExperience } from '../utils/ValidateExperience'
 import { validateDoc } from '../utils/ValidateDoc'
 import { validateJobInfo } from '../utils/ValidateJobInfo'
-import { createEmployee } from '../../Redux/features/employee/employeeThunk'
+import { createEmployee } from '../../redux/features/employee/employeeThunk'
 
 export default function AddEmployee () {
   const navigate = useNavigate()

@@ -14,7 +14,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 
-import { getMyAttendance } from '../../Redux/features/attendance/attendanceThunk'
+import { getMyAttendance } from '../../redux/features/attendance/attendanceThunk'
 import Modal from '../../UI/Modal'
 import AttendanceHistoryModal from '../employeeModal/AttendanceHistoryModal'
 

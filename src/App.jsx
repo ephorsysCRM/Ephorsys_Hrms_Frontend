@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import AppRoutes from "./routes";
-import { restoreAdminSession } from "./Redux/features/auth/authThunk";
+import { restoreAdminSession } from "./redux/features/auth/authThunk";
 
 const App = () => {
   const dispatch = useDispatch();

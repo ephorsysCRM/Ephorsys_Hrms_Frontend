@@ -16,8 +16,8 @@ import {
   sendForgotPasswordOtp,
   verifyForgotOtp,
   resetForgotPassword
-} from '../../Redux/features/auth/authThunk'
-import { loginSuccess } from '../../Redux/features/auth/authSlice'
+} from '../../redux/features/auth/authThunk'
+import { loginSuccess } from '../../redux/features/auth/authSlice'
 
 const Login = () => {
   const dispatch = useDispatch()

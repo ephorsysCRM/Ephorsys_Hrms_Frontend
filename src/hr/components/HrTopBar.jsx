@@ -5,7 +5,7 @@ import { Menu, Bell, Maximize, Minimize, Pencil } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { getAdminProfile } from '../../Redux/features/auth/authThunk'
+import { getAdminProfile } from '../../redux/features/auth/authThunk'
 
 import Modal from '../../UI/Modal'
 import UpdateAdminProfileModal from '../../admin/adminModals/UpdateAdminProfileModal'

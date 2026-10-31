@@ -12,7 +12,7 @@ import {
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getDepartment } from '../../Redux/features/department/departmentThunk'
+import { getDepartment } from '../../redux/features/department/departmentThunk'
 
 const DepartmentViewHr = () => {
   const { id } = useParams()

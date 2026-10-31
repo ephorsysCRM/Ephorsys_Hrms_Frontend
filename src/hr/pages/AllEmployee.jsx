@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import Pagination from '../../UI/Pagination'
-import { getAllEmployees } from '../../Redux/features/employee/employeeThunk'
+import { getAllEmployees } from '../../redux/features/employee/employeeThunk'
 
 const AllEmployee = () => {
   const navigate = useNavigate()
