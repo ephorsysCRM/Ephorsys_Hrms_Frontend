@@ -6,10 +6,9 @@ import { Edit, Eye, RefreshCw, Check, X } from 'lucide-react'
 import {
   getAllAttendance,
   updateAttendanceStatus
-} from '../../redux/features/attendance/attendanceThunk'
+} from '../../Redux/features/attendance/attendanceThunk'
 
-// import { clearAttendanceStatusUpdate } from '../../Redux/features/attendance/attendanceSlice'
-import { clearAttendanceStatusUpdate } from '../../redux/features/attendance/attendanceSlice'
+import {clearAttendanceStatusUpdate} from "../../Redux/features/attendance/attendanceSlice"
 
 import Pagination from '../../UI/Pagination'
 
