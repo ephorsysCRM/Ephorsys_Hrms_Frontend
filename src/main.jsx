@@ -6,9 +6,16 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Toaster } from 'react-hot-toast'
 
+import { registerSW } from 'virtual:pwa-register'
+
 import App from './App.jsx'
 
 import { store, persistor } from './Redux/store'
+
+// Register PWA Service Worker
+registerSW({
+  immediate: true
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
