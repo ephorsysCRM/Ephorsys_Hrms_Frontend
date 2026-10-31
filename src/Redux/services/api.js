@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 const api = axios.create({
@@ -8,58 +9,28 @@ const api = axios.create({
     withCredentials: true,
 });
 
-
 // =====================================================
 // REQUEST INTERCEPTOR
 // =====================================================
 
 api.interceptors.request.use(
     (config) => {
-
-        /*
-         * For normal JSON requests
-         */
+        // Do not manually set Content-Type for FormData.
+        // Browser/Axios must generate the multipart boundary.
         if (
-            config.data &&
-            !(config.data instanceof FormData)
-        ) {
-
-            config.headers[
-                "Content-Type"
-            ] = "application/json";
-
-        }
-
-
-        /*
-         * For FormData requests
-         *
-         * IMPORTANT:
-         * Do not manually set multipart/form-data.
-         *
-         * Browser/Axios will automatically add
-         * the correct boundary.
-         */
-
-        if (
+            typeof FormData !== "undefined" &&
             config.data instanceof FormData
         ) {
-
-            delete config.headers[
-                "Content-Type"
-            ];
-
+            delete config.headers["Content-Type"];
+        } else if (config.data != null) {
+            config.headers.set
+                ? config.headers.set("Content-Type", "application/json")
+                : (config.headers["Content-Type"] = "application/json");
         }
 
-
         return config;
-
     },
-
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
-
 
 export default api;

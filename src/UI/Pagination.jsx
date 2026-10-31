@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const Pagination = ({ currentPage = 1, totalPages = 1, onPageChange }) => {
-  if (totalPages <= 1) {
+  if (totalPages <  1) {
     return null
   }
 

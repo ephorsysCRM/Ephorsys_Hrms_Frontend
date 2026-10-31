@@ -36,20 +36,6 @@ const Leave = () => {
       total: 10,
       icon: Stethoscope
     },
-    {
-      name: 'Earned Leave',
-      shortName: 'EL',
-      used: 3,
-      total: 15,
-      icon: BriefcaseBusiness
-    },
-    {
-      name: 'Work From Home',
-      shortName: 'WFH',
-      used: 6,
-      total: 8,
-      icon: Home
-    }
   ]
 
   const leaveRequests = [
@@ -99,7 +85,7 @@ const Leave = () => {
   }
 
   return (
-    <div className='min-h-screen bg-[#f7f7f7] p-4 sm:p-6 lg:p-1'>
+    <div className='min-h-screen  p-4 sm:p-6 lg:p-1'>
 
       {/* Header */}
       <div className='mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between px-2'>

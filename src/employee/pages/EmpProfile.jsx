@@ -14,37 +14,26 @@ import {
   Eye
 } from 'lucide-react'
 
-import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import DocumentModal from '../../admin/adminModals/DocumentModal'
 import Modal from '../../UI/Modal'
-import { getEmployeeById } from '../../Redux/features/employee/employeeThunk'
 
 const EmployeeProfile = () => {
-  const { id } = useParams()
   const navigate = useNavigate()
-  const dispatch = useDispatch()
 
   const [selectedDocument, setSelectedDocument] = useState(null)
 
   // =====================================================
-  // REDUX
+  // REDUX - LOGGED-IN USER
   // =====================================================
 
-  const { employee, getEmployeeByIdLoading, getEmployeeByIdError } =
-    useSelector(state => state.employee)
+  const { user, authChecked, loading } = useSelector(state => state.auth)
 
-  // =====================================================
-  // GET SINGLE EMPLOYEE
-  // =====================================================
-
-  useEffect(() => {
-    if (id) {
-      dispatch(getEmployeeById(id))
-    }
-  }, [dispatch, id])
+  // Current logged-in employee
+  const employee = user
 
   // =====================================================
   // HELPERS
@@ -113,7 +102,7 @@ const EmployeeProfile = () => {
       return 'HR'
     }
 
-    return role
+    return String(role)
       .replaceAll('_', ' ')
       .replace(/\b\w/g, char => char.toUpperCase())
   }
@@ -127,7 +116,7 @@ const EmployeeProfile = () => {
       return '—'
     }
 
-    return type
+    return String(type)
       .replaceAll('_', ' ')
       .replace(/\b\w/g, char => char.toUpperCase())
   }
@@ -141,7 +130,7 @@ const EmployeeProfile = () => {
       return '—'
     }
 
-    return mode
+    return String(mode)
       .replaceAll('_', ' ')
       .replace(/\b\w/g, char => char.toUpperCase())
   }
@@ -155,7 +144,7 @@ const EmployeeProfile = () => {
       return '—'
     }
 
-    return status
+    return String(status)
       .replaceAll('_', ' ')
       .replace(/\b\w/g, char => char.toUpperCase())
   }
@@ -176,13 +165,17 @@ const EmployeeProfile = () => {
   // EDUCATION
   // =====================================================
 
-  const educationList = employee?.educationList || []
+  const educationList = Array.isArray(employee?.educationList)
+    ? employee.educationList
+    : []
 
   // =====================================================
   // EXPERIENCE
   // =====================================================
 
-  const experienceList = employee?.experienceList || []
+  const experienceList = Array.isArray(employee?.experienceList)
+    ? employee.experienceList
+    : []
 
   // =====================================================
   // DOCUMENT URL
@@ -190,7 +183,6 @@ const EmployeeProfile = () => {
 
   const getDocumentUrl = documentType => {
     const documents = employee?.documents || {}
-
     const documentList = documents[documentType]
 
     if (!Array.isArray(documentList) || documentList.length === 0) {
@@ -284,59 +276,23 @@ const EmployeeProfile = () => {
 
     return Boolean(
       experience.companyName ||
-      experience.designation ||
-      experience.totalExperience ||
-      experience.skills ||
-      experience.startDate ||
-      experience.endDate ||
-      experience.reasonForLeaving
+        experience.designation ||
+        experience.totalExperience ||
+        experience.skills ||
+        experience.startDate ||
+        experience.endDate ||
+        experience.reasonForLeaving
     )
   }
 
   // =====================================================
-  // LOADING
+  // AUTHENTICATION LOADING
   // =====================================================
 
-  if (getEmployeeByIdLoading) {
+  if (!authChecked || loading) {
     return (
       <div className='flex min-h-screen items-center justify-center text-sm text-gray-500'>
         Loading employee profile...
-      </div>
-    )
-  }
-
-  // =====================================================
-  // ERROR
-  // =====================================================
-
-  if (getEmployeeByIdError) {
-    return (
-      <div className='min-h-screen py-6'>
-        <button
-          type='button'
-          onClick={() => navigate('/employee/dashboard')}
-          className='group inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-500 transition-all hover:bg-white hover:text-black'
-        >
-          <ArrowLeft
-            size={17}
-            className='transition-transform group-hover:-translate-x-0.5'
-          />
-          Back to Employees
-        </button>
-
-        <div className='mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-center'>
-          <p className='text-sm font-semibold text-red-600'>
-            {getEmployeeByIdError}
-          </p>
-
-          <button
-            type='button'
-            onClick={() => dispatch(getEmployeeById(id))}
-            className='mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white'
-          >
-            Try Again
-          </button>
-        </div>
       </div>
     )
   }
@@ -350,19 +306,19 @@ const EmployeeProfile = () => {
       <div className='min-h-screen py-6'>
         <button
           type='button'
-          onClick={() => navigate('/admin/all-employees')}
+          onClick={() => navigate('/employee/dashboard')}
           className='group inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-500 transition-all hover:bg-white hover:text-black'
         >
           <ArrowLeft
             size={17}
             className='transition-transform group-hover:-translate-x-0.5'
           />
-          Back to Employees
+          Back to Dashboard
         </button>
 
         <div className='mt-6 rounded-2xl border border-gray-200 bg-white p-10 text-center'>
           <p className='text-sm font-semibold text-gray-600'>
-            Employee not found.
+            Employee profile not found. Please log in again.
           </p>
         </div>
       </div>
@@ -371,39 +327,18 @@ const EmployeeProfile = () => {
 
   return (
     <div className='min-h-screen py-2 text-black'>
-      {/* =====================================================
-          BACK BUTTON
-      ===================================================== */}
-
-      <div className='mx-auto mb-5'>
-        <button
-          type='button'
-          onClick={() => navigate('/admin/all-employees')}
-          className='group inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-white hover:text-black'
-        >
-          <ArrowLeft
-            size={17}
-            className='transition-transform duration-200 group-hover:-translate-x-0.5'
-          />
-          Back to Employees
-        </button>
-      </div>
 
       <div className='mx-auto'>
         {/* =====================================================
             PROFILE HEADER
         ===================================================== */}
 
-        <div className='overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm'>
+        <div className='overflow-hidden rounded-2xl border border-gray-200 shadow-sm'>
           <div className='h-2 bg-black' />
 
           <div className='p-6 sm:p-8'>
             <div className='flex flex-col gap-7 md:flex-row md:items-center md:justify-between'>
-              {/* Employee Identity */}
-
               <div className='flex flex-col items-center gap-5 sm:flex-row sm:items-center'>
-                {/* Profile Picture */}
-
                 <div className='relative'>
                   {employee.profilePhoto ? (
                     <img
@@ -422,8 +357,6 @@ const EmployeeProfile = () => {
                   </div>
                 </div>
 
-                {/* Employee Name */}
-
                 <div className='text-center sm:text-left'>
                   <p className='mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400'>
                     Employee Profile
@@ -434,7 +367,7 @@ const EmployeeProfile = () => {
                   </h1>
 
                   <p className='mt-1 text-sm text-gray-500'>
-                    {employee.employeeId || id}
+                    {employee.employeeId || employee._id || '—'}
 
                     <span className='mx-1.5 text-gray-300'>•</span>
 
@@ -450,10 +383,6 @@ const EmployeeProfile = () => {
                   </div>
                 </div>
               </div>
-
-             
-
-              
             </div>
           </div>
         </div>
@@ -530,7 +459,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -632,7 +560,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -739,7 +666,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
           </div>
 
           <div className='p-5 sm:p-6'>
@@ -832,7 +758,6 @@ const EmployeeProfile = () => {
 
               <div>
                 <p className={labelClass}>TDS</p>
-
                 <p className={valueClass}>{formatCurrency(employee.tds)}</p>
               </div>
             </div>
@@ -929,20 +854,17 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
           </div>
 
           <div className='p-5 sm:p-6'>
             <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
               <div>
                 <p className={labelClass}>Bank Name</p>
-
                 <p className={valueClass}>{employee.bankName || '—'}</p>
               </div>
 
               <div>
                 <p className={labelClass}>Account Holder Name</p>
-
                 <p className={valueClass}>
                   {employee.accountHolderName || '—'}
                 </p>
@@ -950,19 +872,16 @@ const EmployeeProfile = () => {
 
               <div>
                 <p className={labelClass}>Account Number</p>
-
                 <p className={valueClass}>{employee.accountNumber || '—'}</p>
               </div>
 
               <div>
                 <p className={labelClass}>IFSC Code</p>
-
                 <p className={valueClass}>{employee.ifscCode || '—'}</p>
               </div>
 
               <div>
                 <p className={labelClass}>Branch</p>
-
                 <p className={valueClass}>{employee.branch || '—'}</p>
               </div>
             </div>
@@ -1018,7 +937,6 @@ const EmployeeProfile = () => {
                 </p>
               </div>
             </div>
-
           </div>
 
           <div className='space-y-4 p-5 sm:p-6'>
@@ -1041,7 +959,6 @@ const EmployeeProfile = () => {
                   <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
                     <div>
                       <p className={labelClass}>Qualification</p>
-
                       <p className={valueClass}>
                         {education.qualification || '—'}
                       </p>
@@ -1049,7 +966,6 @@ const EmployeeProfile = () => {
 
                     <div>
                       <p className={labelClass}>University / Board</p>
-
                       <p className={valueClass}>
                         {education.university || '—'}
                       </p>
@@ -1057,7 +973,6 @@ const EmployeeProfile = () => {
 
                     <div>
                       <p className={labelClass}>Passing Year</p>
-
                       <p className={valueClass}>
                         {education.passingYear || '—'}
                       </p>
@@ -1065,10 +980,8 @@ const EmployeeProfile = () => {
 
                     <div>
                       <p className={labelClass}>Score</p>
-
                       <p className={valueClass}>
                         {education.score ?? '—'}
-
                         {education.scoreType
                           ? ` (${education.scoreType.toUpperCase()})`
                           : ''}
@@ -1077,7 +990,6 @@ const EmployeeProfile = () => {
 
                     <div>
                       <p className={labelClass}>Specialization</p>
-
                       <p className={valueClass}>
                         {education.specialization || '—'}
                       </p>
@@ -1149,7 +1061,7 @@ const EmployeeProfile = () => {
 
           <div className='space-y-4 p-5 sm:p-6'>
             {experienceList.length === 0 ||
-              !experienceList.some(hasExperienceData) ? (
+            !experienceList.some(hasExperienceData) ? (
               <div className='rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500'>
                 No experience details available.
               </div>
@@ -1168,7 +1080,6 @@ const EmployeeProfile = () => {
                     <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
                       <div>
                         <p className={labelClass}>Company Name</p>
-
                         <p className={valueClass}>
                           {experience.companyName || '—'}
                         </p>
@@ -1176,7 +1087,6 @@ const EmployeeProfile = () => {
 
                       <div>
                         <p className={labelClass}>Designation</p>
-
                         <p className={valueClass}>
                           {experience.designation || '—'}
                         </p>
@@ -1184,7 +1094,6 @@ const EmployeeProfile = () => {
 
                       <div>
                         <p className={labelClass}>Total Experience</p>
-
                         <p className={valueClass}>
                           {experience.totalExperience || '—'}
                         </p>
@@ -1192,13 +1101,11 @@ const EmployeeProfile = () => {
 
                       <div>
                         <p className={labelClass}>Skills</p>
-
                         <p className={valueClass}>{experience.skills || '—'}</p>
                       </div>
 
                       <div>
                         <p className={labelClass}>Start Date</p>
-
                         <p className={valueClass}>
                           {formatDate(experience.startDate)}
                         </p>
@@ -1206,7 +1113,6 @@ const EmployeeProfile = () => {
 
                       <div>
                         <p className={labelClass}>End Date</p>
-
                         <p className={valueClass}>
                           {formatDate(experience.endDate)}
                         </p>
@@ -1214,7 +1120,6 @@ const EmployeeProfile = () => {
 
                       <div className='sm:col-span-2 lg:col-span-3'>
                         <p className={labelClass}>Reason for Leaving</p>
-
                         <p className={valueClass}>
                           {experience.reasonForLeaving || '—'}
                         </p>
@@ -1248,261 +1153,50 @@ const EmployeeProfile = () => {
           </div>
 
           <div className='grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-3'>
-            {/* =================================================
-                AADHAAR
-            ================================================= */}
+            {[
+              'aadhaar',
+              'pan',
+              'resume',
+              'offerLetter',
+              'experienceLetter',
+              'signedNda',
+              'idCard'
+            ].map(documentType => (
+              <button
+                key={documentType}
+                type='button'
+                disabled={!hasDocument(documentType)}
+                onClick={() => handleDocumentClick(documentType)}
+                className='group text-left disabled:cursor-default'
+              >
+                <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
+                      <FileText size={17} />
+                    </div>
 
-            <button
-              type='button'
-              disabled={!hasDocument('aadhaar')}
-              onClick={() => handleDocumentClick('aadhaar')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
+                    <Eye
+                      size={16}
+                      className={
+                        hasDocument(documentType)
+                          ? 'text-gray-400 group-hover:text-black'
+                          : 'text-gray-300'
+                      }
+                    />
                   </div>
 
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('aadhaar')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
+                  <p className='mt-4 text-sm font-bold text-black'>
+                    {getDocumentName(documentType)}
+                  </p>
+
+                  <p className='mt-1 text-xs text-gray-400'>
+                    {hasDocument(documentType)
+                      ? 'View document'
+                      : 'Document not uploaded'}
+                  </p>
                 </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>Aadhaar</p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('aadhaar')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                PAN
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('pan')}
-              onClick={() => handleDocumentClick('pan')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('pan')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>PAN</p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('pan')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                RESUME
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('resume')}
-              onClick={() => handleDocumentClick('resume')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('resume')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>Resume</p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('resume')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                OFFER LETTER
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('offerLetter')}
-              onClick={() => handleDocumentClick('offerLetter')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('offerLetter')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>
-                  Offer Letter
-                </p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('offerLetter')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                EXPERIENCE LETTER
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('experienceLetter')}
-              onClick={() => handleDocumentClick('experienceLetter')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('experienceLetter')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>
-                  Experience Letter
-                </p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('experienceLetter')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                SIGNED NDA
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('signedNda')}
-              onClick={() => handleDocumentClick('signedNda')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('signedNda')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>Signed NDA</p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('signedNda')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
-
-            {/* =================================================
-                ID CARD
-            ================================================= */}
-
-            <button
-              type='button'
-              disabled={!hasDocument('idCard')}
-              onClick={() => handleDocumentClick('idCard')}
-              className='group text-left disabled:cursor-default'
-            >
-              <div className='rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-black hover:shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100'>
-                    <FileText size={17} />
-                  </div>
-
-                  <Eye
-                    size={16}
-                    className={
-                      hasDocument('idCard')
-                        ? 'text-gray-400 group-hover:text-black'
-                        : 'text-gray-300'
-                    }
-                  />
-                </div>
-
-                <p className='mt-4 text-sm font-bold text-black'>ID Card</p>
-
-                <p className='mt-1 text-xs text-gray-400'>
-                  {hasDocument('idCard')
-                    ? 'View document'
-                    : 'Document not uploaded'}
-                </p>
-              </div>
-            </button>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -1567,24 +1261,6 @@ const EmployeeProfile = () => {
             </div>
           </div>
         </section>
-
-        {/* =====================================================
-            BOTTOM BACK BUTTON
-        ===================================================== */}
-
-        <div className='py-8'>
-          <button
-            type='button'
-            onClick={() => navigate('/admin/all-employees')}
-            className='group mx-auto flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 shadow-sm transition-all duration-200 hover:border-black hover:bg-black hover:text-white'
-          >
-            <ArrowLeft
-              size={16}
-              className='transition-transform duration-200 group-hover:-translate-x-0.5'
-            />
-            Back to Employees
-          </button>
-        </div>
       </div>
     </div>
   )
