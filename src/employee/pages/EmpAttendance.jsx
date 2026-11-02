@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   CalendarDays,
@@ -6,17 +6,14 @@ import {
   LogIn,
   LogOut,
   CalendarCheck,
-  CalendarOff,
-  ChevronDown,
-  Eye,
-  PieChart,
+  ChevronLeft,
+  ChevronRight,
   LoaderCircle,
   RefreshCw
 } from 'lucide-react'
 
 import { getMyAttendance } from '../../redux/features/attendance/attendanceThunk'
 import Modal from '../../UI/Modal'
-import AttendanceHistoryModal from '../employeeModal/AttendanceHistoryModal'
 
 // ======================================================
 // Date Helpers
@@ -38,6 +35,13 @@ const getDateString = date => {
 }
 
 const getMonthKey = (year, monthIndex) => `${year}-${pad(monthIndex + 1)}`
+
+const shiftMonth = (monthKey, delta) => {
+  const [year, month] = monthKey.split('-').map(Number)
+  const date = new Date(year, month - 1 + delta, 1)
+
+  return getMonthKey(date.getFullYear(), date.getMonth())
+}
 
 const getMonthRange = monthKey => {
   const [year, month] = monthKey.split('-').map(Number)
@@ -70,6 +74,15 @@ const formatDate = value => {
     timeZone: 'Asia/Kolkata'
   }).format(new Date(`${dateString}T12:00:00+05:30`))
 }
+
+const formatFullDate = dateString =>
+  new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata'
+  }).format(new Date(`${dateString}T12:00:00+05:30`))
 
 const formatTime = value => {
   if (!value) return '--'
@@ -104,38 +117,6 @@ const formatDuration = minutes => {
 }
 
 // ======================================================
-// Financial Year Helpers
-// ======================================================
-
-const getFinancialYears = (count = 6) => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const startYear = now.getMonth() >= 3 ? year : year - 1
-
-  return Array.from({ length: count }, (_, index) => {
-    const start = startYear - index
-
-    return {
-      key: `${start}-${start + 1}`,
-      label: `${start}-${String(start + 1).slice(-2)}`,
-      startYear: start,
-      endYear: start + 1
-    }
-  })
-}
-
-const getFinancialYearMonths = financialYear =>
-  Array.from({ length: 12 }, (_, offset) => {
-    const date = new Date(financialYear.startYear, 3 + offset, 1)
-    const key = getMonthKey(date.getFullYear(), date.getMonth())
-
-    return {
-      key,
-      month: formatMonth(key)
-    }
-  })
-
-// ======================================================
 // Attendance Helpers
 // ======================================================
 
@@ -163,6 +144,11 @@ const getRecordMinutes = record =>
     0,
     Number(record?.totalWorkDuration || 0) ||
       Number(record?.creditedDuration || 0)
+  )
+
+const isCheckedInNow = record =>
+  [record?.firstHalf, record?.secondHalf].some(
+    half => half?.checkIn?.time && !half?.checkOut?.time
   )
 
 const getStatus = record => {
@@ -258,30 +244,115 @@ const getMonthlySummary = records => {
 }
 
 // ======================================================
-// Reusable Components
+// Calendar Helpers
 // ======================================================
 
-const SummaryItem = ({ icon: Icon, label, value }) => (
-  <div className='rounded-xl border border-gray-100 bg-gray-50 p-3'>
-    <div className='flex items-center gap-1.5 text-gray-500'>
-      <Icon size={15} />
-      <span className='text-xs'>{label}</span>
-    </div>
+const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-    <p className='mt-2 break-words text-lg font-semibold text-gray-900'>
-      {value}
-    </p>
-  </div>
-)
+const SUNDAY_LABEL = 'Sunday Off'
+
+// Calendar cell colours, keyed by day label
+const cellClasses = {
+  [SUNDAY_LABEL]: 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100',
+  Present:
+    'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+  Absent: 'border-red-500 bg-red-500 text-white hover:bg-red-600',
+  'On Leave': 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100',
+  'Half Day': 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
+  Holiday: 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100',
+  'Weekly Off': 'border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200',
+  Pending: 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
+  'No Record': 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+}
 
 const statusClasses = {
+  [SUNDAY_LABEL]: 'bg-red-50 text-red-600',
   Present: 'bg-emerald-50 text-emerald-700',
   'Half Day': 'bg-amber-50 text-amber-700',
   Absent: 'bg-red-50 text-red-700',
   'On Leave': 'bg-blue-50 text-blue-700',
   Pending: 'bg-amber-50 text-amber-700',
   Holiday: 'bg-purple-50 text-purple-700',
-  'Weekly Off': 'bg-gray-100 text-gray-600'
+  'Weekly Off': 'bg-gray-100 text-gray-600',
+  'No Record': 'bg-gray-100 text-gray-600'
+}
+
+const legendItems = [
+  { label: 'Present', dot: 'bg-emerald-600' },
+  { label: 'Absent', dot: 'bg-red-500' },
+  { label: 'On Leave', dot: 'bg-blue-500' },
+  { label: 'Half Day', dot: 'bg-amber-500' },
+  { label: 'Holiday', dot: 'bg-purple-500' },
+  { label: SUNDAY_LABEL, dot: 'bg-red-300' }
+]
+
+// ======================================================
+// Reusable Components
+// ======================================================
+
+const SummaryItem = ({ icon: Icon, label, value, className = '' }) => (
+  <div
+    className={`min-w-0 rounded-xl border border-gray-100 bg-gray-50 p-3 ${className}`}
+  >
+    <div className='flex items-center gap-1.5 text-gray-500'>
+      <Icon size={15} className='shrink-0' />
+      <span className='whitespace-nowrap text-xs'>{label}</span>
+    </div>
+
+    <p className='mt-2 whitespace-nowrap text-base font-semibold text-gray-900 sm:text-lg'>
+      {value}
+    </p>
+  </div>
+)
+
+const DetailRow = ({ icon: Icon, label, children }) => (
+  <div className='flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3'>
+    <Icon size={17} className='shrink-0 text-gray-500' />
+    <span className='text-sm text-gray-500'>{label}</span>
+    <span className='ml-auto text-right text-sm font-semibold text-gray-900'>
+      {children}
+    </span>
+  </div>
+)
+
+// Content shown inside the modal when a calendar date is clicked
+const DayDetails = ({ day }) => {
+  const { dateString, record, label } = day
+  const times = getRecordTimes(record)
+
+  const duration = !record
+    ? '--'
+    : isCheckedInNow(record)
+    ? 'In progress'
+    : formatDuration(getRecordMinutes(record))
+
+  return (
+    <div className='space-y-3'>
+      <p className='text-sm text-gray-500'>{formatFullDate(dateString)}</p>
+
+      <DetailRow icon={LogIn} label='Check-in'>
+        {formatTime(times.checkIn)}
+      </DetailRow>
+
+      <DetailRow icon={LogOut} label='Check-out'>
+        {times.checkOut ? formatTime(times.checkOut) : '--'}
+      </DetailRow>
+
+      <DetailRow icon={Clock3} label='Work Duration'>
+        {duration}
+      </DetailRow>
+
+      <DetailRow icon={CalendarCheck} label='Status'>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${
+            statusClasses[label] || 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          {label}
+        </span>
+      </DetailRow>
+    </div>
+  )
 }
 
 // ======================================================
@@ -307,68 +378,26 @@ const Attendance = () => {
     return Number.isNaN(date.getTime()) ? null : date
   }, [joiningDateValue])
 
-  const joiningMonthKey = joiningDate
-    ? getMonthKey(joiningDate.getFullYear(), joiningDate.getMonth())
-    : null
+  const joiningString = joiningDate ? getDateString(joiningDate) : null
+  const joiningMonthKey = joiningString ? joiningString.slice(0, 7) : null
 
-  const financialYears = useMemo(() => getFinancialYears(6), [])
-
-  const currentDate = new Date()
-  const todayString = getDateString(currentDate)
+  const todayString = getDateString(new Date())
   const todayMonthKey = todayString.slice(0, 7)
 
-  const currentFYStartYear =
-    currentDate.getMonth() >= 3
-      ? currentDate.getFullYear()
-      : currentDate.getFullYear() - 1
-
-  const currentFinancialYearKey = `${currentFYStartYear}-${
-    currentFYStartYear + 1
-  }`
-
-  const [selectedFinancialYear, setSelectedFinancialYear] = useState(
-    currentFinancialYearKey
-  )
-
+  const [calendarMonth, setCalendarMonth] = useState(todayMonthKey)
   const [monthlyData, setMonthlyData] = useState({})
   const [monthlyLoading, setMonthlyLoading] = useState(false)
-  const [monthlyError, setMonthlyError] = useState('')
-  const [viewMonth, setViewMonth] = useState(null)
+  const [selectedDay, setSelectedDay] = useState(null)
 
   const [todayData, setTodayData] = useState(null)
   const [todayLoading, setTodayLoading] = useState(false)
   const [todayError, setTodayError] = useState('')
 
-  const selectedFY =
-    financialYears.find(year => year.key === selectedFinancialYear) ||
-    financialYears[0]
+  const calendarData = monthlyData[calendarMonth]
+  const calendarSummary = calendarData?.summary || getMonthlySummary([])
 
-  const allFinancialYearMonths = useMemo(
-    () => getFinancialYearMonths(selectedFY),
-    [selectedFY]
-  )
-
-  const visibleFinancialYearMonths = useMemo(
-    () =>
-      allFinancialYearMonths.filter(month => {
-        if (joiningMonthKey && month.key < joiningMonthKey) {
-          return false
-        }
-
-        if (month.key > todayMonthKey) {
-          return false
-        }
-
-        return true
-      }),
-    [allFinancialYearMonths, joiningMonthKey, todayMonthKey]
-  )
-
-  const selectedMonthKey = todayMonthKey
-  const selectedMonthData = monthlyData[selectedMonthKey]
-
-  const selectedMonthSummary =
-    selectedMonthData?.summary || getMonthlySummary([])
+  const canGoPrev = !joiningMonthKey || calendarMonth > joiningMonthKey
+  const canGoNext = calendarMonth < todayMonthKey
 
   // ------------------------------------------------------
   // Fetch today's attendance
@@ -422,209 +451,160 @@ const Attendance = () => {
   }, [dispatch, todayString])
 
   // ------------------------------------------------------
-  // Fetch visible months
+  // Fetch a single month
   // ------------------------------------------------------
 
+  const fetchMonth = useCallback(
+    async monthKey => {
+      const { startDate, endDate } = getMonthRange(monthKey)
+
+      try {
+        const response = await dispatch(
+          getMyAttendance({
+            startDate,
+            endDate,
+            page: 1,
+            pageSize: 100
+          })
+        ).unwrap()
+
+        const records = response?.attendance || []
+
+        return {
+          key: monthKey,
+          records,
+          summary: getMonthlySummary(records),
+          error: null
+        }
+      } catch (error) {
+        return {
+          key: monthKey,
+          records: [],
+          summary: getMonthlySummary([]),
+          error:
+            typeof error === 'string'
+              ? error
+              : error?.message || 'Failed to load this month.'
+        }
+      }
+    },
+    [dispatch]
+  )
+
+  const loadMonths = useCallback(
+    async monthKeys => {
+      setMonthlyLoading(true)
+
+      const results = await Promise.all(monthKeys.map(fetchMonth))
+
+      setMonthlyData(previous => {
+        const updated = { ...previous }
+
+        results.forEach(result => {
+          updated[result.key] = result
+        })
+
+        return updated
+      })
+
+      setMonthlyLoading(false)
+    },
+    [fetchMonth]
+  )
+
+  // Load the month shown in the calendar whenever it changes.
   useEffect(() => {
     let cancelled = false
 
-    const loadVisibleMonths = async () => {
-      if (!visibleFinancialYearMonths.length) {
-        setMonthlyLoading(false)
-        setMonthlyError('')
-        return
-      }
-
+    const run = async () => {
       setMonthlyLoading(true)
-      setMonthlyError('')
 
-      const results = await Promise.all(
-        visibleFinancialYearMonths.map(async month => {
-          const { startDate, endDate } = getMonthRange(month.key)
+      const result = await fetchMonth(calendarMonth)
 
-          try {
-            const response = await dispatch(
-              getMyAttendance({
-                startDate,
-                endDate,
-                page: 1,
-                pageSize: 100
-              })
-            ).unwrap()
+      if (cancelled) return
 
-            const records = response?.attendance || []
-
-            return {
-              key: month.key,
-              records,
-              summary: getMonthlySummary(records),
-              error: null
-            }
-          } catch (error) {
-            return {
-              key: month.key,
-              records: [],
-              summary: getMonthlySummary([]),
-              error:
-                typeof error === 'string'
-                  ? error
-                  : error?.message || 'Failed to load this month.'
-            }
-          }
-        })
-      )
-
-      if (!cancelled) {
-        setMonthlyData(previous => {
-          const updated = { ...previous }
-
-          results.forEach(result => {
-            updated[result.key] = result
-          })
-
-          return updated
-        })
-
-        setMonthlyError(results.find(result => result.error)?.error || '')
-
-        setMonthlyLoading(false)
-      }
+      setMonthlyData(previous => ({ ...previous, [result.key]: result }))
+      setMonthlyLoading(false)
     }
 
-    loadVisibleMonths()
+    run()
 
     return () => {
       cancelled = true
     }
-  }, [dispatch, visibleFinancialYearMonths])
+  }, [calendarMonth, fetchMonth])
+
+  const refreshCalendar = () => loadMonths([calendarMonth])
 
   // ------------------------------------------------------
-  // Refresh monthly history
+  // Calendar cells
   // ------------------------------------------------------
 
-  const refreshMonthlyHistory = async () => {
-    if (!visibleFinancialYearMonths.length) return
+  const calendarCells = useMemo(() => {
+    const [year, month] = calendarMonth.split('-').map(Number)
+    const daysInMonth = new Date(year, month, 0).getDate()
+    const firstWeekDay = new Date(year, month - 1, 1).getDay()
 
-    setMonthlyLoading(true)
-    setMonthlyError('')
+    const recordsByDate = {}
 
-    const results = await Promise.all(
-      visibleFinancialYearMonths.map(async month => {
-        const { startDate, endDate } = getMonthRange(month.key)
-
-        try {
-          const response = await dispatch(
-            getMyAttendance({
-              startDate,
-              endDate,
-              page: 1,
-              pageSize: 100
-            })
-          ).unwrap()
-
-          const records = response?.attendance || []
-
-          return {
-            key: month.key,
-            records,
-            summary: getMonthlySummary(records),
-            error: null
-          }
-        } catch (error) {
-          return {
-            key: month.key,
-            records: [],
-            summary: getMonthlySummary([]),
-            error:
-              typeof error === 'string'
-                ? error
-                : error?.message || 'Failed to load this month.'
-          }
-        }
-      })
-    )
-
-    setMonthlyData(previous => {
-      const updated = { ...previous }
-
-      results.forEach(result => {
-        updated[result.key] = result
-      })
-
-      return updated
+    ;(calendarData?.records || []).forEach(record => {
+      const key = record?.date?.slice(0, 10)
+      if (key) recordsByDate[key] = record
     })
 
-    setMonthlyError(results.find(result => result.error)?.error || '')
+    const cells = Array.from({ length: firstWeekDay }, () => null)
 
-    setMonthlyLoading(false)
-  }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateString = `${year}-${pad(month)}-${pad(day)}`
+      const weekDay = new Date(year, month - 1, day).getDay()
+      const record = recordsByDate[dateString] || null
+      const isSunday = weekDay === 0
+      const isFuture = dateString > todayString
+      const isBeforeJoining = Boolean(
+        joiningString && dateString < joiningString
+      )
+
+      let label
+
+      if (isSunday && !getRecordTimes(record).checkIn) {
+        label = SUNDAY_LABEL
+      } else if (record) {
+        label = getStatus(record)
+      } else {
+        label = 'No Record'
+      }
+
+      cells.push({
+        day,
+        dateString,
+        record,
+        label,
+        isSunday,
+        isToday: dateString === todayString,
+        // Sundays always stay red (even in the future), other future days
+        // and days before joining are disabled.
+        disabled: isBeforeJoining || (isFuture && !isSunday),
+        isBeforeJoining
+      })
+    }
+
+    return cells
+  }, [calendarMonth, calendarData, todayString, joiningString])
 
   // ------------------------------------------------------
   // Today's attendance details
   // ------------------------------------------------------
 
   const todayTimes = getRecordTimes(todayData)
-
-  const isCurrentlyCheckedIn = [
-    todayData?.firstHalf,
-    todayData?.secondHalf
-  ].some(half => half?.checkIn?.time && !half?.checkOut?.time)
-
+  const isCurrentlyCheckedIn = isCheckedInNow(todayData)
   const todayStatus = todayData ? getStatus(todayData) : 'Pending'
-
-  // ------------------------------------------------------
-  // Financial year totals
-  // ------------------------------------------------------
-
-  const loadedMonths = visibleFinancialYearMonths.filter(
-    month => monthlyData[month.key] && !monthlyData[month.key].error
-  )
-
-  const failedMonths = visibleFinancialYearMonths.filter(
-    month => monthlyData[month.key]?.error
-  )
-
-  const financialYearTotals = loadedMonths.reduce(
-    (total, month) => {
-      const summary = monthlyData[month.key].summary
-
-      total.present += summary.present
-      total.absent += summary.absent
-      total.leave += summary.leave
-      total.halfDays += summary.halfDays
-      total.totalWorkMinutes += summary.totalWorkMinutes
-
-      return total
-    },
-    {
-      present: 0,
-      absent: 0,
-      leave: 0,
-      halfDays: 0,
-      totalWorkMinutes: 0
-    }
-  )
-
-  const totalAttendanceDays =
-    financialYearTotals.present +
-    financialYearTotals.absent +
-    financialYearTotals.leave +
-    financialYearTotals.halfDays
-
-  const financialYearPercentage = totalAttendanceDays
-    ? Math.round(
-        ((financialYearTotals.present + financialYearTotals.halfDays * 0.5) /
-          totalAttendanceDays) *
-          100
-      )
-    : 0
 
   // ------------------------------------------------------
   // Render
   // ------------------------------------------------------
 
   return (
-    <div className='min-h-screen p-2 sm:p-6 lg:p-1'>
+    <div className='min-h-screen py-2 sm:py-4'>
       <div className='mx-auto space-y-6'>
         {/* Header */}
         <div className='flex flex-wrap items-center justify-between gap-3'>
@@ -645,9 +625,9 @@ const Attendance = () => {
         </div>
 
         {/* Top section */}
-        <div className='grid grid-cols-1 items-start gap-5 lg:grid-cols-5'>
+        <div className='grid grid-cols-1 gap-5'>
           {/* Today's attendance */}
-          <section className='overflow-hidden rounded-2xl border border-gray-200 bg-white lg:col-span-3'>
+          <section className='overflow-hidden rounded-2xl border border-gray-200 bg-white'>
             <div className='h-1 bg-black' />
 
             <div className='p-4 sm:p-5'>
@@ -686,7 +666,7 @@ const Attendance = () => {
                 </p>
               ) : (
                 <>
-                  <div className='mt-5 grid grid-cols-3 gap-2 sm:gap-3'>
+                  <div className='mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3'>
                     <SummaryItem
                       icon={LogIn}
                       label='Check-in'
@@ -706,6 +686,7 @@ const Attendance = () => {
                     <SummaryItem
                       icon={Clock3}
                       label='Work duration'
+                      className='col-span-2 sm:col-span-1'
                       value={
                         isCurrentlyCheckedIn
                           ? 'In progress'
@@ -732,136 +713,9 @@ const Attendance = () => {
               )}
             </div>
           </section>
-
-          {/* Monthly overview */}
-          <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 lg:col-span-2'>
-            <div className='flex items-center justify-between gap-2'>
-              <div>
-                <h2 className='font-semibold text-gray-900'>
-                  Monthly Overview
-                </h2>
-
-                <p className='mt-1 text-xs text-gray-500'>
-                  Current month attendance
-                </p>
-              </div>
-
-              <span className='rounded-lg bg-gray-100 px-2.5 py-2 text-xs font-medium text-gray-700'>
-                {formatMonth(selectedMonthKey)}
-              </span>
-            </div>
-
-            {selectedMonthData?.error && (
-              <p className='mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-700'>
-                {selectedMonthData.error}
-              </p>
-            )}
-
-            <div className='mt-4 grid grid-cols-2 gap-2.5'>
-              <SummaryItem
-                icon={LogIn}
-                label='Avg. Check-in'
-                value={selectedMonthSummary.checkIn}
-              />
-
-              <SummaryItem
-                icon={LogOut}
-                label='Avg. Check-out'
-                value={selectedMonthSummary.checkOut}
-              />
-
-              <SummaryItem
-                icon={Clock3}
-                label='Total Work Hours'
-                value={selectedMonthSummary.hours}
-              />
-
-              <SummaryItem
-                icon={CalendarOff}
-                label='Leave Taken'
-                value={`${selectedMonthSummary.leave} days`}
-              />
-            </div>
-
-            <div className='mt-4 rounded-xl border border-gray-100 p-4'>
-              <div className='flex items-center gap-2'>
-                <PieChart size={17} className='text-gray-600' />
-
-                <h3 className='text-sm font-semibold text-gray-900'>
-                  Attendance Distribution
-                </h3>
-              </div>
-
-              <div className='mt-4 flex items-center gap-4'>
-                <div
-                  className='relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full'
-                  style={{
-                    background: `conic-gradient(
-                      #16a34a 0% ${selectedMonthSummary.percentage}%,
-                      #ef4444 ${selectedMonthSummary.percentage}% 100%
-                    )`
-                  }}
-                >
-                  <div className='flex h-20 w-20 flex-col items-center justify-center rounded-full bg-white'>
-                    <span className='text-xl font-bold text-gray-900'>
-                      {selectedMonthSummary.percentage}%
-                    </span>
-
-                    <span className='text-[10px] text-gray-500'>
-                      Attendance
-                    </span>
-                  </div>
-                </div>
-
-                <div className='min-w-0 flex-1 space-y-3'>
-                  {[
-                    {
-                      label: 'Present',
-                      value: selectedMonthSummary.present,
-                      color: 'bg-emerald-600'
-                    },
-                    {
-                      label: 'Absent',
-                      value: selectedMonthSummary.absent,
-                      color: 'bg-red-500'
-                    },
-                    {
-                      label: 'On Leave',
-                      value: selectedMonthSummary.leave,
-                      color: 'bg-blue-500'
-                    },
-                    {
-                      label: 'Half Day',
-                      value: selectedMonthSummary.halfDays,
-                      color: 'bg-amber-500'
-                    }
-                  ].map(item => (
-                    <div
-                      key={item.label}
-                      className='flex items-center justify-between gap-2'
-                    >
-                      <div className='flex items-center gap-2'>
-                        <span
-                          className={`h-2 w-2 rounded-full ${item.color}`}
-                        />
-
-                        <span className='text-xs text-gray-600'>
-                          {item.label}
-                        </span>
-                      </div>
-
-                      <span className='text-xs font-semibold text-gray-900'>
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
 
-        {/* Attendance History */}
+        {/* Attendance History - Calendar */}
         <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-6'>
           <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
             <div>
@@ -870,54 +724,51 @@ const Attendance = () => {
               </h2>
 
               <p className='mt-1 text-sm text-gray-500'>
-                History starts from your joining month and ends at the current
-                month.
+                Click on any date to see check-in, check-out and work duration.
               </p>
 
               {joiningDate && (
                 <p className='mt-1 text-xs text-gray-500'>
-                  Joined on {formatDate(getDateString(joiningDate))}
+                  Joined on {formatDate(joiningString)}
                 </p>
               )}
             </div>
 
-            <div className='flex flex-wrap items-center gap-2'>
-              <label
-                htmlFor='financial-year'
-                className='text-sm font-medium text-gray-600'
-              >
-                Financial Year
-              </label>
-
-              <div className='relative'>
-                <select
-                  id='financial-year'
-                  value={selectedFinancialYear}
-                  onChange={event =>
-                    setSelectedFinancialYear(event.target.value)
+            <div className='flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap'>
+              <div className='flex min-w-0 flex-1 items-center justify-between gap-2 sm:flex-none sm:justify-start'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setCalendarMonth(shiftMonth(calendarMonth, -1))
                   }
-                  className='appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-9 text-sm font-medium text-gray-700 outline-none focus:border-black'
+                  disabled={!canGoPrev}
+                  aria-label='Previous month'
+                  className='shrink-0 rounded-lg border border-gray-200 p-2 text-gray-700 transition hover:bg-gray-50 disabled:opacity-40'
                 >
-                  {financialYears.map(year => (
-                    <option key={year.key} value={year.key}>
-                      {year.label}
-                    </option>
-                  ))}
-                </select>
+                  <ChevronLeft size={16} />
+                </button>
 
-                <ChevronDown
-                  size={15}
-                  className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'
-                />
+                <span className='min-w-0 flex-1 text-center text-sm font-semibold text-gray-900 sm:min-w-[140px] sm:flex-none'>
+                  {formatMonth(calendarMonth)}
+                </span>
+
+                <button
+                  type='button'
+                  onClick={() => setCalendarMonth(shiftMonth(calendarMonth, 1))}
+                  disabled={!canGoNext}
+                  aria-label='Next month'
+                  className='shrink-0 rounded-lg border border-gray-200 p-2 text-gray-700 transition hover:bg-gray-50 disabled:opacity-40'
+                >
+                  <ChevronRight size={16} />
+                </button>
               </div>
 
               <button
                 type='button'
-                onClick={refreshMonthlyHistory}
-                disabled={
-                  monthlyLoading || visibleFinancialYearMonths.length === 0
-                }
-                className='flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-50'
+                onClick={refreshCalendar}
+                disabled={monthlyLoading}
+                aria-label='Refresh'
+                className='flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 sm:ml-1'
               >
                 <RefreshCw
                   size={15}
@@ -935,13 +786,13 @@ const Attendance = () => {
             </div>
           )}
 
-          {monthlyError && (
+          {calendarData?.error && (
             <div className='mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700'>
-              <span>{monthlyError}</span>
+              <span>{calendarData.error}</span>
 
               <button
                 type='button'
-                onClick={refreshMonthlyHistory}
+                onClick={refreshCalendar}
                 className='font-semibold underline'
               >
                 Retry
@@ -949,197 +800,99 @@ const Attendance = () => {
             </div>
           )}
 
-          <div className='mt-5 overflow-x-auto rounded-xl border border-gray-200'>
-            <table className='w-full min-w-[950px] text-left text-sm'>
-              <thead className='bg-gray-50 text-xs uppercase tracking-wide text-gray-500'>
-                <tr>
-                  <th className='px-4 py-3 font-medium'>Month</th>
-                  <th className='px-4 py-3 font-medium'>Present</th>
-                  <th className='px-4 py-3 font-medium'>Absent</th>
-                  <th className='px-4 py-3 font-medium'>Leave</th>
-                  <th className='px-4 py-3 font-medium'>Half Day</th>
-                  <th className='px-4 py-3 font-medium'>Avg. Check-in</th>
-                  <th className='px-4 py-3 font-medium'>Avg. Check-out</th>
-                  <th className='px-4 py-3 font-medium'>Work Hours</th>
-                  <th className='px-4 py-3 text-right font-medium'>Action</th>
-                </tr>
-              </thead>
-
-              <tbody className='divide-y divide-gray-100'>
-                {visibleFinancialYearMonths.map(month => {
-                  const data = monthlyData[month.key]
-                  const stats = data?.summary || getMonthlySummary([])
-                  const isLoading = monthlyLoading && !data
-
-                  return (
-                    <tr key={month.key} className='transition hover:bg-gray-50'>
-                      <td className='whitespace-nowrap px-4 py-4 font-medium text-gray-900'>
-                        {month.month}
-                      </td>
-
-                      <td className='px-4 py-4 font-medium text-emerald-700'>
-                        {data && !data.error ? stats.present : '--'}
-                      </td>
-
-                      <td className='px-4 py-4 font-medium text-red-600'>
-                        {data && !data.error ? stats.absent : '--'}
-                      </td>
-
-                      <td className='px-4 py-4 text-gray-700'>
-                        {data && !data.error ? stats.leave : '--'}
-                      </td>
-
-                      <td className='px-4 py-4 text-gray-700'>
-                        {data && !data.error ? stats.halfDays : '--'}
-                      </td>
-
-                      <td className='whitespace-nowrap px-4 py-4 text-gray-700'>
-                        {data && !data.error ? stats.checkIn : '--'}
-                      </td>
-
-                      <td className='whitespace-nowrap px-4 py-4 text-gray-700'>
-                        {data && !data.error ? stats.checkOut : '--'}
-                      </td>
-
-                      <td className='whitespace-nowrap px-4 py-4 text-gray-700'>
-                        {data && !data.error ? stats.hours : '--'}
-                      </td>
-
-                      <td className='px-4 py-4 text-right'>
-                        {isLoading ? (
-                          <LoaderCircle
-                            size={16}
-                            className='ml-auto animate-spin text-gray-400'
-                          />
-                        ) : data?.error ? (
-                          <button
-                            type='button'
-                            onClick={refreshMonthlyHistory}
-                            className='text-xs font-medium text-red-600 hover:underline'
-                          >
-                            Retry
-                          </button>
-                        ) : (
-                          <button
-                            type='button'
-                            disabled={!data}
-                            onClick={() => setViewMonth(month)}
-                            className='inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-white disabled:opacity-40'
-                          >
-                            <Eye size={14} />
-                            View
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-
-                {!visibleFinancialYearMonths.length && (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className='px-4 py-10 text-center text-sm text-gray-500'
-                    >
-                      No attendance months are available for this financial year
-                      based on your joining date.
-                    </td>
-                  </tr>
-                )}
-
-                {visibleFinancialYearMonths.length > 0 &&
-                  !monthlyLoading &&
-                  loadedMonths.length === 0 &&
-                  !failedMonths.length && (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className='px-4 py-10 text-center text-sm text-gray-500'
-                      >
-                        No attendance records found.
-                      </td>
-                    </tr>
-                  )}
-              </tbody>
-
-              {visibleFinancialYearMonths.length > 0 && (
-                <tfoot className='border-t border-gray-200 bg-gray-50'>
-                  <tr>
-                    <td className='whitespace-nowrap px-4 py-3 font-semibold text-gray-900'>
-                      Total
-                    </td>
-
-                    <td className='px-4 py-3 font-semibold text-emerald-700'>
-                      {financialYearTotals.present}
-                    </td>
-
-                    <td className='px-4 py-3 font-semibold text-red-600'>
-                      {financialYearTotals.absent}
-                    </td>
-
-                    <td className='px-4 py-3 font-semibold text-gray-900'>
-                      {financialYearTotals.leave}
-                    </td>
-
-                    <td className='px-4 py-3 font-semibold text-gray-900'>
-                      {financialYearTotals.halfDays}
-                    </td>
-
-                    <td colSpan={3} className='px-4 py-3 text-xs text-gray-500'>
-                      {loadedMonths.length}/{visibleFinancialYearMonths.length}{' '}
-                      months loaded
-                      {failedMonths.length
-                        ? ` · ${failedMonths.length} failed`
-                        : ''}
-                      {' · '}
-                      {formatDuration(financialYearTotals.totalWorkMinutes)}
-                    </td>
-
-                    <td className='px-4 py-3 text-right font-semibold text-gray-900'>
-                      {financialYearPercentage}%
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
+          {/* Month totals */}
+          <div className='mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5'>
+            {[
+              { label: 'Present', value: calendarSummary.present },
+              { label: 'Absent', value: calendarSummary.absent },
+              { label: 'Leave', value: calendarSummary.leave },
+              { label: 'Half Day', value: calendarSummary.halfDays },
+              { label: 'Work Hours', value: calendarSummary.hours }
+            ].map(item => (
+              <div
+                key={item.label}
+                className='col-span-1 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 last:col-span-2 sm:last:col-span-1'
+              >
+                <p className='text-xs text-gray-500'>{item.label}</p>
+                <p className='mt-1 text-base font-semibold text-gray-900'>
+                  {calendarData && !calendarData.error ? item.value : '--'}
+                </p>
+              </div>
+            ))}
           </div>
 
-          <div className='mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-500'>
-            <span className='flex items-center gap-1.5'>
-              <span className='h-2 w-2 rounded-full bg-emerald-600' />
-              Present
-            </span>
+          {/* Calendar */}
+          <div className='relative mt-5'>
+            {monthlyLoading && !calendarData && (
+              <div className='absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/70'>
+                <LoaderCircle
+                  size={22}
+                  className='animate-spin text-gray-500'
+                />
+              </div>
+            )}
 
-            <span className='flex items-center gap-1.5'>
-              <span className='h-2 w-2 rounded-full bg-red-500' />
-              Absent
-            </span>
+            <div className='grid grid-cols-7 gap-1.5 sm:gap-2'>
+              {WEEK_DAYS.map((name, index) => (
+                <div
+                  key={name}
+                  className={`py-2 text-center text-xs font-medium ${
+                    index === 0 ? 'text-red-600' : 'text-gray-500'
+                  }`}
+                >
+                  {name}
+                </div>
+              ))}
 
-            <span className='flex items-center gap-1.5'>
-              <span className='h-2 w-2 rounded-full bg-blue-500' />
-              Leave
-            </span>
+              {calendarCells.map((cell, index) =>
+                cell === null ? (
+                  <div key={`empty-${index}`} />
+                ) : (
+                  <button
+                    key={cell.dateString}
+                    type='button'
+                    disabled={cell.disabled}
+                    onClick={() => setSelectedDay(cell)}
+                    title={cell.disabled ? '' : cell.label}
+                    className={`flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center rounded-xl border p-1 text-center transition sm:min-h-[76px] sm:items-start sm:justify-between sm:p-2 sm:text-left ${
+                      cell.disabled
+                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                        : cellClasses[cell.label] || cellClasses['No Record']
+                    } ${cell.isToday ? 'ring-2 ring-black ring-offset-1' : ''}`}
+                  >
+                    <span className='text-sm font-semibold'>{cell.day}</span>
 
-            <span className='ml-auto'>Financial year: April – March</span>
+                    {!cell.disabled && (
+                      <span className='hidden text-[10px] font-medium leading-tight sm:block'>
+                        {cell.label === 'No Record' ? '' : cell.label}
+                      </span>
+                    )}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className='mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-500'>
+            {legendItems.map(item => (
+              <span key={item.label} className='flex items-center gap-1.5'>
+                <span className={`h-2 w-2 rounded-full ${item.dot}`} />
+                {item.label}
+              </span>
+            ))}
           </div>
         </section>
       </div>
 
-      {/* Attendance History Modal */}
+      {/* Day details modal */}
       <Modal
-        isOpen={Boolean(viewMonth)}
-        onClose={() => setViewMonth(null)}
-        title={`${viewMonth?.month || 'Attendance'} History`}
-        size='xl'
+        isOpen={Boolean(selectedDay)}
+        onClose={() => setSelectedDay(null)}
+        title='Attendance Details'
+        size='md'
       >
-        {viewMonth && (
-          <AttendanceHistoryModal
-            month={viewMonth.month}
-            records={monthlyData[viewMonth.key]?.records || []}
-            summary={monthlyData[viewMonth.key]?.summary}
-            error={monthlyData[viewMonth.key]?.error}
-          />
-        )}
+        {selectedDay && <DayDetails day={selectedDay} />}
       </Modal>
     </div>
   )
