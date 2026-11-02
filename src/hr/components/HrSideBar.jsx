@@ -484,11 +484,9 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
               px-3
               py-3
               rounded-lg
-              border border-black/10
-              text-black/70
-              hover:bg-black
-              hover:text-white
-              hover:border-black
+              bg-black
+              text-white!
+              hover:bg-black/80
               transition-all
               duration-200
               cursor-pointer
