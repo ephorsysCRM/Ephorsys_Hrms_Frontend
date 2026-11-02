@@ -125,7 +125,7 @@ const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
               </h1>
 
               <p className='text-[10px] uppercase tracking-[0.2em] text-black/50'>
-                employeeMS
+                employees
               </p>
             </div>
           </div>
