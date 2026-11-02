@@ -61,23 +61,6 @@ const NAV_ITEMS = [
     ]
   },
 
-  {
-    label: 'My Document',
-    icon: WalletCards,
-    path: '/employee/document',
-  },
-
-  {
-    label: 'Announcement',
-    path: '/employee/announcement',
-    icon: FileText
-  },
-
-  {
-    label: 'Notification',
-    path: '/employee/notification',
-    icon: Settings
-  }
 ]
 
 const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {

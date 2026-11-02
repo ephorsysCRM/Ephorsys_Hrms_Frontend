@@ -1,600 +1,353 @@
 import {
-  Bell,
   CalendarDays,
   ChevronRight,
   Clock3,
   Eye,
-  FileText,
-  Megaphone,
-  IndianRupee,
   LogIn,
   LogOut,
-  WalletCards,
-  BarChart3,
-} from "lucide-react";
+  Megaphone,
+  WalletCards
+} from 'lucide-react'
+import { useSelector } from 'react-redux'
+
+// ======================================================
+// Demo data - replace with your API / redux data
+// ======================================================
+
+const TARGET_MINUTES = 9 * 60
+
+const todayAttendance = {
+  status: 'Present',
+  checkIn: '09:32 AM',
+  checkOut: null,
+  workedMinutes: 4 * 60 + 25
+}
+
+const leaveBalance = [
+  { label: 'Casual Leave', value: 8 },
+  { label: 'Sick Leave', value: 10 },
+  { label: 'Used', value: 4 }
+]
+
+const monthStats = [
+  { label: 'Present', value: 21, dot: 'bg-emerald-600' },
+  { label: 'Absent', value: 1, dot: 'bg-red-500' },
+  { label: 'Leave', value: 2, dot: 'bg-blue-500' },
+  { label: 'Late', value: 3, dot: 'bg-amber-500' }
+]
+
+const announcements = [
+  { title: 'Salary processed', date: 'Oct 10, 2026' },
+  { title: 'New holiday announced', date: 'Oct 08, 2026' },
+  { title: 'Team meeting tomorrow', date: 'Oct 07, 2026' }
+]
+
+const payslips = [
+  { month: 'October 2026', amount: '₹35,000' },
+  { month: 'September 2026', amount: '₹35,000' },
+  { month: 'August 2026', amount: '₹35,000' }
+]
+
+// ======================================================
+// Helpers
+// ======================================================
+
+const getGreeting = () => {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      hourCycle: 'h23',
+      timeZone: 'Asia/Kolkata'
+    }).format(new Date())
+  )
+
+  if (hour < 12) return 'Good Morning'
+  if (hour < 17) return 'Good Afternoon'
+  return 'Good Evening'
+}
+
+const formatToday = () =>
+  new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata'
+  }).format(new Date())
+
+const formatMinutes = minutes =>
+  `${String(Math.floor(minutes / 60)).padStart(2, '0')}h ${String(
+    minutes % 60
+  ).padStart(2, '0')}m`
+
+// ======================================================
+// Reusable Components
+// ======================================================
+
+const SectionHeader = ({ icon: Icon, title, subtitle, action }) => (
+  <div className='mb-5 flex items-center justify-between gap-3'>
+    <div className='flex items-center gap-3'>
+      <div className='rounded-xl bg-gray-100 p-2.5'>
+        <Icon size={20} />
+      </div>
+
+      <div>
+        <h2 className='font-semibold text-gray-900'>{title}</h2>
+
+        {subtitle && <p className='text-xs text-gray-500'>{subtitle}</p>}
+      </div>
+    </div>
+
+    {action && (
+      <button
+        type='button'
+        className='flex shrink-0 items-center gap-1 text-sm font-medium text-gray-500 transition hover:text-black'
+      >
+        {action}
+        <ChevronRight size={16} />
+      </button>
+    )}
+  </div>
+)
+
+const InfoRow = ({ icon: Icon, label, value, last }) => (
+  <div
+    className={`flex items-center justify-between gap-3 py-3.5 ${
+      last ? '' : 'border-b border-gray-200'
+    }`}
+  >
+    <div className='flex items-center gap-3'>
+      <div className='rounded-lg bg-white p-2'>
+        <Icon size={17} />
+      </div>
+
+      <span className='text-sm text-gray-600'>{label}</span>
+    </div>
+
+    <span className='font-semibold text-gray-900'>{value}</span>
+  </div>
+)
+
+// ======================================================
+// Main Dashboard
+// ======================================================
 
 const EmployeeDashboard = () => {
+  const user = useSelector(state => state.auth?.user)
+
+  const fullName =
+    user?.name ||
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
+    user?.fullName ||
+    ''
+
+  const firstName = fullName.trim().split(/\s+/)[0] || 'there'
+
+  const progress = Math.min(
+    100,
+    Math.round((todayAttendance.workedMinutes / TARGET_MINUTES) * 100)
+  )
+
   return (
-    <div className="min-h-screen bg-[#f7f7f7] text-black">
-      <main className="mx-auto w-full max-w-[1500px] px-4 py-1 sm:px-6 lg:px-1">
+    <div className='mx-auto w-full max-w-[1500px] space-y-6 py-2'>
+      {/* Greeting */}
+      <div>
+        <h1 className='text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl'>
+          {getGreeting()}, {firstName}
+        </h1>
 
-        {/* ================= HEADER ================= */}
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-           
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-              Good Morning, Rahul 👋
-            </h1>
+        <p className='mt-1 text-sm text-gray-500'>{formatToday()}</p>
+      </div>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Here's your work overview for today
-            </p>
-          </div>
+      {/* Today's attendance + leave */}
+      <div className='grid grid-cols-1 gap-5 xl:grid-cols-3'>
+        <section className='overflow-hidden rounded-2xl border border-gray-200 bg-white xl:col-span-2'>
+          <div className='h-1 bg-black' />
 
-          <button
-            className="
-              relative rounded-xl border border-gray-200 bg-white p-3
-              text-gray-600 transition
-              hover:border-black hover:text-black
-            "
-          >
-            <Bell size={20} />
-
-            <span
-              className="
-                absolute -right-1 -top-1 flex h-4 w-4
-                items-center justify-center rounded-full
-                bg-black text-[9px] font-semibold text-white
-              "
-            >
-              3
-            </span>
-          </button>
-        </div>
-
-        {/* ================= SUMMARY CARDS ================= */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-
-          {/* Attendance */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-3">
-                  <CalendarDays size={21} />
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Attendance
-                  </p>
-
-                  <p className="mt-1 text-lg font-semibold">
-                    Present
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight
-                size={19}
-                className="text-gray-400"
-              />
-            </div>
-
-            <div className="mt-4 flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-              <span className="text-sm font-medium">
-                09:32 AM
-              </span>
-            </div>
-          </div>
-
-          {/* Leave */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-3">
-                  <FileText size={21} />
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Leave Balance
-                  </p>
-
-                  <p className="mt-1 text-lg font-semibold">
-                    12 Days
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight
-                size={19}
-                className="text-gray-400"
-              />
-            </div>
-
-            <p className="mt-4 text-sm text-gray-500">
-              Remaining
-            </p>
-          </div>
-
-          {/* Salary */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-3">
-                  <IndianRupee size={21} />
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Salary
-                  </p>
-
-                  <p className="mt-1 text-lg font-semibold">
-                    ₹35,000
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight
-                size={19}
-                className="text-gray-400"
-              />
-            </div>
-
-            <p className="mt-4 text-sm text-gray-500">
-              October 2026
-            </p>
-          </div>
-        </div>
-
-        {/* ================= MAIN GRID ================= */}
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-
-          {/* ================= TODAY ATTENDANCE ================= */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm xl:col-span-2">
-
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-2.5">
+          <div className='p-4 sm:p-5'>
+            <div className='mb-5 flex items-center justify-between gap-3'>
+              <div className='flex items-center gap-3'>
+                <div className='rounded-xl bg-gray-100 p-2.5'>
                   <Clock3 size={20} />
                 </div>
 
                 <div>
-                  <h2 className="font-semibold">
+                  <h2 className='font-semibold text-gray-900'>
                     Today's Attendance
                   </h2>
 
-                  <p className="text-xs text-gray-500">
-                    Thursday, 08 October 2026
-                  </p>
+                  <p className='text-xs text-gray-500'>Work day progress</p>
                 </div>
               </div>
 
-              <button className="flex items-center gap-1 text-sm font-medium text-gray-500 transition hover:text-black">
-                View Details
-                <ChevronRight size={16} />
-              </button>
+              <span className='rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700'>
+                {todayAttendance.status}
+              </span>
             </div>
 
-            <div className="rounded-xl bg-[#f7f7f7] p-4">
+            <div className='rounded-xl bg-gray-50 px-4'>
+              <InfoRow
+                icon={LogIn}
+                label='Check In'
+                value={todayAttendance.checkIn}
+              />
 
-              {/* Check In */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-white p-2">
-                    <LogIn size={17} />
-                  </div>
+              <InfoRow
+                icon={LogOut}
+                label='Check Out'
+                value={todayAttendance.checkOut || '--:--'}
+              />
 
-                  <span className="text-sm text-gray-600">
-                    Check In
-                  </span>
-                </div>
-
-                <span className="font-semibold">
-                  09:32 AM
-                </span>
-              </div>
-
-              {/* Check Out */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-white p-2">
-                    <LogOut size={17} />
-                  </div>
-
-                  <span className="text-sm text-gray-600">
-                    Check Out
-                  </span>
-                </div>
-
-                <span className="font-semibold">
-                  --:--
-                </span>
-              </div>
-
-              {/* Working Time */}
-              <div className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-white p-2">
-                    <Clock3 size={17} />
-                  </div>
-
-                  <span className="text-sm text-gray-600">
-                    Working Time
-                  </span>
-                </div>
-
-                <span className="font-semibold">
-                  04h 25m
-                </span>
-              </div>
+              <InfoRow
+                icon={Clock3}
+                label='Working Time'
+                value={formatMinutes(todayAttendance.workedMinutes)}
+                last
+              />
             </div>
 
-            <button
-              className="
-                mt-5 flex w-full items-center justify-center gap-2
-                rounded-xl bg-black py-3
-                text-sm font-medium text-white
-                transition hover:bg-gray-800
-              "
+            <div className='mt-4'>
+              <div className='mb-1.5 flex items-center justify-between text-xs text-gray-500'>
+                <span>{progress}% of 9h day</span>
+                <span>{formatMinutes(TARGET_MINUTES)}</span>
+              </div>
+
+              <div className='h-2 overflow-hidden rounded-full bg-gray-100'>
+                <div
+                  className='h-full rounded-full bg-black transition-all'
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className='flex flex-col rounded-2xl border border-gray-200 bg-white p-4 sm:p-5'>
+          <SectionHeader
+            icon={CalendarDays}
+            title='My Leave'
+            subtitle='12 days remaining'
+          />
+
+          <div className='space-y-2.5'>
+            {leaveBalance.map(item => (
+              <div
+                key={item.label}
+                className='flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3'
+              >
+                <span className='text-sm text-gray-600'>{item.label}</span>
+
+                <span className='font-semibold text-gray-900'>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type='button'
+            className='mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-black py-3 text-sm font-medium text-gray-900 transition hover:bg-black hover:text-white xl:mt-auto'
+          >
+            <CalendarDays size={17} />
+            Apply Leave
+          </button>
+        </section>
+      </div>
+
+      {/* This month */}
+      <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-5'>
+        <SectionHeader
+          icon={CalendarDays}
+          title='This Month'
+          subtitle='Your attendance overview'
+          action='Full history'
+        />
+
+        <div className='grid grid-cols-2 gap-2.5 sm:grid-cols-4'>
+          {monthStats.map(stat => (
+            <div
+              key={stat.label}
+              className='rounded-xl border border-gray-100 bg-gray-50 p-3'
             >
-              <LogOut size={17} />
-              Check Out
-            </button>
-          </section>
+              <div className='flex items-center gap-2'>
+                <span className={`h-2 w-2 rounded-full ${stat.dot}`} />
 
-          {/* ================= MY LEAVE ================= */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-2.5">
-                  <CalendarDays size={20} />
-                </div>
-
-                <h2 className="font-semibold">
-                  My Leave
-                </h2>
+                <span className='text-xs text-gray-500'>{stat.label}</span>
               </div>
 
-              <ChevronRight
-                size={18}
-                className="text-gray-400"
-              />
+              <p className='mt-2 text-2xl font-semibold text-gray-900'>
+                {stat.value}
+              </p>
             </div>
-
-            <div className="space-y-3">
-
-              <div className="flex items-center justify-between rounded-xl bg-[#f7f7f7] px-4 py-3">
-                <span className="text-sm text-gray-600">
-                  Casual Leave
-                </span>
-
-                <span className="font-semibold">
-                  8
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl bg-[#f7f7f7] px-4 py-3">
-                <span className="text-sm text-gray-600">
-                  Sick Leave
-                </span>
-
-                <span className="font-semibold">
-                  10
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl bg-[#f7f7f7] px-4 py-3">
-                <span className="text-sm text-gray-600">
-                  Used
-                </span>
-
-                <span className="font-semibold">
-                  4
-                </span>
-              </div>
-            </div>
-
-            <button
-              className="
-                mt-19.5 flex w-full items-center justify-center gap-2
-                rounded-xl border border-black
-                py-3 text-sm font-medium
-                transition hover:bg-black hover:text-white
-              "
-            >
-              <CalendarDays size={17} />
-              Apply Leave
-            </button>
-          </section>
+          ))}
         </div>
+      </section>
 
-        {/* ================= ANNOUNCEMENTS ================= */}
-        <div className="mt-6">
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      {/* Announcements + payslips */}
+      <div className='grid grid-cols-1 gap-5 xl:grid-cols-5'>
+        <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 xl:col-span-2'>
+          <SectionHeader
+            icon={Megaphone}
+            title='Announcements'
+            subtitle='Latest updates'
+            action='View all'
+          />
 
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-2.5">
-                  <Megaphone size={20} />
+          <div className='divide-y divide-gray-100'>
+            {announcements.map(item => (
+              <div key={item.title} className='flex gap-3 py-3.5 first:pt-0'>
+                <span className='mt-1.5 h-2 w-2 shrink-0 rounded-full bg-black' />
+
+                <div className='min-w-0'>
+                  <p className='text-sm font-medium text-gray-900'>
+                    {item.title}
+                  </p>
+
+                  <p className='mt-1 text-xs text-gray-500'>{item.date}</p>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-                <div>
-                  <h2 className="font-semibold">
-                    Announcements
-                  </h2>
+        <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 xl:col-span-3'>
+          <SectionHeader
+            icon={WalletCards}
+            title='Recent Payslips'
+            subtitle='Your latest salary records'
+            action='View all'
+          />
 
-                  <p className="text-xs text-gray-500">
-                    Latest updates from your organization
+          <div className='divide-y divide-gray-100 rounded-xl border border-gray-100'>
+            {payslips.map(item => (
+              <div
+                key={item.month}
+                className='flex items-center justify-between gap-3 px-4 py-3.5'
+              >
+                <div className='min-w-0'>
+                  <p className='text-sm font-medium text-gray-900'>
+                    {item.month}
+                  </p>
+
+                  <p className='mt-0.5 text-sm font-semibold text-gray-600'>
+                    {item.amount}
                   </p>
                 </div>
+
+                <button
+                  type='button'
+                  className='flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 transition hover:border-black hover:bg-black hover:text-white'
+                >
+                  <Eye size={14} />
+                  View
+                </button>
               </div>
-
-              <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-black">
-                View All
-                <ChevronRight size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 divide-y divide-gray-100 md:grid-cols-3 md:divide-x md:divide-y-0">
-
-              <Announcement
-                title="Salary processed"
-                date="Oct 10, 2026"
-              />
-
-              <Announcement
-                title="New holiday announced"
-                date="Oct 08, 2026"
-              />
-
-              <Announcement
-                title="Team meeting tomorrow"
-                date="Oct 07, 2026"
-              />
-            </div>
-          </section>
-        </div>
-
-        {/* ================= ATTENDANCE SUMMARY ================= */}
-        <div className="mt-6">
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-2.5">
-                  <BarChart3 size={20} />
-                </div>
-
-                <div>
-                  <h2 className="font-semibold">
-                    Attendance Summary
-                  </h2>
-
-                  <p className="text-xs text-gray-500">
-                    Your attendance overview
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight
-                size={18}
-                className="text-gray-400"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 sm:grid-cols-4 sm:divide-y-0">
-
-              <AttendanceStat
-                label="Present"
-                value="21"
-                dot="bg-green-500"
-              />
-
-              <AttendanceStat
-                label="Absent"
-                value="1"
-                dot="bg-red-400"
-              />
-
-              <AttendanceStat
-                label="Leave"
-                value="2"
-                dot="bg-gray-400"
-              />
-
-              <AttendanceStat
-                label="Late"
-                value="3"
-                dot="bg-yellow-400"
-              />
-
-            </div>
-          </section>
-        </div>
-
-        {/* ================= RECENT PAYSLIPS ================= */}
-        <div className="mt-6">
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-100 p-2.5">
-                  <WalletCards size={20} />
-                </div>
-
-                <div>
-                  <h2 className="font-semibold">
-                    Recent Payslips
-                  </h2>
-
-                  <p className="text-xs text-gray-500">
-                    Your latest salary records
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight
-                size={18}
-                className="text-gray-400"
-              />
-            </div>
-
-            {/* Desktop Table */}
-            <div className="hidden overflow-hidden rounded-xl border border-gray-100 sm:block">
-
-              <div className="grid grid-cols-3 bg-gray-50 px-5 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">
-                <span>Month</span>
-                <span>Amount</span>
-                <span>Action</span>
-              </div>
-
-              <PayslipRow
-                month="October 2026"
-                amount="₹35,000"
-              />
-
-              <PayslipRow
-                month="September 2026"
-                amount="₹35,000"
-              />
-
-              <PayslipRow
-                month="August 2026"
-                amount="₹35,000"
-              />
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="space-y-3 sm:hidden">
-
-              <MobilePayslip
-                month="October 2026"
-                amount="₹35,000"
-              />
-
-              <MobilePayslip
-                month="September 2026"
-                amount="₹35,000"
-              />
-
-              <MobilePayslip
-                month="August 2026"
-                amount="₹35,000"
-              />
-
-            </div>
-          </section>
-        </div>
-
-      </main>
-    </div>
-  );
-};
-
-
-/* ================= COMPONENTS ================= */
-
-const Announcement = ({ title, date }) => {
-  return (
-    <div className="px-0 py-4 md:px-5 md:py-2">
-      <div className="flex gap-3">
-        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-black" />
-
-        <div>
-          <p className="text-sm font-medium">
-            {title}
-          </p>
-
-          <p className="mt-1 text-xs text-gray-500">
-            {date}
-          </p>
-        </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
-  );
-};
+  )
+}
 
-
-const AttendanceStat = ({ label, value, dot }) => {
-  return (
-    <div className="px-4 py-4 sm:px-6">
-      <div className="flex items-center gap-2">
-        <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
-
-        <span className="text-sm text-gray-500">
-          {label}
-        </span>
-      </div>
-
-      <p className="mt-2 text-2xl font-semibold">
-        {value}
-      </p>
-    </div>
-  );
-};
-
-
-const PayslipRow = ({ month, amount }) => {
-  return (
-    <div className="grid grid-cols-3 items-center border-t border-gray-100 px-5 py-4">
-
-      <span className="text-sm font-medium">
-        {month}
-      </span>
-
-      <span className="text-sm font-semibold">
-        {amount}
-      </span>
-
-      <div>
-        <button
-          className="
-            flex items-center gap-2 rounded-lg
-            border border-gray-300 px-3 py-1.5
-            text-xs font-medium
-            transition hover:border-black hover:bg-black hover:text-white
-          "
-        >
-          <Eye size={14} />
-          View
-        </button>
-      </div>
-    </div>
-  );
-};
-
-
-const MobilePayslip = ({ month, amount }) => {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-100 p-4">
-
-      <div>
-        <p className="text-sm font-medium">
-          {month}
-        </p>
-
-        <p className="mt-1 text-sm font-semibold">
-          {amount}
-        </p>
-      </div>
-
-      <button
-        className="
-          flex items-center gap-2 rounded-lg
-          border border-gray-300 px-3 py-2
-          text-xs font-medium
-          hover:border-black
-        "
-      >
-        <Eye size={14} />
-        View
-      </button>
-    </div>
-  );
-};
-
-export default EmployeeDashboard;
+export default EmployeeDashboard
