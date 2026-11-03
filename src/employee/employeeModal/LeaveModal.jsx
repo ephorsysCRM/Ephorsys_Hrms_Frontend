@@ -3,7 +3,7 @@ import { CalendarDays, Clock3, Info, LoaderCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { createAttendanceRequest } from '../../Redux/features/attendance/attendanceThunk'
+import { createAttendanceRequest } from '../../redux/features/attendance/attendanceThunk'
 
 const LeaveModal = ({ onClose }) => {
   const dispatch = useDispatch()

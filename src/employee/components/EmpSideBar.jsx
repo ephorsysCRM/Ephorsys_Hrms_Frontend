@@ -61,23 +61,6 @@ const NAV_ITEMS = [
     ]
   },
 
-  {
-    label: 'My Document',
-    icon: WalletCards,
-    path: '/employee/document',
-  },
-
-  {
-    label: 'Announcement',
-    path: '/employee/announcement',
-    icon: FileText
-  },
-
-  {
-    label: 'Notification',
-    path: '/employee/notification',
-    icon: Settings
-  }
 ]
 
 const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -142,7 +125,7 @@ const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
               </h1>
 
               <p className='text-[10px] uppercase tracking-[0.2em] text-black/50'>
-                employeeMS
+                employees
               </p>
             </div>
           </div>

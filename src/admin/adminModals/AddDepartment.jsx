@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { useDispatch } from 'react-redux'
 
-import { createDepartment } from '../../Redux/features/department/departmentThunk'
+import { createDepartment } from '../../redux/features/department/departmentThunk'
 
 const AddDepartment = ({ onClose }) => {
   const dispatch = useDispatch()

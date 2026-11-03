@@ -7,9 +7,6 @@ import ProtectedRoute from './protected.routes'
 import EmpProfile from '../employee/pages/EmpProfile'
 import EmpLeave from '../employee/pages/EmpLeave'
 import EmpSalary from '../employee/pages/EmpSalary'
-import EmpAnnouncement from '../employee/pages/EmpAnnouncement'
-import EmpDocument from '../employee/pages/EmpDocument'
-import EmpNotification from '../employee/pages/EmpNotification'
 import EmpAttendance from '../employee/pages/EmpAttendance'
 
 const EmpRoutes = (
@@ -24,9 +21,6 @@ const EmpRoutes = (
         <Route path='profile' element={<EmpProfile />} />
         <Route path='leave' element={<EmpLeave />} />
         <Route path='salary' element={<EmpSalary />} />
-        <Route path='announcement' element={<EmpAnnouncement />} />
-        <Route path='document' element={<EmpDocument />} />
-        <Route path='notification' element={<EmpNotification />} />
         <Route path='attendance' element={<EmpAttendance />} />
         
       </Route>

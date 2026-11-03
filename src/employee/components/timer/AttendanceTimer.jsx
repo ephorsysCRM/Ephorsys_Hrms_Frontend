@@ -15,7 +15,7 @@ import {
   checkIn as checkInThunk,
   checkOut as checkOutThunk,
   getMyAttendance
-} from '../../../Redux/features/attendance/attendanceThunk'
+} from '../../../redux/features/attendance/attendanceThunk'
 
 const KNOB = 48 // knob size in px
 const PADDING = 4 // gap between knob and track edge

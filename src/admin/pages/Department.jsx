@@ -22,7 +22,7 @@ import {
   deleteDepartment,
   getAllDepartments,
   updateDepartment
-} from '../../Redux/features/department/departmentThunk'
+} from '../../redux/features/department/departmentThunk'
 
 const Department = () => {
   // =====================================================

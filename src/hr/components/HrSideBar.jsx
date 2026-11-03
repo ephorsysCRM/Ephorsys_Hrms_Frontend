@@ -14,26 +14,42 @@ import {
   ClipboardList,
   User,
   Wallet,
-  Folder,
   Megaphone,
-  BellRing,
   FileCheck2
 } from 'lucide-react'
 
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Modal from '../../UI/Modal'
 import image from '/icon.png'
 import LogoutModal from '../../admin/adminModals/LogoutModal'
 
+// =========================================================
+// SECTIONS
+// =========================================================
+
+const SECTIONS = {
+  hr: {
+    label: 'HR Panel',
+    caption: 'Manage employees, attendance and payroll',
+    icon: Users,
+    home: '/hr/dashboard'
+  },
+  self: {
+    label: 'My Space',
+    caption: 'Your own attendance, leave and salary',
+    icon: UserRound,
+    home: '/hr/my/dashboard'
+  }
+}
 
 // =========================================================
-// MANAGE EMPLOYEE SIDEBAR ITEMS
+// HR PANEL ITEMS (HR manages the company here)
 // =========================================================
 
-const NAV_ITEMS = [
+const HR_ITEMS = [
   {
     label: 'Dashboard',
     path: '/hr/dashboard',
@@ -42,26 +58,14 @@ const NAV_ITEMS = [
 
   {
     label: 'Departments',
-    icon: Building2,
-    children: [
-      {
-        label: 'Departments',
-        path: '/hr/departments',
-        icon: Building2
-      }
-    ]
+    path: '/hr/departments',
+    icon: Building2
   },
 
   {
     label: 'Employees',
-    icon: Users,
-    children: [
-      {
-        label: 'All Employees',
-        path: '/hr/all-employees',
-        icon: UserRound
-      }
-    ]
+    path: '/hr/all-employees',
+    icon: Users
   },
 
   {
@@ -122,112 +126,95 @@ const NAV_ITEMS = [
   }
 ]
 
-
 // =========================================================
-// MY PROFILE SIDEBAR ITEMS
+// MY SPACE ITEMS (HR uses these as a normal employee)
 // =========================================================
 
-const PROFILE_ITEMS = [
+const SELF_ITEMS = [
   {
     label: 'Dashboard',
-    path: '/employee/dashboard',
+    path: '/hr/my/dashboard',
     icon: LayoutDashboard
   },
 
   {
     label: 'My Profile',
-    icon: User,
-    path: '/employee/profile',
-   
+    path: '/hr/my/profile',
+    icon: User
+  },
+
+  {
+    label: 'My Attendance',
+    path: '/hr/my/attendance',
+    icon: CalendarCheck
   },
 
   {
     label: 'My Leave',
-    icon:   CalendarDays,
-    path: '/employee/leave',
-    
+    path: '/hr/my/leave',
+    icon: CalendarDays
   },
 
   {
     label: 'My Salary',
-    icon: Wallet,
-    children: [
-      {
-        label: 'Pay Slips',
-        path: '/employee/salary',
-        icon: FileText
-      }
-    ]
-  },
-
-  {
-    label: 'My Document',
-    icon: Folder,
-    path: '/employee/document',
-  },
-
-  {
-    label: 'Announcement',
-    path: '/employee/announcement',
-    icon: Megaphone
-  },
-
-  {
-    label: 'Notification',
-    path: '/employee/notification',
-    icon: BellRing
+    path: '/hr/my/salary',
+    icon: Wallet
   }
 ]
 
+// =========================================================
+// HELPERS
+// =========================================================
+
+const isPathActive = (pathname, path) =>
+  pathname === path || pathname.startsWith(`${path}/`)
 
 // =========================================================
 // HR SIDEBAR
 // =========================================================
 
 const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
+  const { pathname } = useLocation()
 
-  const [logoutview, setLogoutView] = useState(false)
+  const [logoutView, setLogoutView] = useState(false)
 
+  // Only stores menus the user opened/closed by hand.
+  // A menu that contains the current page opens automatically.
   const [openMenus, setOpenMenus] = useState({})
 
-  // Manage Employee is selected by default
-  const [activeSection, setActiveSection] = useState('manage')
+  const navigate = useNavigate()
 
+  const getSectionFromPath = path =>
+    path === '/hr/my' || path.startsWith('/hr/my/') ? 'self' : 'hr'
 
-  // =======================================================
-  // CURRENT SIDEBAR ITEMS
-  // =======================================================
+  const [activeSection, setActiveSection] = useState(
+    getSectionFromPath(pathname)
+  )
 
-  const currentMenuItems =
-    activeSection === 'profile'
-      ? PROFILE_ITEMS
-      : NAV_ITEMS
+  // Follow the page the user lands on (refresh, deep link, menu click)
+  useEffect(() => {
+    setActiveSection(getSectionFromPath(pathname))
+  }, [pathname])
 
+  const currentMenuItems = activeSection === 'self' ? SELF_ITEMS : HR_ITEMS
 
-  // =======================================================
-  // TOGGLE SUBMENU
-  // =======================================================
+  // Show that section's menu at once and open its home page
+  const handleSwitchSection = section => {
+    if (section === activeSection) return
 
-  const toggleMenu = label => {
-    setOpenMenus(prev => ({
-      ...prev,
-      [label]: !prev[label]
+    setOpenMenus({})
+    setActiveSection(section)
+    navigate(SECTIONS[section].home)
+  }
+
+  const toggleMenu = (label, isOpen) => {
+    setOpenMenus(previous => ({
+      ...previous,
+      [label]: !isOpen
     }))
   }
 
-
-  const handleManageEmployee = () => {
-    setActiveSection('manage')
-    setOpenMenus({})
-  }
-
-
-
-  const handleMyProfile = () => {
-    setActiveSection('profile')
-    setOpenMenus({})
-  }
-
+  const closeOnMobile = () => setSidebarOpen(false)
 
   return (
     <>
@@ -242,12 +229,11 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className='fixed inset-0 z-40 bg-black/40  text-white! lg:hidden'
-            onClick={() => setSidebarOpen(false)}
+            className='fixed inset-0 z-40 bg-black/40 lg:hidden'
+            onClick={closeOnMobile}
           />
         )}
       </AnimatePresence>
-
 
       {/* =========================================================
           SIDEBAR
@@ -267,24 +253,13 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
+        {/* HEADER */}
 
-        {/* =======================================================
-            SIDEBAR HEADER
-        ======================================================= */}
-
-        <div className='h-16 flex items-center justify-between px-5 border-black/10'>
-
+        <div className='h-16 flex items-center justify-between px-5'>
           <div className='flex items-center gap-3'>
-
-            {/* Logo */}
-
-            <div className='w-9 h-9 rounded-lg text-white flex items-center justify-center'>
-              <img
-                src={image}
-                alt='EPHORSYS'
-              />
+            <div className='w-9 h-9 rounded-lg flex items-center justify-center'>
+              <img src={image} alt='EPHORSYS' />
             </div>
-
 
             <div>
               <h1 className='text-lg font-bold tracking-tight text-black'>
@@ -295,15 +270,12 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                 HRMS
               </p>
             </div>
-
           </div>
-
-
-          {/* Mobile Close */}
 
           <button
             type='button'
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeOnMobile}
+            aria-label='Close sidebar'
             className='
               lg:hidden
               p-2
@@ -316,105 +288,75 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
           >
             <X size={20} />
           </button>
-
         </div>
 
+        {/* SECTION SWITCHER */}
 
-        {/* =======================================================
-            SECTION SWITCHER
-        ======================================================= */}
+        <div className='border-y border-black/10 px-3 py-3'>
+          <div
+            role='tablist'
+            aria-label='Switch workspace'
+            className='grid grid-cols-2 gap-1 rounded-lg bg-black/5 p-1'
+          >
+            {Object.entries(SECTIONS).map(([key, section]) => {
+              const SectionIcon = section.icon
+              const isActive = activeSection === key
 
-        <div className='border-y border-black/10 px-2 py-3'>
-
-          <div className='grid grid-cols-2 gap-1 rounded-lg bg-black/5 '>
-
-            {/* =================================================
-                MANAGE EMPLOYEE
-            ================================================= */}
-
-            <button
-              type='button'
-              onClick={handleManageEmployee}
-              className={`
-                rounded-md
-                px-1
-                py-2
-                text-[11px]
-                font-medium
-                transition-all
-                duration-200
-
-                ${activeSection === 'manage'
-                  ? 'bg-black text-white shadow-sm'
-                  : 'text-black/50 hover:text-black'
-                }
-              `}
-            >
-            Employee
-            </button>
-
-
-            {/* =================================================
-                MY PROFILE
-            ================================================= */}
-
-            <button
-              type='button'
-              onClick={handleMyProfile}
-              className={`
-                rounded-md
-                px-2
-                py-2
-                text-[11px]
-                font-medium
-                transition-all
-                duration-200
-
-                ${activeSection === 'profile'
-                  ? 'bg-black text-white shadow-sm'
-                  : 'text-black/50 hover:text-black'
-                }
-              `}
-            >
-              My Profile
-            </button>
-
+              return (
+                <button
+                  key={key}
+                  type='button'
+                  role='tab'
+                  aria-selected={isActive}
+                  onClick={() => handleSwitchSection(key)}
+                  className={`
+                    flex items-center justify-center gap-1.5
+                    rounded-md px-2 py-2
+                    text-[12px] font-medium
+                    transition-all duration-200
+                    cursor-pointer
+                    ${
+                      isActive
+                        ? 'bg-black text-white shadow-sm'
+                        : 'text-black/50 hover:text-black'
+                    }
+                  `}
+                >
+                  <SectionIcon size={14} strokeWidth={1.9} />
+                  {section.label}
+                </button>
+              )
+            })}
           </div>
 
+          <p className='mt-2 px-1 text-[11px] leading-snug text-black/40'>
+            {SECTIONS[activeSection].caption}
+          </p>
         </div>
 
+        {/* NAVIGATION */}
 
-        {/* =======================================================
-            NAVIGATION
-        ======================================================= */}
-
-        <nav className='flex-1 overflow-y-auto px-3 py-5'>
-
+        <nav className='flex-1 overflow-y-auto px-3 py-4'>
           <div className='space-y-1'>
-
             {currentMenuItems.map(item => {
-
               const Icon = item.icon
 
-
-              {/* =================================================
-                  MENU WITH SUBMENU
-              ================================================= */}
+              // ---------- MENU WITH SUBMENU ----------
 
               if (item.children) {
+                const hasActiveChild = item.children.some(child =>
+                  isPathActive(pathname, child.path)
+                )
 
-                const isOpen = openMenus[item.label]
-
+                const isOpen = openMenus[item.label] ?? hasActiveChild
 
                 return (
                   <div key={item.label}>
-
-                    {/* Parent Menu */}
-
                     <button
                       type='button'
-                      onClick={() => toggleMenu(item.label)}
-                      className='
+                      onClick={() => toggleMenu(item.label, isOpen)}
+                      aria-expanded={isOpen}
+                      className={`
                         w-full
                         flex
                         items-center
@@ -422,80 +364,50 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                         px-3
                         py-3
                         rounded-lg
-                        text-black/70
-                        hover:bg-black/5
-                        hover:text-black
                         transition-all
                         duration-200
-                      '
+                        cursor-pointer
+                        ${
+                          hasActiveChild
+                            ? 'bg-black/5 text-black'
+                            : 'text-black/70 hover:bg-black/5 hover:text-black'
+                        }
+                      `}
                     >
-
                       <div className='flex items-center gap-3'>
-
-                        <Icon
-                          size={19}
-                          strokeWidth={1.8}
-                        />
+                        <Icon size={19} strokeWidth={1.8} />
 
                         <span className='text-sm font-medium'>
                           {item.label}
                         </span>
-
                       </div>
 
-
                       <motion.div
-                        animate={{
-                          rotate: isOpen ? 180 : 0
-                        }}
-                        transition={{
-                          duration: 0.2
-                        }}
+                        animate={{ rotate: isOpen ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
                       >
                         <ChevronDown size={17} />
                       </motion.div>
-
                     </button>
 
-
-                    {/* Submenu */}
-
                     <AnimatePresence initial={false}>
-
                       {isOpen && (
-
                         <motion.div
-                          initial={{
-                            height: 0,
-                            opacity: 0
-                          }}
-                          animate={{
-                            height: 'auto',
-                            opacity: 1
-                          }}
-                          exit={{
-                            height: 0,
-                            opacity: 0
-                          }}
-                          transition={{
-                            duration: 0.2,
-                            ease: 'easeInOut'
-                          }}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
                           className='overflow-hidden'
                         >
-
                           <div className='mt-1 ml-3 pl-3 border-l border-black/10 space-y-1'>
-
                             {item.children.map(child => {
-
                               const ChildIcon = child.icon
-
 
                               return (
                                 <NavLink
                                   key={child.path}
                                   to={child.path}
-                                  onClick={() => setSidebarOpen(false)}
+                                  onClick={closeOnMobile}
                                   className={({ isActive }) => `
                                     flex
                                     items-center
@@ -505,50 +417,34 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                                     rounded-lg
                                     transition-all
                                     duration-200
-
-                                    ${isActive
-                                      ? 'bg-black text-white! font-medium'
-                                      : 'text-black/60 hover:bg-black/5 hover:text-black'
+                                    ${
+                                      isActive
+                                        ? 'bg-black text-white! font-medium'
+                                        : 'text-black/60 hover:bg-black/5 hover:text-black'
                                     }
                                   `}
                                 >
+                                  <ChildIcon size={16} strokeWidth={1.8} />
 
-                                  <ChildIcon
-                                    size={16}
-                                    strokeWidth={1.8}
-                                  />
-
-                                  <span className='text-sm'>
-                                    {child.label}
-                                  </span>
-
+                                  <span className='text-sm'>{child.label}</span>
                                 </NavLink>
                               )
-
                             })}
-
                           </div>
-
                         </motion.div>
-
                       )}
-
                     </AnimatePresence>
-
                   </div>
                 )
               }
 
-
-              {/* =================================================
-                  NORMAL MENU
-              ================================================= */}
+              // ---------- NORMAL MENU ----------
 
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={closeOnMobile}
                   className={({ isActive }) => `
                     flex
                     items-center
@@ -558,38 +454,25 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
                     rounded-lg
                     transition-all
                     duration-200
-
-                    ${isActive
-                      ? 'bg-black text-white! shadow-sm'
-                      : 'text-black/70 hover:bg-black/5 hover:text-black'
+                    ${
+                      isActive
+                        ? 'bg-black text-white! shadow-sm'
+                        : 'text-black/70 hover:bg-black/5 hover:text-black'
                     }
                   `}
                 >
+                  <Icon size={19} strokeWidth={1.8} />
 
-                  <Icon
-                    size={19}
-                    strokeWidth={1.8}
-                  />
-
-                  <span className='text-sm font-medium'>
-                    {item.label}
-                  </span>
-
+                  <span className='text-sm font-medium'>{item.label}</span>
                 </NavLink>
               )
             })}
-
           </div>
-
         </nav>
 
+        {/* FOOTER */}
 
-        {/* =======================================================
-            SIDEBAR FOOTER
-        ======================================================= */}
-
-        <div className='p-3 border-black/10'>
-
+        <div className='border-t border-black/10 p-3'>
           <button
             type='button'
             onClick={() => setLogoutView(true)}
@@ -602,46 +485,27 @@ const HrSideBar = ({ sidebarOpen, setSidebarOpen }) => {
               py-3
               rounded-lg
               bg-black
-              text-white
-              hover:bg-black/5
-              hover:text-black
+              text-white!
+              hover:bg-black/80
               transition-all
               duration-200
+              cursor-pointer
             '
           >
+            <LogOut size={19} strokeWidth={1.8} />
 
-            <LogOut
-              size={19}
-              strokeWidth={1.8}
-            />
-
-            <span className='text-sm font-medium'>
-              Logout
-            </span>
-
+            <span className='text-sm font-medium'>Logout</span>
           </button>
-
         </div>
-
       </aside>
 
+      {/* LOGOUT MODAL */}
 
-      {/* =========================================================
-          LOGOUT MODAL
-      ========================================================= */}
-
-      <Modal
-        isOpen={logoutview}
-        onClose={() => setLogoutView(false)}
-      >
-        <LogoutModal
-          onClose={() => setLogoutView(false)}
-        />
+      <Modal isOpen={logoutView} onClose={() => setLogoutView(false)}>
+        <LogoutModal onClose={() => setLogoutView(false)} />
       </Modal>
-
     </>
   )
 }
-
 
 export default HrSideBar

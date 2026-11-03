@@ -21,6 +21,14 @@ import Reports from '../hr/pages/Reports'
 import AttendanceRequests from '../hr/pages/AttendanceRequests'
 import AttendanceDetails from '../hr/pages/AttendanceDetails'
 
+// Employee pages, reused so HR can use them as a normal employee
+import EmpDashboard from '../employee/pages/EmpDashboard'
+import EmpProfile from '../employee/pages/EmpProfile'
+import EmpLeave from '../employee/pages/EmpLeave'
+import EmpSalary from '../employee/pages/EmpSalary'
+import EmpAttendance from '../employee/pages/EmpAttendance'
+import MyDashboard from '../hr/pages/MyDashboard'
+
 const HrRoutes = (
   <Route path='hr'>
     {/* Public Login Route */}
@@ -29,6 +37,7 @@ const HrRoutes = (
     {/* HR Protected Routes */}
     <Route element={<ProtectedRoute allowedRoles={['hr']} />}>
       <Route element={<HrLayout />}>
+        {/* ---------- HR Panel ---------- */}
         <Route path='dashboard' element={<HrDashboard />} />
 
         <Route path='all-employees' element={<AllEmployee />} />
@@ -49,6 +58,15 @@ const HrRoutes = (
         <Route path='payroll' element={<PayRoll />} />
         <Route path='payslips' element={<PaySlips />} />
         <Route path='reports' element={<Reports />} />
+
+        {/* ---------- My Space (HR as an employee) ---------- */}
+        <Route path='my'>
+          <Route path='dashboard' element={<MyDashboard />} />
+          <Route path='profile' element={<EmpProfile />} />
+          <Route path='attendance' element={<EmpAttendance />} />
+          <Route path='leave' element={<EmpLeave />} />
+          <Route path='salary' element={<EmpSalary />} />
+        </Route>
       </Route>
     </Route>
   </Route>

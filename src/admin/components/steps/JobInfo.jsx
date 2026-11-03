@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { validateJobInfo } from '../../utils/ValidateJobInfo'
-import { getAllDepartments } from '../../../Redux/features/department/departmentThunk'
+import { getAllDepartments } from '../../../redux/features/department/departmentThunk'
 
 export default function JobInfo ({ data, onChange, errors = {} }) {
   // =====================================================
