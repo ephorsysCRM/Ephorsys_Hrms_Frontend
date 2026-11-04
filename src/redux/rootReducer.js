@@ -6,6 +6,7 @@ import authReducer from "./features/auth/authSlice";
 import departmentReducer from "./features/department/departmentSlice";
 import employeeReducer from "./features/employee/employeeSlice";
 import attendanceReducer from "./features/attendance/attendanceSlice";
+import regularizationReducer from "./features/regularization/regularizationSlice";
 
 // =====================================================
 // STORAGE
@@ -53,6 +54,13 @@ const rootReducer = combineReducers({
     employee: employeeReducer,
 
     attendance: attendanceReducer,
+
+    // Regularization (Employee + HR/Admin)
+    regularization: regularizationReducer,
 });
+
+// =====================================================
+// EXPORT ROOT REDUCER
+// =====================================================
 
 export default rootReducer;

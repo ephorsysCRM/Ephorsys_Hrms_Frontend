@@ -8,6 +8,7 @@ import EmpProfile from '../employee/pages/EmpProfile'
 import EmpLeave from '../employee/pages/EmpLeave'
 import EmpSalary from '../employee/pages/EmpSalary'
 import EmpAttendance from '../employee/pages/EmpAttendance'
+import Regularization from '../employee/pages/Regularization'
 
 const EmpRoutes = (
   <Route path='employee'>
@@ -22,6 +23,7 @@ const EmpRoutes = (
         <Route path='leave' element={<EmpLeave />} />
         <Route path='salary' element={<EmpSalary />} />
         <Route path='attendance' element={<EmpAttendance />} />
+        <Route path='regularization' element={<Regularization />} />
         
       </Route>
     </Route>

@@ -9,10 +9,15 @@ import {
   ChevronLeft,
   ChevronRight,
   LoaderCircle,
-  RefreshCw
+  RefreshCw,
+  Send
 } from 'lucide-react'
 
 import { getMyAttendance } from '../../redux/features/attendance/attendanceThunk'
+import {
+  createRegularizationRequest,
+  getMyRegularization
+} from '../../redux/features/regularization/regularizationThunk'
 import Modal from '../../UI/Modal'
 
 // ======================================================
@@ -316,7 +321,7 @@ const DetailRow = ({ icon: Icon, label, children }) => (
 )
 
 // Content shown inside the modal when a calendar date is clicked
-const DayDetails = ({ day }) => {
+const DayDetails = ({ day, onRegularize, request }) => {
   const { dateString, record, label } = day
   const times = getRecordTimes(record)
 
@@ -351,7 +356,123 @@ const DayDetails = ({ day }) => {
           {label}
         </span>
       </DetailRow>
+
+      <div className='border-t border-gray-100 pt-3'>
+        {request && ['pending', 'approved'].includes(request.status) ? (
+          <div className='space-y-2 rounded-xl bg-amber-50 px-4 py-3'>
+            <div className='flex items-center justify-between gap-2'>
+              <span className='text-sm font-medium text-amber-800'>
+                Regularization Request
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  request.status === 'approved'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-amber-100 text-amber-700'
+                }`}
+              >
+                {request.status === 'approved' ? 'Approved' : 'Pending HR'}
+              </span>
+            </div>
+            {request.reason && (
+              <p className='text-xs text-amber-800'>{request.reason}</p>
+            )}
+          </div>
+        ) : (
+          <button
+            type='button'
+            onClick={() => onRegularize(day)}
+            className='flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-black hover:bg-gray-50'
+          >
+            <CalendarCheck size={16} />
+            Add Regularization
+          </button>
+        )}
+      </div>
     </div>
+  )
+}
+
+const RegularizationForm = ({ day, onClose, onSubmit, loading = false }) => {
+  const [description, setDescription] = useState('')
+  const [regularizationStatus, setRegularizationStatus] = useState('')
+
+  const handleSubmit = event => {
+    event.preventDefault()
+
+    const reason = description.trim()
+    if (!reason || !regularizationStatus) return
+
+    onSubmit({
+      attendanceDate: day.dateString,
+      reason,
+      requestedStatus: regularizationStatus
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className='space-y-4'>
+      {/* Regularization Status */}
+      <div>
+        <label className='mb-1.5 block text-sm font-medium text-gray-700'>
+          Regularization Status
+        </label>
+
+        <select
+          value={regularizationStatus}
+          onChange={event => setRegularizationStatus(event.target.value)}
+          required
+          className='w-full rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 outline-none focus:border-black'
+        >
+          <option value='' disabled>
+            Select regularization status
+          </option>
+          <option value='half_day'>Half Day</option>
+          <option value='present'>Present</option>
+          <option value='leave'>Leave</option>
+        </select>
+      </div>
+
+      {/* Reason */}
+      <div>
+        <label className='mb-1.5 block text-sm font-medium text-gray-700'>
+          Reason For Regularization
+        </label>
+
+        <textarea
+          value={description}
+          onChange={event => setDescription(event.target.value)}
+          rows={4}
+          required
+          placeholder='Please explain why you need attendance regularization...'
+          className='w-full resize-none rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-black'
+        />
+      </div>
+
+      {/* Actions */}
+      <div className='flex justify-end gap-3 pt-2'>
+        <button
+          type='button'
+          onClick={onClose}
+          className='rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50'
+        >
+          Cancel
+        </button>
+
+        <button
+          type='submit'
+          disabled={loading || !description.trim() || !regularizationStatus}
+          className='flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50'
+        >
+          {loading ? (
+            <LoaderCircle size={15} className='animate-spin' />
+          ) : (
+            <Send size={15} />
+          )}
+          {loading ? 'Submitting...' : 'Send Request'}
+        </button>
+      </div>
+    </form>
   )
 }
 
@@ -388,6 +509,24 @@ const Attendance = () => {
   const [monthlyData, setMonthlyData] = useState({})
   const [monthlyLoading, setMonthlyLoading] = useState(false)
   const [selectedDay, setSelectedDay] = useState(null)
+  const [selectedRegularizationDay, setSelectedRegularizationDay] =
+    useState(null)
+  const {
+    myRequests: regularizationRequestList = [],
+    loading: regularizationLoading = {},
+    error: regularizationError = {}
+  } = useSelector(state => state.regularization || {})
+
+  const regularizationRequests = useMemo(() => {
+    return (regularizationRequestList || []).reduce((map, request) => {
+      const date = String(request?.attendanceDate || request?.date || '').slice(
+        0,
+        10
+      )
+      if (date) map[date] = request
+      return map
+    }, {})
+  }, [regularizationRequestList])
 
   const [todayData, setTodayData] = useState(null)
   const [todayLoading, setTodayLoading] = useState(false)
@@ -398,6 +537,11 @@ const Attendance = () => {
 
   const canGoPrev = !joiningMonthKey || calendarMonth > joiningMonthKey
   const canGoNext = calendarMonth < todayMonthKey
+
+  // Load the employee's regularization requests from Redux/API.
+  useEffect(() => {
+    dispatch(getMyRegularization({ page: 1, limit: 100 }))
+  }, [dispatch])
 
   // ------------------------------------------------------
   // Fetch today's attendance
@@ -535,6 +679,18 @@ const Attendance = () => {
   }, [calendarMonth, fetchMonth])
 
   const refreshCalendar = () => loadMonths([calendarMonth])
+
+  // Submit the regularization request through Redux.
+  const handleRegularizationSubmit = async payload => {
+    try {
+      await dispatch(createRegularizationRequest(payload)).unwrap()
+      await dispatch(getMyRegularization({ page: 1, limit: 100 }))
+      setSelectedRegularizationDay(null)
+    } catch (error) {
+      // The Redux slice stores the API error; keep the form open for correction.
+      console.error('Regularization request failed:', error)
+    }
+  }
 
   // ------------------------------------------------------
   // Calendar cells
@@ -748,7 +904,7 @@ const Attendance = () => {
                   <ChevronLeft size={16} />
                 </button>
 
-                <span className='min-w-0 flex-1 text-center text-sm font-semibold text-gray-900 sm:min-w-[140px] sm:flex-none'>
+                <span className='min-w-0 flex-1 text-center text-sm font-semibold text-gray-900 sm:min-w-35 sm:flex-none'>
                   {formatMonth(calendarMonth)}
                 </span>
 
@@ -854,7 +1010,7 @@ const Attendance = () => {
                     disabled={cell.disabled}
                     onClick={() => setSelectedDay(cell)}
                     title={cell.disabled ? '' : cell.label}
-                    className={`flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center rounded-xl border p-1 text-center transition sm:min-h-[76px] sm:items-start sm:justify-between sm:p-2 sm:text-left ${
+                    className={`flex min-h-13 w-full min-w-0 flex-col items-center justify-center rounded-xl border p-1 text-center transition sm:min-h-19 sm:items-start sm:justify-between sm:p-2 sm:text-left ${
                       cell.disabled
                         ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
                         : cellClasses[cell.label] || cellClasses['No Record']
@@ -883,6 +1039,112 @@ const Attendance = () => {
             ))}
           </div>
         </section>
+
+        {/* My Regularization Requests */}
+        <section className='rounded-2xl border border-gray-200 bg-white p-4 sm:p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <div>
+              <h2 className='font-semibold text-gray-900'>
+                My Regularization Requests
+              </h2>
+              <p className='mt-1 text-sm text-gray-500'>
+                Track the status of your attendance correction requests.
+              </p>
+            </div>
+            <button
+              type='button'
+              onClick={() =>
+                dispatch(getMyRegularization({ page: 1, limit: 100 }))
+              }
+              disabled={Boolean(regularizationLoading?.getMyRequests)}
+              className='flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50'
+            >
+              <RefreshCw
+                size={14}
+                className={
+                  regularizationLoading?.getMyRequests ? 'animate-spin' : ''
+                }
+              />
+              Refresh
+            </button>
+          </div>
+
+          {regularizationError?.getMyRequests && (
+            <p className='mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700'>
+              {typeof regularizationError.getMyRequests === 'string'
+                ? regularizationError.getMyRequests
+                : 'Unable to load regularization requests.'}
+            </p>
+          )}
+
+          {regularizationLoading?.getMyRequests ? (
+            <div className='flex items-center gap-2 py-8 text-sm text-gray-500'>
+              <LoaderCircle size={16} className='animate-spin' /> Loading
+              requests...
+            </div>
+          ) : regularizationRequestList.length === 0 ? (
+            <p className='py-8 text-center text-sm text-gray-500'>
+              You have not submitted any regularization requests yet.
+            </p>
+          ) : (
+            <div className='mt-4 space-y-3'>
+              {regularizationRequestList.map(request => {
+                const requestStatus = String(
+                  request.status || 'pending'
+                ).toLowerCase()
+                const badgeClass =
+                  requestStatus === 'approved'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : requestStatus === 'rejected'
+                    ? 'bg-red-50 text-red-700'
+                    : 'bg-amber-50 text-amber-700'
+                return (
+                  <div
+                    key={request._id}
+                    className='rounded-xl border border-gray-100 p-4'
+                  >
+                    <div className='flex flex-wrap items-start justify-between gap-3'>
+                      <div>
+                        <p className='text-sm font-semibold text-gray-900'>
+                          {formatDate(request.attendanceDate || request.date)}
+                        </p>
+                        <p className='mt-1 text-xs text-gray-500'>
+                          Requested status:{' '}
+                          <span className='font-medium capitalize'>
+                            {String(request.requestedStatus || '').replaceAll(
+                              '_',
+                              ' '
+                            )}
+                          </span>
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${badgeClass}`}
+                      >
+                        {requestStatus}
+                      </span>
+                    </div>
+                    {request.reason && (
+                      <p className='mt-3 text-sm text-gray-600'>
+                        {request.reason}
+                      </p>
+                    )}
+                    {requestStatus === 'rejected' && request.rejectionReason && (
+                      <div className='mt-3 rounded-lg bg-red-50 p-3'>
+                        <p className='text-xs font-semibold text-red-700'>
+                          HR feedback
+                        </p>
+                        <p className='mt-1 text-sm text-red-700'>
+                          {request.rejectionReason}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </section>
       </div>
 
       {/* Day details modal */}
@@ -892,7 +1154,33 @@ const Attendance = () => {
         title='Attendance Details'
         size='md'
       >
-        {selectedDay && <DayDetails day={selectedDay} />}
+        {selectedDay && (
+          <DayDetails
+            day={selectedDay}
+            request={regularizationRequests[selectedDay.dateString]}
+            onRegularize={day => {
+              setSelectedDay(null)
+              setSelectedRegularizationDay(day)
+            }}
+          />
+        )}
+      </Modal>
+
+      {/* Regularization request modal */}
+      <Modal
+        isOpen={Boolean(selectedRegularizationDay)}
+        onClose={() => setSelectedRegularizationDay(null)}
+        title='Attendance Regularization'
+        size='md'
+      >
+        {selectedRegularizationDay && (
+          <RegularizationForm
+            day={selectedRegularizationDay}
+            onClose={() => setSelectedRegularizationDay(null)}
+            onSubmit={handleRegularizationSubmit}
+            loading={Boolean(regularizationLoading?.createRequest)}
+          />
+        )}
       </Modal>
     </div>
   )
