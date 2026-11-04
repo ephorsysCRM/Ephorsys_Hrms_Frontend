@@ -8,7 +8,7 @@ import {
   updateAttendanceStatus
 } from '../../redux/features/attendance/attendanceThunk'
 
-import {clearAttendanceStatusUpdate} from "../../redux/features/attendance/attendanceSlice"
+import { clearAttendanceStatusUpdate } from '../../redux/features/attendance/attendanceSlice'
 
 import Pagination from '../../UI/Pagination'
 
@@ -45,6 +45,7 @@ const isValidDate = value => {
   )
 }
 
+// Fallback rule (jab punch-in time available nahi ho, e.g. Absent):
 // Editing is allowed from day-before-yesterday and older.
 // Example: If today is 31 October, editing starts from 29 October.
 const canEditAttendance = attendanceDate => {
@@ -60,6 +61,17 @@ const canEditAttendance = attendanceDate => {
   const yesterday = yesterdayDate.toISOString().slice(0, 10)
 
   return attendanceDate < yesterday
+}
+
+// Punch-in ke 24 ghante baad edit allowed
+const EDIT_DELAY_MS = 12 * 60 * 60 * 1000
+
+const formatRemaining = ms => {
+  const totalMinutes = Math.max(1, Math.ceil(ms / 60000))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  return `${hours}h ${String(minutes).padStart(2, '0')}m`
 }
 
 // ==================================================
@@ -113,6 +125,32 @@ const getTimestamp = value => {
   const timestamp = new Date(value).getTime()
 
   return Number.isNaN(timestamp) ? null : timestamp
+}
+
+// Earliest punch-in of the day (first half or second half)
+const getFirstPunchIn = record => {
+  const times = [
+    record?.firstHalf?.checkIn?.time,
+    record?.secondHalf?.checkIn?.time
+  ]
+    .map(getTimestamp)
+    .filter(time => time !== null)
+
+  return times.length ? Math.min(...times) : null
+}
+
+// Punch-in + 24 hours ke baad editable
+const getEditInfo = (record, selectedDate, now) => {
+  const punchIn = getFirstPunchIn(record)
+
+  // Punch-in nahi hai (e.g. Absent) -> purana date-based rule
+  if (punchIn === null) {
+    return { editable: canEditAttendance(selectedDate), remainingMs: 0 }
+  }
+
+  const remainingMs = punchIn + EDIT_DELAY_MS - now
+
+  return { editable: remainingMs <= 0, remainingMs }
 }
 
 const formatTime = value => {
@@ -264,6 +302,9 @@ const Attendance = () => {
   // Local UI feedback
   const [updateSuccess, setUpdateSuccess] = useState('')
 
+  // Live clock for "Editable in Xh Ym" countdown
+  const [now, setNow] = useState(Date.now())
+
   const limit = 20
 
   // ==================================================
@@ -294,6 +335,16 @@ const Attendance = () => {
 
   const pagination =
     attendanceState.allAttendancePagination || attendanceState.pagination || {}
+
+  // ==================================================
+  // COUNTDOWN TIMER (har 30 sec)
+  // ==================================================
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   // ==================================================
   // FETCH ATTENDANCE
@@ -335,7 +386,7 @@ const Attendance = () => {
   // ==================================================
 
   const handleEditStatus = employee => {
-    if (!canEditAttendance(selectedDate)) return
+    if (!getEditInfo(employee.record, selectedDate, Date.now()).editable) return
 
     dispatch(clearAttendanceStatusUpdate())
 
@@ -355,7 +406,7 @@ const Attendance = () => {
   }
 
   const handleSaveStatus = async employee => {
-    if (!canEditAttendance(selectedDate)) return
+    if (!getEditInfo(employee.record, selectedDate, Date.now()).editable) return
     if (!employee?.key || !editStatus || updateLoading) return
 
     setUpdateSuccess('')
@@ -605,7 +656,12 @@ const Attendance = () => {
                 ) : filteredEmployees.length > 0 ? (
                   filteredEmployees.map(employee => {
                     const isEditing = editingId === employee.key
-                    const isEditable = canEditAttendance(selectedDate)
+                    const editInfo = getEditInfo(
+                      employee.record,
+                      selectedDate,
+                      now
+                    )
+                    const isEditable = editInfo.editable
 
                     return (
                       <tr key={employee.key} className='hover:bg-gray-50'>
@@ -744,7 +800,7 @@ const Attendance = () => {
                                   {employee.status}
                                 </span>
 
-                                {/* Edit only for eligible dates */}
+                                {/* Edit only after 24h from first punch-in */}
                                 {isEditable && (
                                   <button
                                     type='button'
@@ -754,6 +810,14 @@ const Attendance = () => {
                                   >
                                     <Edit size={14} />
                                   </button>
+                                )}
+
+                                {/* Countdown until editable */}
+                                {!isEditable && editInfo.remainingMs > 0 && (
+                                  <span className='whitespace-nowrap text-[11px] text-orange-600'>
+                                    Editable in{' '}
+                                    {formatRemaining(editInfo.remainingMs)}
+                                  </span>
                                 )}
                               </div>
 
