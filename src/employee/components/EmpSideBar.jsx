@@ -11,7 +11,8 @@ import {
   FileText,
   Settings,
   ChevronDown,
-  ClipboardList
+  ClipboardList,
+  CalendarSearch
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -39,6 +40,12 @@ const NAV_ITEMS = [
     label: 'My Attendance',
     icon: Users,
     path: '/employee/attendance',
+    
+  },
+  {
+    label: 'Regularization Requests',
+    icon: CalendarSearch,
+    path: '/employee/regularization',
     
   },
 
