@@ -15,7 +15,8 @@ import {
   User,
   Wallet,
   Megaphone,
-  FileCheck2
+  FileCheck2,
+  CalendarSearch
 } from 'lucide-react'
 
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
@@ -81,6 +82,11 @@ const HR_ITEMS = [
         label: 'Attendance Requests',
         path: '/hr/attendance-requests',
         icon: FileCheck2
+      },
+      {
+        label: 'Regularization Requests',
+        path: '/hr/regularization-requests',
+        icon: CalendarSearch
       },
       {
         label: 'Leave Management',
