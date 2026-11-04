@@ -96,7 +96,7 @@ const SummaryItem = ({ icon: Icon, label, value }) => (
       <span className='text-xs'>{label}</span>
     </div>
 
-    <p className='mt-2 break-words text-lg font-semibold text-gray-900'>
+    <p className='mt-2 wrap-break-word text-lg font-semibold text-gray-900'>
       {value}
     </p>
   </div>
@@ -152,7 +152,7 @@ const AttendanceHistoryModal = ({ month, records = [], summary, error }) => {
           </div>
 
           <div className='overflow-x-auto rounded-xl border border-gray-200'>
-            <table className='w-full min-w-[650px] text-left text-sm'>
+            <table className='w-full min-w-162.5 text-left text-sm'>
               <thead className='bg-gray-50 text-xs text-gray-500'>
                 <tr>
                   <th className='px-4 py-3 font-medium'>Date</th>

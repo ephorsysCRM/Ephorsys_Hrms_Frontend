@@ -621,7 +621,7 @@ const Attendance = () => {
 
           {/* Table */}
           <div className='w-full overflow-x-auto'>
-            <table className='w-full min-w-[950px] text-left'>
+            <table className='w-full min-w-237.5 text-left'>
               <thead className='bg-gray-50'>
                 <tr>
                   {[
@@ -710,7 +710,7 @@ const Attendance = () => {
                         {/* Status */}
                         <td className='px-4 py-4 sm:px-5'>
                           {isEditing ? (
-                            <div className='min-w-[220px] space-y-2'>
+                            <div className='min-w-55 space-y-2'>
                               <select
                                 value={editStatus}
                                 disabled={updateLoading}
@@ -822,7 +822,7 @@ const Attendance = () => {
                               </div>
 
                               {employee.reason && (
-                                <p className='max-w-[220px] text-[11px] text-gray-500'>
+                                <p className='max-w-55 text-[11px] text-gray-500'>
                                   Reason: {employee.reason}
                                 </p>
                               )}

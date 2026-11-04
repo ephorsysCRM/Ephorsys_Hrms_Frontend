@@ -1047,7 +1047,7 @@ const getRecordMinutes = record =>
   Math.max(
     0,
     Number(record?.totalWorkDuration || 0) ||
-      Number(record?.creditedDuration || 0)
+    Number(record?.creditedDuration || 0)
   )
 
 const isCheckedInNow = record =>
@@ -1227,8 +1227,8 @@ const DayDetails = ({ day, onRegularize, hasRequest }) => {
   const duration = !record
     ? '--'
     : isCheckedInNow(record)
-    ? 'In progress'
-    : formatDuration(getRecordMinutes(record))
+      ? 'In progress'
+      : formatDuration(getRecordMinutes(record))
 
   return (
     <div className='space-y-3'>
@@ -1248,9 +1248,8 @@ const DayDetails = ({ day, onRegularize, hasRequest }) => {
 
       <DetailRow icon={CalendarCheck} label='Status'>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            statusClasses[label] || 'bg-gray-100 text-gray-600'
-          }`}
+          className={`rounded-full px-3 py-1 text-xs font-medium ${statusClasses[label] || 'bg-gray-100 text-gray-600'
+            }`}
         >
           {label}
         </span>
@@ -1285,18 +1284,20 @@ const DayDetails = ({ day, onRegularize, hasRequest }) => {
 
 const RegularizationForm = ({ day, onClose, onSubmit }) => {
   const [description, setDescription] = useState('')
+  const [regularizationStatus, setRegularizationStatus] = useState('')
 
   const handleSubmit = event => {
     event.preventDefault()
 
     const reason = description.trim()
-    if (!reason) return
+    if (!reason || !regularizationStatus) return
 
     onSubmit({
       date: day.dateString,
       recordId: day.record?._id || null,
       reason,
       description: reason,
+      regularizationStatus,
       status: 'pending',
       requestedAt: new Date().toISOString()
     })
@@ -1304,6 +1305,28 @@ const RegularizationForm = ({ day, onClose, onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
+      {/* Regularization Status */}
+      <div>
+        <label className='mb-1.5 block text-sm font-medium text-gray-700'>
+          Regularization Status
+        </label>
+
+        <select
+          value={regularizationStatus}
+          onChange={event => setRegularizationStatus(event.target.value)}
+          required
+          className='w-full rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 outline-none focus:border-black'
+        >
+          <option value='' disabled>
+            Select regularization status
+          </option>
+          <option value='half_day'>Half Day</option>
+          <option value='present'>Present</option>
+          <option value='leave'>Leave</option>
+        </select>
+      </div>
+
+      {/* Reason */}
       <div>
         <label className='mb-1.5 block text-sm font-medium text-gray-700'>
           Reason For Regularization
@@ -1319,6 +1342,7 @@ const RegularizationForm = ({ day, onClose, onSubmit }) => {
         />
       </div>
 
+      {/* Actions */}
       <div className='flex justify-end gap-3 pt-2'>
         <button
           type='button'
@@ -1330,7 +1354,7 @@ const RegularizationForm = ({ day, onClose, onSubmit }) => {
 
         <button
           type='submit'
-          disabled={!description.trim()}
+          disabled={!description.trim() || !regularizationStatus}
           className='flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50'
         >
           <Send size={15} />
@@ -1414,7 +1438,7 @@ const Attendance = () => {
 
           setTodayData(
             records.find(record => record.date?.slice(0, 10) === todayString) ||
-              null
+            null
           )
         }
       } catch (error) {
@@ -1549,10 +1573,10 @@ const Attendance = () => {
 
     const recordsByDate = {}
 
-    ;(calendarData?.records || []).forEach(record => {
-      const key = record?.date?.slice(0, 10)
-      if (key) recordsByDate[key] = record
-    })
+      ; (calendarData?.records || []).forEach(record => {
+        const key = record?.date?.slice(0, 10)
+        if (key) recordsByDate[key] = record
+      })
 
     const cells = Array.from({ length: firstWeekDay }, () => null)
 
@@ -1649,9 +1673,8 @@ const Attendance = () => {
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                    statusClasses[todayStatus] || 'bg-gray-100 text-gray-600'
-                  }`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium ${statusClasses[todayStatus] || 'bg-gray-100 text-gray-600'
+                    }`}
                 >
                   {todayStatus}
                 </span>
@@ -1750,7 +1773,7 @@ const Attendance = () => {
                   <ChevronLeft size={16} />
                 </button>
 
-                <span className='min-w-0 flex-1 text-center text-sm font-semibold text-gray-900 sm:min-w-[140px] sm:flex-none'>
+                <span className='min-w-0 flex-1 text-center text-sm font-semibold text-gray-900 sm:min-w-35 sm:flex-none'>
                   {formatMonth(calendarMonth)}
                 </span>
 
@@ -1838,9 +1861,8 @@ const Attendance = () => {
               {WEEK_DAYS.map((name, index) => (
                 <div
                   key={name}
-                  className={`py-2 text-center text-xs font-medium ${
-                    index === 0 ? 'text-red-600' : 'text-gray-500'
-                  }`}
+                  className={`py-2 text-center text-xs font-medium ${index === 0 ? 'text-red-600' : 'text-gray-500'
+                    }`}
                 >
                   {name}
                 </div>
@@ -1856,11 +1878,10 @@ const Attendance = () => {
                     disabled={cell.disabled}
                     onClick={() => setSelectedDay(cell)}
                     title={cell.disabled ? '' : cell.label}
-                    className={`flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center rounded-xl border p-1 text-center transition sm:min-h-[76px] sm:items-start sm:justify-between sm:p-2 sm:text-left ${
-                      cell.disabled
-                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
-                        : cellClasses[cell.label] || cellClasses['No Record']
-                    } ${cell.isToday ? 'ring-2 ring-black ring-offset-1' : ''}`}
+                    className={`flex min-h-13 w-full min-w-0 flex-col items-center justify-center rounded-xl border p-1 text-center transition sm:min-h-19 sm:items-start sm:justify-between sm:p-2 sm:text-left ${cell.disabled
+                      ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                      : cellClasses[cell.label] || cellClasses['No Record']
+                      } ${cell.isToday ? 'ring-2 ring-black ring-offset-1' : ''}`}
                   >
                     <span className='text-sm font-semibold'>{cell.day}</span>
 
