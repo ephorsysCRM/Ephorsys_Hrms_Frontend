@@ -29,6 +29,7 @@ import EmpSalary from '../employee/pages/EmpSalary'
 import EmpAttendance from '../employee/pages/EmpAttendance'
 import MyDashboard from '../hr/pages/MyDashboard'
 import RegularizationRequests from '../hr/pages/RegularizationRequests'
+import Regularization from '../employee/pages/Regularization'
 
 const HrRoutes = (
   <Route path='hr'>
@@ -55,7 +56,10 @@ const HrRoutes = (
         <Route path='attendance' element={<Attendance />} />
         <Route path='attendance/:id' element={<AttendanceDetails />} />
         <Route path='attendance-requests' element={<AttendanceRequests />} />
-        <Route path='regularization-requests' element={<RegularizationRequests />} />
+        <Route
+          path='regularization-requests'
+          element={<RegularizationRequests />}
+        />
         <Route path='leave-management' element={<LeaveManagement />} />
         <Route path='payroll' element={<PayRoll />} />
         <Route path='payslips' element={<PaySlips />} />
@@ -66,6 +70,7 @@ const HrRoutes = (
           <Route path='dashboard' element={<MyDashboard />} />
           <Route path='profile' element={<EmpProfile />} />
           <Route path='attendance' element={<EmpAttendance />} />
+          <Route path='regularization' element={<Regularization />} />
           <Route path='leave' element={<EmpLeave />} />
           <Route path='salary' element={<EmpSalary />} />
         </Route>

@@ -79,12 +79,7 @@ const HR_ITEMS = [
         icon: CalendarDays
       },
       {
-        label: 'Attendance Requests',
-        path: '/hr/attendance-requests',
-        icon: FileCheck2
-      },
-      {
-        label: 'Regularization Requests',
+        label: 'Regularization Req',
         path: '/hr/regularization-requests',
         icon: CalendarSearch
       },
@@ -153,6 +148,11 @@ const SELF_ITEMS = [
     label: 'My Attendance',
     path: '/hr/my/attendance',
     icon: CalendarCheck
+  },
+  {
+    label: 'Regularization Requests',
+    icon: CalendarSearch,
+    path: '/hr/my/regularization'
   },
 
   {

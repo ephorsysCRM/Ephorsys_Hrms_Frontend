@@ -1,727 +1,856 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 
-import { useMemo, useState } from "react";
 import {
-    Search,
-    Filter,
-    Eye,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    FileText,
-    ChevronLeft,
-    ChevronRight,
-    X,
-    Check,
-    User,
-    CalendarDays,
-    Building2,
-    Briefcase,
-    AlertCircle,
-    MoreVertical
-} from "lucide-react";
+  Search,
+  Eye,
+  MoreVertical,
+  CheckCircle,
+  XCircle,
+  CalendarDays,
+  User,
+  RefreshCw,
+  FileText,
+  AlertCircle
+} from 'lucide-react'
 
-const regularizationData = [
-    {
-        _id: "6ae9de191e9bace821a59b9f",
-        employee: {
-            employeeId: "E/00989",
-            firstName: "Manoj@123",
-            middleName: "Kumar",
-            lastName: "Das",
-            profilePhoto:
-                "https://res.cloudinary.com/devrmpo2p/image/upload/v1792153457/hrms/employees/zzzzhkgl5k4tilikqxk5.jpg",
-            department: { name: "Hr" },
-            designation: "Software Developer",
-        },
-        attendanceDate: "2026-11-03",
-        reason: "I forgot to mark my attendance.",
-        requestedStatus: "present",
-        status: "approved",
-        reviewedBy: "Rahul Kumar Sharma",
-        reviewedAt: "2026-11-04T10:02:50.015Z",
-        rejectionReason: "",
-        createdAt: "2026-11-03T13:14:01.447Z",
-    },
-    {
-        _id: "6aeb03696950e71b3ba163bb",
-        employee: {
-            employeeId: "EMP001",
-            firstName: "Rahul",
-            middleName: "Kumar",
-            lastName: "Sharma",
-            profilePhoto:
-                "https://res.cloudinary.com/devrmpo2p/image/upload/v1791526376/hrms/employees/vdeu6yyxvpix4rnd3uog.png",
-            department: null,
-            designation: "Human Resource",
-        },
-        attendanceDate: "2026-11-02",
-        reason: "I forgot to mark my attendance.",
-        requestedStatus: "present",
-        status: "approved",
-        reviewedBy: "Rahul Kumar Sharma",
-        reviewedAt: "2026-11-04T10:06:04.820Z",
-        rejectionReason: "",
-        createdAt: "2026-11-04T10:05:29.200Z",
-    },
-    {
-        _id: "6aeb01200fcf6b3788fcab7e",
-        employee: {
-            employeeId: "E/00989",
-            firstName: "Manoj@123",
-            middleName: "Kumar",
-            lastName: "Das",
-            profilePhoto:
-                "https://res.cloudinary.com/devrmpo2p/image/upload/v1792153457/hrms/employees/zzzzhkgl5k4tilikqxk5.jpg",
-            department: { name: "Hr" },
-            designation: "Software Developer",
-        },
-        attendanceDate: "2026-11-02",
-        reason: "I forgot to mark my attendance.",
-        requestedStatus: "present",
-        status: "rejected",
-        reviewedBy: "Rahul Kumar Sharma",
-        reviewedAt: "2026-11-04T10:04:15.163Z",
-        rejectionReason:
-            "Your attendance proof is insufficient. Please provide valid supporting evidence.",
-        createdAt: "2026-11-04T09:55:44.564Z",
-    },
-    {
-        _id: "6aeb04136950e71b3ba163f3",
-        employee: {
-            employeeId: "E/00989",
-            firstName: "Manoj@123",
-            middleName: "Kumar",
-            lastName: "Das",
-            profilePhoto:
-                "https://res.cloudinary.com/devrmpo2p/image/upload/v1792153457/hrms/employees/zzzzhkgl5k4tilikqxk5.jpg",
-            department: { name: "Hr" },
-            designation: "Software Developer",
-        },
-        attendanceDate: "2026-10-30",
-        reason: "I forgot to mark my attendance.",
-        requestedStatus: "present",
-        status: "pending",
-        reviewedBy: null,
-        reviewedAt: null,
-        rejectionReason: "",
-        createdAt: "2026-11-04T10:08:19.344Z",
-    },
-];
+import { useDispatch, useSelector } from 'react-redux'
 
-const formatDate = (date) => {
-    if (!date) return "—";
+import {
+  getAllRegularization,
+  reviewRegularization
+} from '../../redux/features/regularization/regularizationThunk'
 
-    return new Date(date).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
-};
+import Pagination from '../../UI/Pagination'
+import Modal from '../../UI/Modal'
 
-const formatStatus = (status) => {
-    if (!status) return "—";
-
-    return status
-        .replace("_", " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-};
-
-const getEmployeeName = (employee) =>
-    [
-        employee?.firstName,
-        employee?.middleName,
-        employee?.lastName,
-    ]
-        .filter(Boolean)
-        .join(" ");
-
-const StatusBadge = ({ status }) => {
-    const styles = {
-        approved: "bg-green-100 text-green-700 border-green-200",
-        pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-        rejected: "bg-red-100 text-red-700 border-red-200",
-    };
-
-    const icons = {
-        approved: <CheckCircle2 size={13} />,
-        pending: <Clock size={13} />,
-        rejected: <XCircle size={13} />,
-    };
-
-    return (
-        <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${styles[status] || styles.pending
-                }`}
-        >
-            {icons[status]}
-            {formatStatus(status)}
-        </span>
-    );
-};
-
-const StatCard = ({ title, count, icon: Icon }) => (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-black">
-        <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <div className="rounded-lg bg-gray-100 p-2">
-                <Icon size={19} className="text-black" />
-            </div>
-        </div>
-        <h2 className="mt-4 text-3xl font-semibold text-black">
-            {count}
-        </h2>
-    </div>
-);
+import RegularizationDetailsModal from '../hrModals/RegularizationDetailsModal'
+import RegularizationRejectModal from '../hrModals/RegularizationRejectModal'
 
 const RegularizationRequests = () => {
-    const [requests, setRequests] = useState(regularizationData);
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [selectedRequest, setSelectedRequest] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch()
 
-    const [showRejectModal, setShowRejectModal] = useState(false);
-    const [rejectReason, setRejectReason] = useState("");
-    const [rejectRequest, setRejectRequest] = useState(null);
+  const {
+    allRequests = [],
+    allRequestsPagination = {},
+    loading = {},
+    error = {}
+  } = useSelector(state => state.regularization || {})
 
-    const [openMenuId, setOpenMenuId] = useState(null);
+  // --------------------------------------------------
+  // FILTER STATES
+  // --------------------------------------------------
 
-    const pageSize = 5;
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [attendanceDate, setAttendanceDate] = useState('')
 
-    const stats = {
-        total: requests.length,
-        approved: requests.filter((r) => r.status === "approved").length,
-        pending: requests.filter((r) => r.status === "pending").length,
-        rejected: requests.filter((r) => r.status === "rejected").length,
-    };
+  // --------------------------------------------------
+  // PAGINATION
+  // --------------------------------------------------
 
-    const filteredRequests = useMemo(() => {
-        return requests.filter((request) => {
-            const employeeName = getEmployeeName(request.employee);
+  const [currentPage, setCurrentPage] = useState(1)
+  const limit = 10
 
-            const matchesSearch =
-                employeeName.toLowerCase().includes(search.toLowerCase()) ||
-                request.employee?.employeeId?.toLowerCase().includes(search.toLowerCase()) ||
-                request.reason.toLowerCase().includes(search.toLowerCase()) ||
-                request.attendanceDate.includes(search);
+  // --------------------------------------------------
+  // ACTION MENU
+  // --------------------------------------------------
 
-            const matchesStatus =
-                statusFilter === "all" || request.status === statusFilter;
+  const [openActionId, setOpenActionId] = useState(null)
+  const [menuPosition, setMenuPosition] = useState(null)
 
-            return matchesSearch && matchesStatus;
-        });
-    }, [requests, search, statusFilter]);
+  // --------------------------------------------------
+  // DETAILS MODAL
+  // --------------------------------------------------
 
-    const totalPages = Math.max(
-        1,
-        Math.ceil(filteredRequests.length / pageSize)
-    );
+  const [selectedRequest, setSelectedRequest] = useState(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
 
-    const paginatedRequests = filteredRequests.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-    );
+  // --------------------------------------------------
+  // REJECT MODAL
+  // --------------------------------------------------
 
-    const handleSearch = (value) => {
-        setSearch(value);
-        setCurrentPage(1);
-    };
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [rejectRequestId, setRejectRequestId] = useState(null)
+  const [rejectionReason, setRejectionReason] = useState('')
 
-    const handleFilter = (value) => {
-        setStatusFilter(value);
-        setCurrentPage(1);
-    };
+  const [reviewLoading, setReviewLoading] = useState(false)
 
-    // Approve request
-    const handleApprove = (requestId) => {
-        setRequests((prev) =>
-            prev.map((request) =>
-                request._id === requestId
-                    ? {
-                        ...request,
-                        status: "approved",
-                        reviewedBy: "Current HR User",
-                        reviewedAt: new Date().toISOString(),
-                        rejectionReason: "",
-                    }
-                    : request
-            )
-        );
+  // --------------------------------------------------
+  // FETCH REQUESTS
+  // --------------------------------------------------
 
-        setSelectedRequest(null);
-    };
+  const fetchRequests = useCallback(() => {
+    const params = {
+      page: currentPage,
+      limit
+    }
 
-    // Open rejection modal
-    const openRejectModal = (request) => {
-        setRejectRequest(request);
-        setRejectReason("");
-        setShowRejectModal(true);
-    };
+    if (statusFilter !== 'all') {
+      params.status = statusFilter
+    }
 
-    // Reject request with mandatory reason
-    const handleReject = () => {
-        if (!rejectReason.trim()) return;
+    // Filter by exact attendance date.
+    // Both dates are the same because the user selects one date.
+    if (attendanceDate) {
+      params.startDate = attendanceDate
+      params.endDate = attendanceDate
+    }
 
-        setRequests((prev) =>
-            prev.map((request) =>
-                request._id === rejectRequest._id
-                    ? {
-                        ...request,
-                        status: "rejected",
-                        reviewedBy: "Current HR User",
-                        reviewedAt: new Date().toISOString(),
-                        rejectionReason: rejectReason.trim(),
-                    }
-                    : request
-            )
-        );
+    dispatch(getAllRegularization(params))
+  }, [dispatch, currentPage, statusFilter, attendanceDate])
 
-        setShowRejectModal(false);
-        setRejectRequest(null);
-        setRejectReason("");
-        setSelectedRequest(null);
-    };
+  useEffect(() => {
+    fetchRequests()
+  }, [fetchRequests])
+
+  // --------------------------------------------------
+  // HELPERS
+  // --------------------------------------------------
+
+  const getEmployeeName = employee => {
+    if (!employee) return 'Unknown Employee'
+
+    if (typeof employee === 'string') return employee
 
     return (
-        <div className="min-h-screen bg-gray-50 px-3 sm:px-5 lg:px-7">
-            <div className="mx-auto max-w-[1600px] space-y-7">
+      [employee.firstName, employee.middleName, employee.lastName]
+        .filter(Boolean)
+        .join(' ') ||
+      employee.name ||
+      employee.fullName ||
+      'Unknown Employee'
+    )
+  }
 
-                {/* Header */}
-                <div>
-                    <h1 className="text-lg font-bold tracking-tight text-black sm:text-3xl">
-                        Attendance Regularization
-                    </h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Review and manage employee attendance regularization requests.
-                    </p>
-                </div>
+  const getEmployeeImage = employee => {
+    if (!employee || typeof employee === 'string') return null
 
-                {/* Statistics */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard title="Total Requests" count={stats.total} icon={FileText} />
-                    <StatCard title="Approved" count={stats.approved} icon={CheckCircle2} />
-                    <StatCard title="Pending" count={stats.pending} icon={Clock} />
-                    <StatCard title="Rejected" count={stats.rejected} icon={XCircle} />
-                </div>
+    return employee.profilePhoto || null
+  }
 
-                {/* Table */}
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+  const getEmployeeId = employee => {
+    if (!employee) return '-'
 
-                    <div className="flex flex-col justify-between gap-4 border-b border-gray-200 p-5 lg:flex-row lg:items-center">
-                        <div>
-                            <h2 className="text-lg font-semibold text-black">
-                                Employee Requests
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-500">
-                                Review employee requests and take appropriate action.
-                            </p>
-                        </div>
+    if (typeof employee === 'string') return employee
 
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                            <div className="relative">
-                                <Search
-                                    size={17}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Search employee..."
-                                    value={search}
-                                    onChange={(e) => handleSearch(e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-black sm:w-64"
-                                />
-                            </div>
+    return employee.employeeId || employee.empId || employee._id || '-'
+  }
 
-                            <div className="relative">
-                                <Filter
-                                    size={16}
-                                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                                />
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => handleFilter(e.target.value)}
-                                    className="w-full appearance-none rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-8 text-sm outline-none focus:border-black sm:w-40"
-                                >
-                                    <option value="all">All Status</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="rejected">Rejected</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+  const getDepartmentName = employee => {
+    if (!employee || typeof employee === 'string') return '-'
 
-                    <div className="w-full overflow-x-auto">
-                        <table className="w-full min-w-[1100px] text-left">
-                            <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50">
-                                    {[
-                                        "Employee",
-                                        "Attendance Date",
-                                        "Reason",
-                                        "Requested Status",
-                                        "Request Status",
-                                        "Action",
-                                    ].map((heading) => (
-                                        <th
-                                            key={heading}
-                                            className="whitespace-nowrap px-5 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500"
-                                        >
-                                            {heading}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
+    if (typeof employee.department === 'object') {
+      return employee.department?.name || '-'
+    }
 
-                            <tbody className="divide-y divide-gray-100">
-                                {paginatedRequests.length > 0 ? (
-                                    paginatedRequests.map((request) => (
-                                        <tr
-                                            key={request._id}
-                                            className="transition hover:bg-gray-50"
-                                        >
-                                            <td className="whitespace-nowrap px-5 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    {request.employee?.profilePhoto ? (
-                                                        <img
-                                                            src={request.employee.profilePhoto}
-                                                            alt=""
-                                                            className="h-10 w-10 rounded-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                                                            <User size={18} />
-                                                        </div>
-                                                    )}
+    return employee.department || '-'
+  }
 
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-black">
-                                                            {getEmployeeName(request.employee)}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {request.employee?.employeeId}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
+  const getReviewerName = reviewer => {
+    if (!reviewer) return '-'
 
-                                            <td className="whitespace-nowrap px-5 py-4 text-sm text-black">
-                                                {formatDate(request.attendanceDate)}
-                                            </td>
+    if (typeof reviewer === 'string') return reviewer
 
-                                            <td className="max-w-48 px-5 py-4 text-sm text-gray-600">
-                                                <span className="line-clamp-2">
-                                                    {request.reason}
-                                                </span>
-                                            </td>
+    return (
+      [reviewer.firstName, reviewer.middleName, reviewer.lastName]
+        .filter(Boolean)
+        .join(' ') ||
+      reviewer.name ||
+      '-'
+    )
+  }
 
-                                            <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700">
-                                                {formatStatus(request.requestedStatus)}
-                                            </td>
+  // --------------------------------------------------
+  // DATE HELPERS
+  // --------------------------------------------------
 
-                                            <td className="whitespace-nowrap px-5 py-4">
-                                                <StatusBadge status={request.status} />
-                                            </td>
+  const formatDate = date => {
+    if (!date) return '-'
 
-                                            <td className="px-5 py-4">
-                                                <div className="relative flex justify-center">
-                                                    <button
-                                                        onClick={() =>
-                                                            setOpenMenuId(
-                                                                openMenuId === request._id ? null : request._id
-                                                            )
-                                                        }
-                                                        title="More options"
-                                                        className="rounded-lg border border-gray-200 p-2 text-gray-600 transition hover:border-black hover:bg-gray-100"
-                                                    >
-                                                        <MoreVertical size={18} />
-                                                    </button>
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const [year, month, day] = date.split('-')
 
-                                                    {openMenuId === request._id && (
-                                                        <div className="absolute right-8 bottom-0 z-30 w-44 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day)
+      ).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    }
 
-                                                            {/* View */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedRequest(request);
-                                                                    setOpenMenuId(null);
-                                                                }}
-                                                                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                                            >
-                                                                <Eye size={15} />
-                                                                View Details
-                                                            </button>
+    const parsedDate = new Date(date)
 
-                                                            {request.status === "pending" && (
-                                                                <>
-                                                                    {/* Approve */}
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            handleApprove(request._id);
-                                                                            setOpenMenuId(null);
-                                                                        }}
-                                                                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-green-700 hover:bg-green-50"
-                                                                    >
-                                                                        <Check size={15} />
-                                                                        Approve
-                                                                    </button>
+    if (Number.isNaN(parsedDate.getTime())) return '-'
 
-                                                                    {/* Reject */}
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            openRejectModal(request);
-                                                                            setOpenMenuId(null);
-                                                                        }}
-                                                                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
-                                                                    >
-                                                                        <X size={15} />
-                                                                        Reject
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="6" className="px-5 py-16 text-center">
-                                            <FileText
-                                                size={32}
-                                                className="mx-auto mb-3 text-gray-300"
-                                            />
-                                            <p className="font-medium text-black">
-                                                No requests found
-                                            </p>
-                                            <p className="mt-1 text-sm text-gray-500">
-                                                Try changing your search or filters.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+    return parsedDate.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
 
-                    {/* Pagination */}
-                    <div className="flex flex-col justify-between gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center mr-16">
-                        <p className="text-sm text-gray-500">
-                            Showing{" "}
-                            <span className="font-medium text-black">
-                                {filteredRequests.length === 0
-                                    ? 0
-                                    : (currentPage - 1) * pageSize + 1}
-                                {" - "}
-                                {Math.min(currentPage * pageSize, filteredRequests.length)}
-                            </span>{" "}
-                            of{" "}
-                            <span className="font-medium text-black">
-                                {filteredRequests.length}
-                            </span>{" "}
-                            requests
-                        </p>
+  const formatDateTime = date => {
+    if (!date) return '-'
 
-                        <div className="flex items-center">
-                            <button
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage((p) => p - 1)}
-                                className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:border-black disabled:opacity-30"
-                            >
-                                <ChevronLeft size={17} />
-                            </button>
+    const parsedDate = new Date(date)
 
-                            <span className="px-3 text-sm font-medium text-black">
-                                {currentPage} / {totalPages}
-                            </span>
+    if (Number.isNaN(parsedDate.getTime())) return '-'
 
-                            <button
-                                disabled={currentPage === totalPages}
-                                onClick={() => setCurrentPage((p) => p + 1)}
-                                className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:border-black disabled:opacity-30"
-                            >
-                                <ChevronRight size={17} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    return parsedDate.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
-            {/* Request Details Modal */}
-            {selectedRequest && (
-                <div
-                    className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
-                    onClick={() => setSelectedRequest(null)}
-                >
-                    <div
-                        className="my-8 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-5 shadow-xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="mb-6 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-black">
-                                    Request Details
-                                </h2>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Employee attendance regularization information
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedRequest(null)}
-                                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+  // --------------------------------------------------
+  // STATUS HELPERS
+  // --------------------------------------------------
 
-                        <div className="mb-5 flex items-center gap-3 rounded-lg border border-gray-200 p-4">
-                            <img
-                                src={selectedRequest.employee?.profilePhoto}
-                                alt=""
-                                className="h-14 w-14 rounded-full object-cover"
-                            />
-                            <div>
-                                <p className="font-semibold text-black">
-                                    {getEmployeeName(selectedRequest.employee)}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    {selectedRequest.employee?.employeeId}
-                                </p>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    {selectedRequest.employee?.designation}
-                                </p>
-                            </div>
-                        </div>
+  const getStatusClass = status => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+        return 'bg-green-100 text-green-700'
 
-                        <div className="space-y-4">
-                            {[
-                                ["Department", selectedRequest.employee?.department?.name || "—"],
-                                ["Attendance Date", formatDate(selectedRequest.attendanceDate)],
-                                ["Requested Status", formatStatus(selectedRequest.requestedStatus)],
-                                ["Employee Reason", selectedRequest.reason],
-                                ["Reviewed By", selectedRequest.reviewedBy || "Not reviewed yet"],
-                                ["Reviewed At", formatDate(selectedRequest.reviewedAt)],
-                                ["Submitted At", formatDate(selectedRequest.createdAt)],
-                            ].map(([label, value]) => (
-                                <div key={label} className="border-b border-gray-100 pb-3">
-                                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">
-                                        {label}
-                                    </p>
-                                    <p className="break-words text-sm font-medium text-gray-800">
-                                        {value}
-                                    </p>
-                                </div>
-                            ))}
+      case 'rejected':
+        return 'bg-red-100 text-red-700'
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-500">
-                                    Request Status
-                                </span>
-                                <StatusBadge status={selectedRequest.status} />
-                            </div>
+      case 'pending':
+      default:
+        return 'bg-amber-100 text-amber-700'
+    }
+  }
 
-                            {selectedRequest.rejectionReason && (
-                                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-                                    <p className="mb-1 text-xs font-semibold uppercase text-red-600">
-                                        Rejection Reason
-                                    </p>
-                                    <p className="text-sm text-red-700">
-                                        {selectedRequest.rejectionReason}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+  const getRequestedStatusLabel = status => {
+    switch (status?.toLowerCase()) {
+      case 'present':
+        return 'Present'
 
-                        {selectedRequest.status === "pending" && (
-                            <div className="mt-6 grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => handleApprove(selectedRequest._id)}
-                                    className="flex items-center justify-center gap-2 rounded-lg bg-green-600 py-3 text-sm font-medium text-white transition hover:bg-green-700"
-                                >
-                                    <Check size={17} />
-                                    Approve
-                                </button>
+      case 'half_day':
+        return 'Half Day'
 
-                                <button
-                                    onClick={() => openRejectModal(selectedRequest)}
-                                    className="flex items-center justify-center gap-2 rounded-lg bg-red-600 py-3 text-sm font-medium text-white transition hover:bg-red-700"
-                                >
-                                    <X size={17} />
-                                    Reject
-                                </button>
-                            </div>
-                        )}
+      case 'leave':
+        return 'Leave'
 
-                        <button
-                            onClick={() => setSelectedRequest(null)}
-                            className="mt-3 w-full rounded-lg border border-gray-200 py-3 text-sm font-medium text-black transition hover:bg-gray-50"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+      default:
+        return status || '-'
+    }
+  }
 
-            {/* Reject Confirmation Modal */}
-            {showRejectModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-center gap-3">
-                            <div className="rounded-full bg-red-100 p-3 text-red-600">
-                                <AlertCircle size={22} />
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-black">
-                                    Reject Request
-                                </h2>
-                                <p className="text-sm text-gray-500">
-                                    Provide a reason for rejecting this request.
-                                </p>
-                            </div>
-                        </div>
+  // --------------------------------------------------
+  // ACTION MENU POSITION
+  // Render menu outside the table to prevent clipping.
+  // --------------------------------------------------
 
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Rejection Reason <span className="text-red-500">*</span>
-                        </label>
+  const toggleActionMenu = (event, request) => {
+    event.preventDefault()
+    event.stopPropagation()
 
-                        <textarea
-                            rows="4"
-                            value={rejectReason}
-                            onChange={(e) => setRejectReason(e.target.value)}
-                            placeholder="Enter the reason for rejection..."
-                            className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm outline-none focus:border-black"
-                        />
+    if (openActionId === request._id) {
+      setOpenActionId(null)
+      setMenuPosition(null)
+      return
+    }
 
-                        <p className="mt-1 text-xs text-gray-400">
-                            A rejection reason is mandatory.
-                        </p>
+    const rect = event.currentTarget.getBoundingClientRect()
 
-                        <div className="mt-5 flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowRejectModal(false);
-                                    setRejectRequest(null);
-                                    setRejectReason("");
-                                }}
-                                className="flex-1 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                            >
-                                Cancel
-                            </button>
+    const menuWidth = 190
+    const menuHeight = request.status === 'pending' ? 150 : 55
 
-                            <button
-                                onClick={handleReject}
-                                disabled={!rejectReason.trim()}
-                                className="flex-1 rounded-lg bg-red-600 py-3 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
-                            >
-                                Confirm Reject
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+    let left = rect.right - menuWidth
+    let top = rect.bottom + 6
+
+    // Keep menu inside the screen horizontally.
+    left = Math.max(8, Math.min(left, window.innerWidth - menuWidth - 8))
+
+    // Open upward when there isn't enough space below.
+    if (top + menuHeight > window.innerHeight - 8) {
+      top = rect.top - menuHeight - 6
+    }
+
+    top = Math.max(8, top)
+
+    setMenuPosition({ top, left })
+    setOpenActionId(request._id)
+  }
+
+  const closeActionMenu = () => {
+    setOpenActionId(null)
+    setMenuPosition(null)
+  }
+
+  // --------------------------------------------------
+  // VIEW DETAILS
+  // --------------------------------------------------
+
+  const handleViewDetails = request => {
+    closeActionMenu()
+    setSelectedRequest(request)
+    setShowDetailsModal(true)
+  }
+
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false)
+    setSelectedRequest(null)
+  }
+
+  // --------------------------------------------------
+  // APPROVE REQUEST
+  // --------------------------------------------------
+
+  const handleApprove = async request => {
+    if (!request?._id) return
+
+    const confirmed = window.confirm(
+      'Are you sure you want to approve this regularization request?'
+    )
+
+    if (!confirmed) return
+
+    try {
+      setReviewLoading(true)
+      closeActionMenu()
+
+      await dispatch(
+        reviewRegularization({
+          regularizationId: request._id,
+          status: 'approved'
+        })
+      ).unwrap()
+
+      await fetchRequests()
+
+      window.alert('Regularization request approved successfully.')
+    } catch (err) {
+      window.alert(
+        typeof err === 'string'
+          ? err
+          : err?.message || 'Failed to approve request.'
+      )
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // --------------------------------------------------
+  // REJECT REQUEST
+  // --------------------------------------------------
+
+  const openRejectModal = request => {
+    closeActionMenu()
+    setRejectRequestId(request._id)
+    setRejectionReason('')
+    setShowRejectModal(true)
+  }
+
+  const closeRejectModal = () => {
+    setShowRejectModal(false)
+    setRejectRequestId(null)
+    setRejectionReason('')
+  }
+
+  const handleReject = async () => {
+    if (!rejectRequestId) return
+
+    if (!rejectionReason.trim()) {
+      window.alert('Please enter a rejection reason.')
+      return
+    }
+
+    try {
+      setReviewLoading(true)
+
+      await dispatch(
+        reviewRegularization({
+          regularizationId: rejectRequestId,
+          status: 'rejected',
+          rejectionReason: rejectionReason.trim()
+        })
+      ).unwrap()
+
+      closeRejectModal()
+
+      await fetchRequests()
+
+      window.alert('Regularization request rejected successfully.')
+    } catch (err) {
+      window.alert(
+        typeof err === 'string'
+          ? err
+          : err?.message || 'Failed to reject request.'
+      )
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // --------------------------------------------------
+  // SEARCH
+  // --------------------------------------------------
+
+  const filteredRequests = useMemo(() => {
+    if (!searchTerm.trim()) return allRequests
+
+    const search = searchTerm.toLowerCase()
+
+    return allRequests.filter(request => {
+      const employeeName = getEmployeeName(request.employee)
+      const employeeId = getEmployeeId(request.employee)
+
+      return (
+        employeeName.toLowerCase().includes(search) ||
+        String(employeeId).toLowerCase().includes(search) ||
+        String(request.reason || '')
+          .toLowerCase()
+          .includes(search) ||
+        String(request.status || '')
+          .toLowerCase()
+          .includes(search)
+      )
+    })
+  }, [allRequests, searchTerm])
+
+  // --------------------------------------------------
+  // RESET FILTERS
+  // --------------------------------------------------
+
+  const handleResetFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setAttendanceDate('')
+    setCurrentPage(1)
+    closeActionMenu()
+  }
+
+  // --------------------------------------------------
+  // PAGINATION
+  // --------------------------------------------------
+
+  const totalPages = Math.max(1, allRequestsPagination?.totalPages || 1)
+
+  const handlePageChange = page => {
+    setCurrentPage(page)
+    closeActionMenu()
+  }
+
+  // Server-side total count after filters.
+  const totalRecords = allRequestsPagination?.totalRecords ?? allRequests.length
+
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
+
+  return (
+    <div className='mx-auto w-full max-w-[1500px] space-y-5 py-2'>
+      {/* HEADER */}
+      <div className='flex flex-col justify-between gap-3 sm:flex-row sm:items-center'>
+        <div>
+          <h1 className='text-2xl font-bold text-gray-900'>
+            Regularization Requests
+          </h1>
+
+          <p className='mt-1 text-sm text-gray-500'>
+            Review and manage employee attendance regularization requests.
+          </p>
         </div>
-    );
-};
 
-export default RegularizationRequests;
+        <button
+          type='button'
+          onClick={fetchRequests}
+          disabled={loading.getAllRequests || reviewLoading}
+          className='inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50'
+        >
+          <RefreshCw
+            size={17}
+            className={loading.getAllRequests ? 'animate-spin' : ''}
+          />
+          Refresh
+        </button>
+      </div>
+
+      {/* FILTER SECTION */}
+      <div className='rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5'>
+        <div className='grid grid-cols-1 gap-3 lg:grid-cols-12'>
+          {/* SEARCH */}
+          <div className='relative lg:col-span-6'>
+            <Search
+              size={18}
+              className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
+            />
+
+            <input
+              type='text'
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder='Search employee or reason...'
+              className='h-12 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+            />
+          </div>
+
+          {/* STATUS */}
+          <div className='lg:col-span-3'>
+            <select
+              value={statusFilter}
+              onChange={e => {
+                setStatusFilter(e.target.value)
+                setCurrentPage(1)
+                closeActionMenu()
+              }}
+              className='h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+            >
+              <option value='all'>All Status</option>
+              <option value='pending'>Pending</option>
+              <option value='approved'>Approved</option>
+              <option value='rejected'>Rejected</option>
+            </select>
+          </div>
+
+          {/* ATTENDANCE DATE */}
+          <div className='relative lg:col-span-3'>
+            <CalendarDays
+              size={18}
+              className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
+            />
+
+            <input
+              type='date'
+              value={attendanceDate}
+              onChange={e => {
+                setAttendanceDate(e.target.value)
+                setCurrentPage(1)
+                closeActionMenu()
+              }}
+              className='h-12 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+              title='Select Attendance Date'
+            />
+          </div>
+        </div>
+
+        {/* FILTER FOOTER */}
+        <div className='mt-4 flex flex-col justify-between gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:items-center'>
+          <p className='text-xs text-gray-500'>
+            {attendanceDate
+              ? `Showing requests for attendance date: ${formatDate(
+                  attendanceDate
+                )}`
+              : 'Filter requests by employee, status or attendance date.'}
+          </p>
+
+          <button
+            type='button'
+            onClick={handleResetFilters}
+            className='text-left text-sm font-medium text-blue-600 transition hover:text-blue-800 sm:text-right'
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      {/* ERROR */}
+      {error.getAllRequests && (
+        <div className='flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700'>
+          <AlertCircle size={18} />
+          {error.getAllRequests}
+        </div>
+      )}
+
+      {/* TABLE CONTAINER */}
+      <div className='rounded-2xl border border-gray-200 bg-white shadow-sm'>
+        {/* TABLE HEADER */}
+        <div className='flex flex-col justify-between gap-2 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center'>
+          <div>
+            <h2 className='font-semibold text-gray-900'>Employee Requests</h2>
+
+            <p className='mt-1 text-xs text-gray-500'>
+              {attendanceDate
+                ? `${totalRecords} requests on ${formatDate(attendanceDate)}`
+                : `${totalRecords} total requests`}
+            </p>
+          </div>
+
+          {attendanceDate && (
+            <span className='inline-flex w-fit items-center rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700'>
+              {formatDate(attendanceDate)}
+            </span>
+          )}
+        </div>
+
+        {/* TABLE SCROLL */}
+        <div className='w-full overflow-x-auto'>
+          <table className='w-full min-w-[1100px] table-fixed text-left'>
+            <colgroup>
+              <col className='w-[21%]' />
+              <col className='w-[14%]' />
+              <col className='w-[17%]' />
+              <col className='w-[14%]' />
+              <col className='w-[14%]' />
+              <col className='w-[13%]' />
+              <col className='w-[7%]' />
+            </colgroup>
+
+            <thead className='bg-gray-50'>
+              <tr className='border-b border-gray-200 text-xs font-semibold uppercase tracking-wide text-gray-500'>
+                <th className='px-5 py-4'>Employee</th>
+                <th className='px-5 py-4'>Attendance Date</th>
+                <th className='px-5 py-4'>Reason</th>
+                <th className='px-5 py-4'>Requested Status</th>
+                <th className='px-5 py-4'>Request Status</th>
+                <th className='px-5 py-4'>Submitted On</th>
+                <th className='px-5 py-4 text-center'>Action</th>
+              </tr>
+            </thead>
+
+            <tbody className='divide-y divide-gray-100'>
+              {loading.getAllRequests ? (
+                <tr>
+                  <td colSpan={7} className='px-5 py-16 text-center'>
+                    <RefreshCw
+                      size={25}
+                      className='mx-auto animate-spin text-blue-600'
+                    />
+
+                    <p className='mt-3 text-sm text-gray-500'>
+                      Loading regularization requests...
+                    </p>
+                  </td>
+                </tr>
+              ) : filteredRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className='px-5 py-16 text-center'>
+                    <FileText size={36} className='mx-auto text-gray-300' />
+
+                    <p className='mt-3 font-medium text-gray-700'>
+                      No requests found
+                    </p>
+
+                    <p className='mt-1 text-sm text-gray-500'>
+                      {attendanceDate
+                        ? `No requests found for ${formatDate(attendanceDate)}.`
+                        : 'No regularization requests match your filters.'}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredRequests.map(request => (
+                  <tr key={request._id} className='transition hover:bg-gray-50'>
+                    {/* EMPLOYEE */}
+                    <td className='px-5 py-4'>
+                      <div className='flex min-w-0 items-center gap-3'>
+                        <div className='flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-blue-50 text-blue-600'>
+                          {getEmployeeImage(request.employee) ? (
+                            <img
+                              src={getEmployeeImage(request.employee)}
+                              alt={getEmployeeName(request.employee)}
+                              className='h-full w-full object-cover'
+                              onError={e => {
+                                e.currentTarget.style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <User size={20} />
+                          )}
+                        </div>
+
+                        <div className='min-w-0'>
+                          <p
+                            className='truncate text-sm font-semibold text-gray-800'
+                            title={getEmployeeName(request.employee)}
+                          >
+                            {getEmployeeName(request.employee)}
+                          </p>
+
+                          <p className='mt-1 truncate text-xs text-gray-500'>
+                            ID: {getEmployeeId(request.employee)}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* ATTENDANCE DATE */}
+                    <td className='px-5 py-4 text-sm text-gray-700'>
+                      {formatDate(request.attendanceDate)}
+                    </td>
+
+                    {/* REASON */}
+                    <td className='px-5 py-4'>
+                      <p
+                        className='truncate text-sm text-gray-600'
+                        title={request.reason || ''}
+                      >
+                        {request.reason || '-'}
+                      </p>
+                    </td>
+
+                    {/* REQUESTED STATUS */}
+                    <td className='px-5 py-4'>
+                      <span className='inline-flex whitespace-nowrap rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-medium capitalize text-blue-700'>
+                        {getRequestedStatusLabel(request.requestedStatus)}
+                      </span>
+                    </td>
+
+                    {/* REQUEST STATUS */}
+                    <td className='px-5 py-4'>
+                      <span
+                        className={`inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${getStatusClass(
+                          request.status
+                        )}`}
+                      >
+                        {request.status || 'Pending'}
+                      </span>
+                    </td>
+
+                    {/* SUBMITTED ON */}
+                    <td className='px-5 py-4 text-sm text-gray-600'>
+                      {formatDate(request.createdAt)}
+                    </td>
+
+                    {/* ACTION BUTTON */}
+                    <td className='px-5 py-4 text-center'>
+                      <button
+                        type='button'
+                        onClick={e => toggleActionMenu(e, request)}
+                        className='inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-800'
+                        aria-label='Open request actions'
+                      >
+                        <MoreVertical size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGINATION */}
+        {!loading.getAllRequests && allRequests.length > 0 && (
+          <div className='flex flex-col justify-between gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center'>
+            <p className='text-xs text-gray-500'>
+              Page {allRequestsPagination?.currentPage || currentPage} of{' '}
+              {totalPages}
+            </p>
+
+            <Pagination
+              currentPage={allRequestsPagination?.currentPage || currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* --------------------------------------------------
+          ACTION MENU - OUTSIDE TABLE USING PORTAL
+      -------------------------------------------------- */}
+
+      {openActionId &&
+        menuPosition &&
+        createPortal(
+          <>
+            <button
+              type='button'
+              aria-label='Close action menu'
+              className='fixed inset-0 z-[9998] cursor-default'
+              onClick={closeActionMenu}
+            />
+
+            <div
+              className='fixed z-[9999] w-[190px] overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-2xl'
+              style={{
+                top: menuPosition.top,
+                left: menuPosition.left
+              }}
+            >
+              <button
+                type='button'
+                onClick={() => {
+                  const request = allRequests.find(
+                    item => item._id === openActionId
+                  )
+
+                  if (request) handleViewDetails(request)
+                }}
+                className='flex w-full items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50'
+              >
+                <Eye size={17} />
+                View Details
+              </button>
+
+              {(() => {
+                const request = allRequests.find(
+                  item => item._id === openActionId
+                )
+
+                if (request?.status !== 'pending') return null
+
+                return (
+                  <>
+                    <button
+                      type='button'
+                      disabled={reviewLoading}
+                      onClick={() => handleApprove(request)}
+                      className='flex w-full items-center gap-3 px-4 py-3 text-sm text-green-700 transition hover:bg-green-50 disabled:opacity-50'
+                    >
+                      <CheckCircle size={17} />
+                      Approve
+                    </button>
+
+                    <button
+                      type='button'
+                      disabled={reviewLoading}
+                      onClick={() => openRejectModal(request)}
+                      className='flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-50'
+                    >
+                      <XCircle size={17} />
+                      Reject
+                    </button>
+                  </>
+                )
+              })()}
+            </div>
+          </>,
+          document.body
+        )}
+
+      {/* --------------------------------------------------
+          VIEW DETAILS MODAL
+      -------------------------------------------------- */}
+
+      <Modal
+        isOpen={showDetailsModal}
+        onClose={closeDetailsModal}
+        title='Regularization Request Details'
+        size='lg'
+      >
+        <RegularizationDetailsModal request={selectedRequest} />
+      </Modal>
+
+      {/* --------------------------------------------------
+          REJECT MODAL
+      -------------------------------------------------- */}
+
+      <Modal
+        isOpen={showRejectModal}
+        onClose={closeRejectModal}
+        title='Reject Regularization Request'
+        size='md'
+      >
+        <RegularizationRejectModal
+          rejectionReason={rejectionReason}
+          setRejectionReason={setRejectionReason}
+          handleReject={handleReject}
+          reviewLoading={reviewLoading}
+          onClose={closeRejectModal}
+        />
+      </Modal>
+    </div>
+  )
+}
+
+export default RegularizationRequests
