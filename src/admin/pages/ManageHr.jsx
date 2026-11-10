@@ -1,587 +1,374 @@
-import { useMemo, useState, useEffect } from 'react';
+import { Search, MoreHorizontal, Eye, Pencil, Users, Plus } from 'lucide-react'
 
-import {
-  Users,
-  UserCheck,
-  UserX,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-} from 'lucide-react';
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-import Pagination from '../../UI/Pagination';
-import CreateHRModal from '../adminModals/CreateHrModal';
-import ViewHRDetailsModal from '../adminModals/ViewHrDetailsModal';
+import Pagination from '../../UI/Pagination'
+import { getAllEmployees } from '../../redux/features/employee/employeeThunk'
 
-const initialHrList = [
-  {
-    id: 1,
-    name: 'Rahul Sharma',
-    email: 'rahul@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2026-01-15',
-    status: 'Active'
-  },
-  {
-    id: 2,
-    name: 'Priya Das',
-    email: 'priya@company.com',
-    department: 'Human Resources',
-    designation: 'HR Manager',
-    joiningDate: '2025-11-10',
-    status: 'Active'
-  },
-  {
-    id: 3,
-    name: 'Amit Kumar',
-    email: 'amit@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2025-08-20',
-    status: 'Inactive'
-  },
-  {
-    id: 4,
-    name: 'Sneha Patnaik',
-    email: 'sneha@company.com',
-    department: 'Human Resources',
-    designation: 'Senior HR Executive',
-    joiningDate: '2025-07-12',
-    status: 'Active'
-  },
-  {
-    id: 5,
-    name: 'Rakesh Das',
-    email: 'rakesh@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2025-06-05',
-    status: 'Active'
-  },
-  {
-    id: 6,
-    name: 'Ananya Rout',
-    email: 'ananya@company.com',
-    department: 'Human Resources',
-    designation: 'HR Manager',
-    joiningDate: '2025-04-18',
-    status: 'Inactive'
-  },
-  {
-    id: 7,
-    name: 'Suman Sahu',
-    email: 'suman@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2025-03-10',
-    status: 'Active'
-  },
-  {
-    id: 8,
-    name: 'Puja Mohanty',
-    email: 'puja@company.com',
-    department: 'Human Resources',
-    designation: 'Senior HR Executive',
-    joiningDate: '2025-02-15',
-    status: 'Active'
-  },
-  {
-    id: 9,
-    name: 'Deepak Kumar',
-    email: 'deepak@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2025-01-20',
-    status: 'Active'
-  },
-  {
-    id: 10,
-    name: 'Swati Nayak',
-    email: 'swati@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2024-12-10',
-    status: 'Inactive'
-  },
-  {
-    id: 11,
-    name: 'Rajesh Behera',
-    email: 'rajesh@company.com',
-    department: 'Human Resources',
-    designation: 'HR Manager',
-    joiningDate: '2024-11-05',
-    status: 'Active'
-  },
-  {
-    id: 12,
-    name: 'Meera Das',
-    email: 'meera@company.com',
-    department: 'Human Resources',
-    designation: 'HR Executive',
-    joiningDate: '2024-10-12',
-    status: 'Active'
-  }
-];
+const ManageHR = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-const initialFormData = {
-  name: '',
-  email: '',
-  department: 'Human Resources',
-  designation: 'HR Executive'
-};
+  // Redux
+  const {
+    employees = [],
+    pagination = {},
+    getAllEmployeesLoading,
+    getAllEmployeesError
+  } = useSelector(state => state.employee || {})
 
-const ManageHr = () => {
-  const [hrList, setHrList] = useState(initialHrList);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
+  // Local states
+  const [search, setSearch] = useState('')
+  const [openMenu, setOpenMenu] = useState(null)
+  const [menuPosition, setMenuPosition] = useState({
+    top: 0,
+    left: 0
+  })
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  // Pagination
+  const currentPage = pagination?.currentPage || 1
+  const limit = pagination?.limit || 10
+  const totalPages = pagination?.totalPages || 0
+  const totalHR = pagination?.totalEmployees || 0
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedHr, setSelectedHr] = useState(null);
-  const [activeMenu, setActiveMenu] = useState(null);
-
-  const [formData, setFormData] = useState(initialFormData);
-
-  const totalHr = hrList.length;
-
-  const activeHr = hrList.filter(
-    (hr) => hr.status === 'Active'
-  ).length;
-
-  const inactiveHr = totalHr - activeHr;
-
-  // Search and status filtering
-  const filteredHr = useMemo(() => {
-    return hrList.filter((hr) => {
-      const searchTerm = search.trim().toLowerCase();
-
-      const matchesSearch =
-        hr.name.toLowerCase().includes(searchTerm) ||
-        hr.email.toLowerCase().includes(searchTerm);
-
-      const matchesStatus =
-        statusFilter === 'All' || hr.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [hrList, search, statusFilter]);
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredHr.length / itemsPerPage);
-
-  // Reset page if filtering removes the current page
+  // Fetch ONLY HR accounts
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(Math.max(1, totalPages));
+    dispatch(getAllEmployees(currentPage, limit, 'hr'))
+  }, [dispatch, currentPage, limit])
+
+  // Close dropdown on scroll or resize
+  useEffect(() => {
+    if (!openMenu) return
+
+    const closeMenu = () => setOpenMenu(null)
+
+    window.addEventListener('scroll', closeMenu, true)
+    window.addEventListener('resize', closeMenu)
+
+    return () => {
+      window.removeEventListener('scroll', closeMenu, true)
+      window.removeEventListener('resize', closeMenu)
     }
-  }, [currentPage, totalPages]);
+  }, [openMenu])
 
-  // Get only the records for the current page
-  const paginatedHr = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
+  // Open action dropdown using viewport coordinates
+  const handleMenuClick = (event, employeeId) => {
+    if (openMenu === employeeId) {
+      setOpenMenu(null)
+      return
+    }
 
-    return filteredHr.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
-  }, [filteredHr, currentPage]);
+    const rect = event.currentTarget.getBoundingClientRect()
 
-  const handleSearchChange = (value) => {
-    setSearch(value);
-    setCurrentPage(1);
-    setActiveMenu(null);
-  };
+    const menuWidth = 128
+    const menuHeight = 88
+    const gap = 6
 
-  const handleStatusFilterChange = (value) => {
-    setStatusFilter(value);
-    setCurrentPage(1);
-    setActiveMenu(null);
-  };
+    let left = rect.right - menuWidth
+    let top = rect.bottom + gap
 
-  // Open Create HR modal
-  const openCreateModal = () => {
-    setSelectedHr(null);
-    setFormData(initialFormData);
-    setShowCreateModal(true);
-    setActiveMenu(null);
-  };
+    // Prevent dropdown from going outside the viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - menuWidth - 8))
 
-  // Create HR - local demo only
-  const handleCreateHr = (e) => {
-    e.preventDefault();
+    if (top + menuHeight > window.innerHeight - 8) {
+      top = rect.top - menuHeight - gap
+    }
 
-    const newHr = {
-      id: Date.now(),
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      department: formData.department.trim(),
-      designation: formData.designation,
-      joiningDate: new Date().toISOString().slice(0, 10),
-      status: 'Active'
-    };
+    setMenuPosition({ top, left })
+    setOpenMenu(employeeId)
+  }
 
-    setHrList((prev) => [newHr, ...prev]);
-    setCurrentPage(1);
-    setSearch('');
-    setStatusFilter('All');
-    closeModal();
-  };
+  // Pagination
+  const handlePageChange = page => {
+    if (page < 1 || page > totalPages || page === currentPage) {
+      return
+    }
 
-  // Activate / Deactivate HR
-  const handleToggleStatus = (id) => {
-    setHrList((prev) =>
-      prev.map((hr) =>
-        hr.id === id
-          ? {
-            ...hr,
-            status: hr.status === 'Active' ? 'Inactive' : 'Active'
-          }
-          : hr
-      )
-    );
+    setOpenMenu(null)
+    dispatch(getAllEmployees(page, limit, 'hr'))
+  }
 
-    setActiveMenu(null);
-  };
+  // Employee name
+  const getEmployeeName = employee => {
+    return (
+      [employee.firstName, employee.middleName, employee.lastName]
+        .filter(Boolean)
+        .join(' ') || 'Unknown HR'
+    )
+  }
 
+  // Initials
+  const getInitials = employee => {
+    return getEmployeeName(employee)
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+  }
 
-  const closeModal = () => {
-    setShowCreateModal(false);
-    setFormData(initialFormData);
-  };
+  // Employment status
+  const getStatusLabel = status => {
+    switch (status) {
+      case 'active':
+        return 'Active'
+      case 'notice_period':
+        return 'Notice Period'
+      case 'resigned':
+        return 'Resigned'
+      case 'terminated':
+        return 'Terminated'
+      default:
+        return status || 'Unknown'
+    }
+  }
 
-  const formatDate = (date) => {
-    if (!date) return '-';
+  // Search HR
+  const filteredHR = employees.filter(employee => {
+    if (employee.role !== 'hr') return false
 
-    return new Date(`${date}T00:00:00`).toLocaleDateString(
-      'en-IN',
-      {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      }
-    );
-  };
+    const searchValue = search.toLowerCase().trim()
+
+    if (!searchValue) return true
+
+    const name = getEmployeeName(employee).toLowerCase()
+
+    const email = (
+      employee.officialEmail ||
+      employee.personalEmail ||
+      ''
+    ).toLowerCase()
+
+    const department = (employee.department?.name || '').toLowerCase()
+    const employeeId = (employee.employeeId || '').toLowerCase()
+
+    return (
+      name.includes(searchValue) ||
+      email.includes(searchValue) ||
+      department.includes(searchValue) ||
+      employeeId.includes(searchValue)
+    )
+  })
+
+  // Action dropdown portal
+  const renderActionMenu = employee => {
+    if (openMenu !== employee._id) return null
+
+    return createPortal(
+      <>
+        {/* Outside click overlay */}
+        <button
+          type='button'
+          className='fixed inset-0 z-[9998] cursor-default'
+          aria-label='Close menu'
+          onClick={() => setOpenMenu(null)}
+        />
+
+        {/* Dropdown */}
+        <div
+          className='fixed z-[9999] w-32 rounded-lg border border-gray-200 bg-white p-1 shadow-xl'
+          style={{
+            top: menuPosition.top,
+            left: menuPosition.left
+          }}
+        >
+          <button
+            type='button'
+            onClick={() => {
+              setOpenMenu(null)
+              navigate(`/admin/employees/${employee._id}`)
+            }}
+            className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100'
+          >
+            <Eye size={16} />
+            View
+          </button>
+
+          <button
+            type='button'
+            onClick={() => {
+              setOpenMenu(null)
+              navigate(`/admin/edit-employees/${employee._id}`)
+            }}
+            className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100'
+          >
+            <Pencil size={16} />
+            Edit
+          </button>
+        </div>
+      </>,
+      document.body
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-1 py-2">
-      {/* Page Header */}
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className='min-h-screen text-black'>
+      {/* HEADER */}
+      <div className='flex flex-col gap-4 py-3 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <div className="mb-1 flex items-center gap-2">
+          <h1 className='text-xl font-semibold sm:text-2xl'>Manage HR</h1>
 
-            <h1 className="text-xl font-semibold text-slate-900">
-              Manage HR
-            </h1>
-          </div>
-
-          <p className="text-sm text-slate-500">
-            Manage HR staff, employee details and account status.
+          <p className='mt-1 text-sm text-gray-500'>
+            View and manage your Human Resource team members.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+        <div
+          className='flex cursor-pointer items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white'
+          onClick={() => navigate('/admin/add-employee')}
         >
-          <Plus size={18} />
-          Create HR
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <SummaryCard
-          title="Total HR"
-          value={totalHr}
-          icon={Users}
-          iconClass="bg-blue-50 text-blue-700"
-        />
-
-        <SummaryCard
-          title="Active HR"
-          value={activeHr}
-          icon={UserCheck}
-          iconClass="bg-emerald-50 text-emerald-700"
-        />
-
-        <SummaryCard
-          title="Inactive HR"
-          value={inactiveHr}
-          icon={UserX}
-          iconClass="bg-rose-50 text-rose-700"
-        />
-      </div>
-
-      {/* HR Directory */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Search and Filter */}
-        <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="font-semibold text-slate-900">
-              HR Directory
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              {filteredHr.length} HR record
-              {filteredHr.length !== 1 ? 's' : ''} found
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Search name or email..."
-                className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-slate-400 sm:w-64"
-              />
-            </div>
-
-            <div className="relative">
-              <Filter
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-
-              <select
-                value={statusFilter}
-                onChange={(e) =>
-                  handleStatusFilterChange(e.target.value)
-                }
-                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-8 text-sm outline-none focus:border-slate-400 sm:w-36"
-              >
-                <option value="All">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
+          <Plus size={17} />
+          Add Hr
         </div>
+      </div>
 
-        {/* HR Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[850px] text-left">
-            <thead className="bg-slate-50">
-              <tr className="border-b border-slate-200">
-                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  HR Details
-                </th>
+      {/* SEARCH */}
+      <div className='rounded-xl border border-gray-200 p-1'>
+        <div className='relative'>
+          <Search
+            size={18}
+            className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
+          />
 
-                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Department
-                </th>
+          <input
+            type='text'
+            value={search}
+            placeholder='Search HR by name, email, ID or department...'
+            onChange={e => setSearch(e.target.value)}
+            className='w-full rounded-lg bg-gray-100 py-3 pl-10 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-black/10'
+          />
+        </div>
+      </div>
 
-                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Designation
-                </th>
+      {/* HR COUNT */}
+      <p className='mt-4 text-sm text-gray-500'>
+        {totalHR} {totalHR === 1 ? 'HR Member' : 'HR Members'}
+      </p>
 
-                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Joining Date
-                </th>
+      {/* ERROR */}
+      {getAllEmployeesError && (
+        <div className='mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600'>
+          {getAllEmployeesError}
+        </div>
+      )}
 
-                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Status
-                </th>
+      {/* HR TABLE */}
+      <div className='mt-5 pb-6'>
+        <div className='w-full overflow-x-auto rounded-xl border border-gray-200'>
+          <div className='min-w-[900px] bg-white'>
+            {/* TABLE HEADER */}
+            <div className='grid grid-cols-5 gap-4 border-b border-gray-200 bg-gray-50 p-4 text-sm font-medium text-gray-500'>
+              <div>Name & Role</div>
+              <div>Email</div>
+              <div>Department</div>
+              <div>Status</div>
+              <div>Action</div>
+            </div>
 
-                <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-100">
-              {paginatedHr.map((hr) => (
-                <tr
-                  key={hr.id}
-                  className="transition hover:bg-slate-50"
+            {/* LOADING */}
+            {getAllEmployeesLoading ? (
+              <div className='p-10 text-center text-sm text-gray-500'>
+                Loading HR members...
+              </div>
+            ) : filteredHR.length === 0 ? (
+              <div className='p-10 text-center text-sm text-gray-500'>
+                No HR members found.
+              </div>
+            ) : (
+              filteredHR.map(employee => (
+                <div
+                  key={employee._id}
+                  className='grid grid-cols-5 items-center gap-4 border-b border-gray-200 p-4 last:border-b-0'
                 >
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700">
-                        {hr.name
-                          .split(' ')
-                          .map((part) => part[0])
-                          .slice(0, 2)
-                          .join('')
-                          .toUpperCase()}
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {hr.name}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {hr.email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="px-5 py-4 text-sm text-slate-600">
-                    {hr.department}
-                  </td>
-
-                  <td className="px-5 py-4 text-sm text-slate-600">
-                    {hr.designation}
-                  </td>
-
-                  <td className="px-5 py-4 text-sm text-slate-600">
-                    {formatDate(hr.joiningDate)}
-                  </td>
-
-                  <td className="px-5 py-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${hr.status === 'Active'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-600'
-                        }`}
-                    >
-                      <span
-                        className={`mr-1.5 h-1.5 w-1.5 rounded-full ${hr.status === 'Active'
-                            ? 'bg-emerald-500'
-                            : 'bg-slate-400'
-                          }`}
+                  {/* NAME + ROLE */}
+                  <div className='flex min-w-0 items-center gap-3'>
+                    {employee.profilePhoto ? (
+                      <img
+                        src={employee.profilePhoto}
+                        alt={getEmployeeName(employee)}
+                        className='h-10 w-10 shrink-0 rounded-full object-cover'
                       />
+                    ) : (
+                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black text-xs font-bold text-white'>
+                        {getInitials(employee)}
+                      </div>
+                    )}
 
-                      {hr.status}
-                    </span>
-                  </td>
+                    <div className='min-w-0'>
+                      <h3 className='truncate text-sm font-semibold text-gray-900'>
+                        {getEmployeeName(employee)}
+                      </h3>
 
-                  <td className="px-5 py-4 text-right">
-                    <div className="relative inline-block">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setActiveMenu(
-                            activeMenu === hr.id ? null : hr.id
-                          )
-                        }
-                        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                        aria-label={`Actions for ${hr.name}`}
-                      >
-                        <MoreVertical size={19} />
-                      </button>
+                      <p className='mt-0.5 text-xs font-medium text-blue-600'>
+                        HR
+                      </p>
 
-                      {activeMenu === hr.id && (
-                        <div className="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedHr(hr);
-                              setActiveMenu(null);
-                            }}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            <Eye size={16} />
-                            View Details
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStatus(hr.id)}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            {hr.status === 'Active' ? (
-                              <UserX size={16} />
-                            ) : (
-                              <UserCheck size={16} />
-                            )}
-
-                            {hr.status === 'Active'
-                              ? 'Deactivate'
-                              : 'Activate'}
-                          </button>
-                        </div>
-                      )}
+                      <p className='text-xs text-gray-400'>
+                        {employee.employeeId || '-'}
+                      </p>
                     </div>
-                  </td>
-                </tr>
-              ))}
+                  </div>
 
-              {paginatedHr.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center">
-                    <Users
-                      size={34}
-                      className="mx-auto mb-3 text-slate-300"
-                    />
-
-                    <p className="font-medium text-slate-700">
-                      No HR records found
+                  {/* EMAIL */}
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm'>
+                      {employee.officialEmail || employee.personalEmail || '-'}
                     </p>
+                  </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Try changing your search or status filter.
+                  {/* DEPARTMENT */}
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm'>
+                      {employee.department?.name || '-'}
                     </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+
+                  {/* STATUS */}
+                  <div>
+                    <span
+                      className={`text-sm ${
+                        employee.employmentStatus === 'active'
+                          ? 'font-medium text-green-700'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      {getStatusLabel(employee.employmentStatus)}
+                    </span>
+                  </div>
+
+                  {/* ACTION */}
+                  <div>
+                    <button
+                      type='button'
+                      onClick={event => handleMenuClick(event, employee._id)}
+                      className='rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-black'
+                    >
+                      <MoreHorizontal size={20} />
+                    </button>
+
+                    {renderActionMenu(employee)}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
+      </div>
 
-        {/* Pagination */}
+      {/* PAGINATION */}
+      {totalPages > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
-      </div>
-
-      <CreateHRModal
-        isOpen={showCreateModal}
-        onClose={closeModal}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleCreateHr}
-      />
-
-      <ViewHRDetailsModal
-        hr={selectedHr}
-        onClose={() => setSelectedHr(null)}
-        formatDate={formatDate}
-      />
+      )}
     </div>
-  );
-};
+  )
+}
 
-const SummaryCard = ({ title, value, icon: Icon, iconClass }) => (
-  <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-slate-500">{title}</p>
-        <h3 className="mt-2 text-3xl font-bold text-slate-900">
-          {value}
-        </h3>
-      </div>
-
-      <div className={`rounded-xl p-3 ${iconClass}`}>
-        <Icon size={23} />
-      </div>
-    </div>
-  </div>
-);
-
-const DetailRow = ({ label, value }) => (
-  <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
-    <span className="text-slate-500">{label}</span>
-    <span className="text-right font-medium text-slate-800">
-      {value}
-    </span>
-  </div>
-);
-
-export default ManageHr;
+export default ManageHR
