@@ -69,8 +69,8 @@ const NAV_ITEMS = [
         icon: CalendarDays
       },
       {
-        label: 'Attendance Requests',
-        path: '/admin/attendance-requests',
+        label: 'Regularization Req',
+        path: '/admin/regularization-requests',
         icon: FileCheck2
       },
       {

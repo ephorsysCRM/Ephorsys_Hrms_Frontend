@@ -18,6 +18,8 @@ import Attendance from '../admin/pages/Attendance'
 import LeaveManagement from '../admin/pages/LeaveManagement'
 import AttendanceRequests from '../admin/pages/AttendanceRequests'
 import Announcements from '../admin/pages/Announcements'
+import AttendanceDetails from '../admin/pages/AttendanceDetails'
+import RegularizationRequests from '../admin/pages/RegularizationRequests'
 
 const AdminRoutes = (
   <Route path='/'>
@@ -33,7 +35,7 @@ const AdminRoutes = (
         <Route path='all-employees' element={<AllEmployee />} />
 
         <Route path='add-employee' element={<AddEmployee />} />
-
+        <Route path='attendance/:id' element={<AttendanceDetails />} />
         <Route path='employees/:id' element={<EmployeeProfile />} />
         <Route path='edit-employees/:id' element={<EditEmployee />} />
 
@@ -41,13 +43,16 @@ const AdminRoutes = (
 
         <Route path='departments/:id' element={<DepartmentView />} />
 
-        <Route path='attendance' element={<Attendance/>} />
+        <Route path='attendance' element={<Attendance />} />
 
-        <Route path='attendance-requests' element={<AttendanceRequests/>} />
+        <Route
+          path='regularization-requests'
+          element={<RegularizationRequests />}
+        />
 
-        <Route path='leave-management' element={<LeaveManagement/>} />
+        <Route path='leave-management' element={<LeaveManagement />} />
 
-        <Route path='announcements' element={<Announcements/>} />
+        <Route path='announcements' element={<Announcements />} />
       </Route>
     </Route>
 
