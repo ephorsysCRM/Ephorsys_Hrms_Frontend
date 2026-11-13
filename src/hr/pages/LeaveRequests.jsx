@@ -435,7 +435,7 @@ const LeaveRequests = () => {
     )
 
     return (
-        <div className='mx-auto w-full max-w-[1500px] space-y-5 py-2'>
+        <div className='mx-auto w-full max-w-375 space-y-5 py-2'>
             {/* HEADER */}
             <div className='flex flex-col justify-between gap-3 sm:flex-row sm:items-center'>
                 <div>
@@ -544,21 +544,6 @@ const LeaveRequests = () => {
                         />
                     </div>
                 </div>
-
-                <div className='mt-4 flex flex-col justify-between gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:items-center'>
-                    <p className='text-xs text-gray-500'>
-                        {leaveDate
-                            ? `Showing leave requests that include ${formatDate(leaveDate)}.`
-                            : 'Filter requests by employee, status or leave date.'}
-                    </p>
-                    <button
-                        type='button'
-                        onClick={handleResetFilters}
-                        className='text-left text-sm font-medium text-blue-600 transition hover:text-blue-800 sm:text-right'
-                    >
-                        Reset Filters
-                    </button>
-                </div>
             </div>
 
             {/* TABLE */}
@@ -580,7 +565,7 @@ const LeaveRequests = () => {
                 </div>
 
                 <div className='w-full overflow-x-auto'>
-                    <table className='w-full min-w-[1100px] table-fixed text-left'>
+                    <table className='w-full min-w-275 table-fixed text-left'>
                         <colgroup>
                             <col className='w-[21%]' />
                             <col className='w-[14%]' />
@@ -723,12 +708,7 @@ const LeaveRequests = () => {
                 </div>
 
                 {filteredRequests.length > 0 && (
-                    <div className='flex flex-col justify-between gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center'>
-                        <p className='text-xs text-gray-500'>
-                            Showing {(safePage - 1) * PAGE_SIZE + 1}–
-                            {Math.min(safePage * PAGE_SIZE, filteredRequests.length)} of{' '}
-                            {filteredRequests.length} requests
-                        </p>
+                    <div className='flex flex-col justify-center gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center'>
                         <Pagination
                             currentPage={safePage}
                             totalPages={totalPages}
@@ -750,12 +730,12 @@ const LeaveRequests = () => {
                         <button
                             type='button'
                             aria-label='Close action menu'
-                            className='fixed inset-0 z-[9998] cursor-default'
+                            className='fixed inset-0 z-9998 cursor-default'
                             onClick={closeActionMenu}
                         />
 
                         <div
-                            className='fixed z-[9999] w-30 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-2xl'
+                            className='fixed z-9999 w-30 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-2xl'
                             style={{
                                 top: menuPosition.top,
                                 left: menuPosition.left
