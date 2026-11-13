@@ -1,518 +1,278 @@
+
 import {
   CalendarDays,
-  CheckCircle2,
-  Clock3,
-  XCircle,
-  Plus,
-  ArrowUpRight,
-  BriefcaseBusiness,
   Stethoscope,
-  Home
-} from 'lucide-react'
+  Home,
+  ArrowUpRight,
+  Clock3,
+} from "lucide-react";
 
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-import Modal from '../../UI/Modal'
-import LeaveModal from '../employeeModal/LeaveModal'
-
-const Leave = () => {
-  const navigate = useNavigate()
-
-  const [applyLeaveOpen, setApplyLeaveOpen] = useState(false)
-
-  const leaveBalances = [
-    {
-      name: 'Casual Leave',
-      shortName: 'CL',
-      used: 4,
-      total: 12,
-      icon: CalendarDays
+const leaveBalances = [
+  {
+    name: "Casual Leave",
+    used: 4,
+    total: 12,
+    icon: CalendarDays,
+    theme: {
+      main: "text-blue-700",
+      icon: "bg-blue-600 text-white",
+      light: "bg-black",
+      border: "border-blue-100",
+      progress: "bg-blue-600",
+      accent: "bg-blue-500",
+      soft: "text-blue-400",
+      gradient: "from-black to-blue-700",
+      glow: "bg-blue-400/10",
+      line: "border-blue-200/70",
     },
-    {
-      name: 'Sick Leave',
-      shortName: 'SL',
-      used: 3,
-      total: 10,
-      icon: Stethoscope
+  },
+  {
+    name: "Sick Leave",
+    used: 3,
+    total: 10,
+    icon: Stethoscope,
+    theme: {
+      main: "text-yellow-700",
+      icon: "bg-yellow-500 text-white",
+      light: "bg-black",
+      border: "border-yellow-100",
+      progress: "bg-yellow-500",
+      accent: "bg-yellow-400",
+      soft: "text-yellow-400",
+      gradient: "from-black to-yellow-700",
+      glow: "bg-yellow-400/10",
+      line: "border-yellow-200/70",
     },
-  ]
-
-  const leaveRequests = [
-    {
-      id: 1,
-      type: 'Casual Leave',
-      from: '10 Oct 2026',
-      to: '11 Oct 2026',
-      days: 2,
-      reason: 'Personal work',
-      status: 'Pending'
+  },
+  {
+    name: "Work From Home",
+    used: 0,
+    total: 10,
+    icon: Home,
+    theme: {
+      main: "text-emerald-700",
+      icon: "bg-emerald-600 text-white",
+      light: "bg-black",
+      border: "border-emerald-100",
+      progress: "bg-emerald-600",
+      accent: "bg-emerald-500",
+      soft: "text-emerald-400",
+      gradient: "from-black to-teal-700",
+      glow: "bg-emerald-400/10",
+      line: "border-emerald-200/70",
     },
-    {
-      id: 2,
-      type: 'Sick Leave',
-      from: '02 Oct 2026',
-      to: '02 Oct 2026',
-      days: 1,
-      reason: 'Not feeling well',
-      status: 'Approved'
-    },
-    {
-      id: 3,
-      type: 'Work From Home',
-      from: '28 Sep 2026',
-      to: '28 Sep 2026',
-      days: 1,
-      reason: 'Personal work',
-      status: 'Rejected'
-    }
-  ]
+  },
+];
 
-  const getStatusStyle = status => {
-    if (status === 'Approved') {
-      return 'border-green-200 bg-green-50 text-green-700'
-    }
-
-    if (status === 'Rejected') {
-      return 'border-red-200 bg-red-50 text-red-700'
-    }
-
-    return 'border-amber-200 bg-amber-50 text-amber-700'
-  }
-
-  const handleCloseApplyLeave = () => {
-    setApplyLeaveOpen(false)
-  }
-
+const EmpLeave = () => {
   return (
-    <div className='min-h-screen  p-4 sm:p-6 lg:p-1'>
+    <div className="min-h-screen px-0 py-4 sm:px-6 sm:py-6 lg:px-1 lg:py-1">
 
-      {/* Header */}
-      <div className='mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between px-2'>
-
+      {/* Page Header */}
+      <div className="mb-8 flex flex-col justify-between gap-4 px-2 sm:flex-row sm:items-center">
         <div>
-          
+          <div className="mb-2 flex items-center gap-2">
+            <span className="h-1.5 w-7 rounded-full bg-blue-600" />
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">
+              Employee Portal
+            </span>
+          </div>
 
-          <h1 className='text-2xl font-bold tracking-tight text-black sm:text-3xl'>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">
             Leave Management
           </h1>
 
-          <p className='mt-1.5 text-sm text-gray-500'>
-            Manage your leave balance and track your requests.
+          <p className="mt-2 text-sm text-gray-500">
+            Keep track of your leave balance and plan your time off.
           </p>
         </div>
 
-        <button
-          onClick={() => setApplyLeaveOpen(true)}
-          className='inline-flex items-center justify-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-gray-800'
-        >
-          <Plus size={18} />
-          Apply Leave
-        </button>
-
+        <div className="flex items-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm sm:self-center">
+          <Clock3 size={17} className="text-blue-600" />
+          <span className="text-sm font-semibold text-gray-700">
+            Leave Year 2026
+          </span>
+        </div>
       </div>
 
-      {/* Summary */}
-      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-
-        {/* Available */}
-        <div className='rounded-2xl border border-gray-200 bg-white p-5 shadow-sm'>
-          <div className='flex items-start justify-between'>
-
-            <div>
-              <p className='text-xs font-semibold uppercase tracking-wider text-gray-400'>
-                Available
-              </p>
-
-              <p className='mt-3 text-3xl font-bold tracking-tight text-black'>
-                17
-              </p>
-
-              <p className='mt-1 text-xs text-gray-500'>
-                days remaining
-              </p>
-            </div>
-
-            <div className='rounded-xl bg-gray-100 p-3 text-black'>
-              <CalendarDays size={20} />
-            </div>
-
-          </div>
-        </div>
-
-        {/* Used */}
-        <div className='rounded-2xl border border-gray-200 bg-white p-5 shadow-sm'>
-          <div className='flex items-start justify-between'>
-
-            <div>
-              <p className='text-xs font-semibold uppercase tracking-wider text-gray-400'>
-                Used
-              </p>
-
-              <p className='mt-3 text-3xl font-bold tracking-tight text-black'>
-                10
-              </p>
-
-              <p className='mt-1 text-xs text-gray-500'>
-                days this year
-              </p>
-            </div>
-
-            <div className='rounded-xl bg-gray-100 p-3 text-black'>
-              <CheckCircle2 size={20} />
-            </div>
-
-          </div>
-        </div>
-
-        {/* Pending */}
-        <div className='rounded-2xl border border-gray-200 bg-white p-5 shadow-sm'>
-          <div className='flex items-start justify-between'>
-
-            <div>
-              <p className='text-xs font-semibold uppercase tracking-wider text-gray-400'>
-                Pending
-              </p>
-
-              <p className='mt-3 text-3xl font-bold tracking-tight text-black'>
-                1
-              </p>
-
-              <p className='mt-1 text-xs text-gray-500'>
-                awaiting approval
-              </p>
-            </div>
-
-            <div className='rounded-xl bg-gray-100 p-3 text-black'>
-              <Clock3 size={20} />
-            </div>
-
-          </div>
-        </div>
-
-        {/* Rejected */}
-        <div className='rounded-2xl border border-gray-200 bg-white p-5 shadow-sm'>
-          <div className='flex items-start justify-between'>
-
-            <div>
-              <p className='text-xs font-semibold uppercase tracking-wider text-gray-400'>
-                Rejected
-              </p>
-
-              <p className='mt-3 text-3xl font-bold tracking-tight text-black'>
-                1
-              </p>
-
-              <p className='mt-1 text-xs text-gray-500'>
-                requests rejected
-              </p>
-            </div>
-
-            <div className='rounded-xl bg-gray-100 p-3 text-black'>
-              <XCircle size={20} />
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-
-      {/* Leave Balance */}
-      <div className='mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm'>
-
-        <div className='flex flex-col gap-1 border-b border-gray-100 px-5 py-5 sm:px-6'>
-
-          <h2 className='text-lg font-bold text-black'>
-            Leave Balance
-          </h2>
-
-          <p className='text-sm text-gray-500'>
-            Your current leave entitlement for 2026.
-          </p>
-
-        </div>
-
-        <div className='grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6'>
-
-          {leaveBalances.map(leave => {
-
-            const Icon = leave.icon
-
-            const remaining = leave.total - leave.used
-
-            const percentage =
-              (remaining / leave.total) * 100
-
-            return (
-              <div
-                key={leave.name}
-                className='rounded-xl border border-gray-200 p-4 transition duration-200 hover:border-gray-300'
-              >
-
-                <div className='flex items-center justify-between gap-4'>
-
-                  <div className='flex min-w-0 items-center gap-3'>
-
-                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black text-white'>
-                      <Icon size={18} />
-                    </div>
-
-                    <div className='min-w-0'>
-
-                      <p className='truncate text-sm font-semibold text-gray-900'>
-                        {leave.name}
-                      </p>
-
-                      <p className='mt-0.5 text-xs text-gray-500'>
-                        {leave.used} used of {leave.total} days
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <div className='text-right'>
-
-                    <p className='text-lg font-bold text-black'>
-                      {remaining}
-                    </p>
-
-                    <p className='text-[10px] uppercase tracking-wide text-gray-400'>
-                      left
-                    </p>
-
-                  </div>
-
-                </div>
-
-               <div className='mt-4 h-4 overflow-hidden rounded-full bg-gray-200'>
-  <div
-    className={`h-full rounded-full transition-all duration-500 ${
-      percentage < 40
-        ? 'bg-red-500'
-        : percentage < 70
-          ? 'bg-yellow-700'
-          : 'bg-green-900'
-    }`}
-    style={{
-      width: `${percentage}%`
-    }}
-  />
-</div>
-              </div>
-            )
-          })}
-
-        </div>
-
-      </div>
-
-      {/* Leave Requests */}
-      <div className='mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm'>
-
-        <div className='flex flex-col gap-3 border-b border-gray-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
-
-          <div>
-
-            <h2 className='text-lg font-bold text-black'>
-              My Leave Requests
-            </h2>
-
-            <p className='mt-1 text-sm text-gray-500'>
-              Recent leave applications and their status.
-            </p>
-
-          </div>
-
-          <button
-            onClick={() => setApplyLeaveOpen(true)}
-            className='inline-flex items-center gap-1.5 text-sm font-semibold text-black transition hover:underline'
-          >
-            Apply new leave
-            <ArrowUpRight size={16} />
-          </button>
-
-        </div>
-
-        {/* Desktop */}
-        <div className='hidden overflow-x-auto md:block'>
-
-          <table className='w-full'>
-
-            <thead>
-
-              <tr className='border-b border-gray-100 bg-gray-50/70'>
-
-                <th className='px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-                  Leave Type
-                </th>
-
-                <th className='px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-                  Duration
-                </th>
-
-                <th className='px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-                  Days
-                </th>
-
-                <th className='px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-                  Reason
-                </th>
-
-                <th className='px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-                  Status
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody className='divide-y divide-gray-100'>
-
-              {leaveRequests.map(request => (
-
-                <tr
-                  key={request.id}
-                  className='transition hover:bg-gray-50/70'
-                >
-
-                  <td className='px-6 py-4'>
-
-                    <p className='text-sm font-semibold text-gray-900'>
-                      {request.type}
-                    </p>
-
-                  </td>
-
-                  <td className='px-6 py-4'>
-
-                    <p className='text-sm text-gray-700'>
-                      {request.from}
-                    </p>
-
-                    {request.from !== request.to && (
-                      <p className='mt-0.5 text-xs text-gray-400'>
-                        to {request.to}
-                      </p>
-                    )}
-
-                  </td>
-
-                  <td className='px-6 py-4'>
-
-                    <span className='text-sm font-semibold text-gray-900'>
-                      {request.days}{' '}
-                      {request.days === 1
-                        ? 'day'
-                        : 'days'}
-                    </span>
-
-                  </td>
-
-                  <td className='max-w-[240px] px-6 py-4'>
-
-                    <p className='truncate text-sm text-gray-600'>
-                      {request.reason}
-                    </p>
-
-                  </td>
-
-                  <td className='px-6 py-4'>
-
-                    <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold ${getStatusStyle(
-                        request.status
-                      )}`}
-                    >
-                      {request.status}
-                    </span>
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-        {/* Mobile */}
-        <div className='space-y-3 p-4 md:hidden'>
-
-          {leaveRequests.map(request => (
-
+      {/* Leave Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+
+        {leaveBalances.map((leave) => {
+          const Icon = leave.icon;
+          const remaining = leave.total - leave.used;
+
+          const percentage =
+            leave.total > 0
+              ? (remaining / leave.total) * 100
+              : 0;
+
+          const usedPercentage =
+            leave.total > 0
+              ? (leave.used / leave.total) * 100
+              : 0;
+
+          return (
             <div
-              key={request.id}
-              className='rounded-xl border border-gray-200 p-4'
+              key={leave.name}
+              className={`group relative overflow-hidden rounded-2xl border ${leave.theme.border} bg-white shadow-[0_4px_20px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_35px_rgba(15,23,42,0.11)]`}
             >
+              {/* Top Color Accent */}
+              <div className={`h-1 w-full bg-gradient-to-r ${leave.theme.gradient}` } />
 
-              <div className='flex items-start justify-between gap-3'>
+              {/* Card Decorations */}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
 
-                <div>
+                {/* Soft Color Glow */}
+                <div className={`absolute -right-12 top-16 h-36 w-36 rounded-full ${leave.theme.glow} blur-2xl transition-transform duration-700 group-hover:scale-125`} />
 
-                  <p className='text-sm font-bold text-black'>
-                    {request.type}
-                  </p>
+                <div className={`absolute -bottom-12 -left-10 h-32 w-32 rounded-full ${leave.theme.glow} blur-2xl transition-transform duration-700 group-hover:scale-125`} />
 
-                  <p className='mt-1 text-xs text-gray-500'>
-                    {request.from}
-
-                    {request.from !== request.to &&
-                      ` → ${request.to}`}
-                  </p>
-
+                {/* Thin Geometric Lines */}
+                <div className="absolute right-0 top-24 flex rotate-[-35deg] flex-col gap-2 opacity-50">
+                  <span className={`h-px w-24 border-t ${leave.theme.line}`} />
+                  <span className={`h-px w-32 border-t ${leave.theme.line}`} />
+                  <span className={`h-px w-20 border-t ${leave.theme.line}`} />
                 </div>
 
-                <span
-                  className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${getStatusStyle(
-                    request.status
-                  )}`}
-                >
-                  {request.status}
-                </span>
+                {/* Hollow Circle */}
+                <div className={`absolute -right-5 top-36 h-16 w-16 rounded-full border ${leave.theme.line} transition-transform duration-500 group-hover:scale-125`} />
+
+                <div className={`absolute bottom-24 left-4 h-7 w-7 rounded-full border ${leave.theme.line}`} />
+
+                {/* Small Diamond */}
+                <div className={`absolute right-8 bottom-28 h-3 w-3 rotate-45 border ${leave.theme.line} transition-transform duration-500 group-hover:rotate-90`} />
+
+                {/* Tiny Details */}
+                <span className={`absolute left-1/2 top-7 h-1.5 w-1.5 rounded-full ${leave.theme.accent}`} />
+                <span className={`absolute right-14 top-14 h-2 w-2 rounded-full ${leave.theme.accent} opacity-40`} />
 
               </div>
 
-              <div className='mt-3 flex items-center justify-between border-t border-gray-100 pt-3'>
+              <div className="relative p-5 sm:p-6">
 
-                <p className='max-w-[70%] truncate text-xs text-gray-500'>
-                  {request.reason}
-                </p>
+                {/* Card Top */}
+                <div className="flex items-center justify-between">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${leave.theme.icon} shadow-md transition-all duration-300 group-hover:scale-105 group-hover:rotate-3`}>
+                    <Icon size={21} />
+                  </div>
 
-                <p className='text-xs font-bold text-black'>
-                  {request.days}{' '}
-                  {request.days === 1
-                    ? 'day'
-                    : 'days'}
-                </p>
+                  <div className={`h-2 w-2 rounded-full ${leave.theme.accent} opacity-70`} />
+                </div>
+
+                {/* Leave Title */}
+                <div className="mt-5">
+                  <h2 className="text-lg font-bold tracking-tight text-gray-900">
+                    {leave.name}
+                  </h2>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    Your available leave entitlement
+                  </p>
+                </div>
+
+                {/* Main Balance */}
+                <div className={`group/balance relative mt-5 overflow-hidden rounded-xl ${leave.theme.light} p-4 shadow-lg shadow-black/15 transition-all duration-500`}>
+
+                  {/* Thin Geometric Lines */}
+                  <div className="pointer-events-none absolute -right-5 top-0 h-36 w-36 rotate-45 opacity-20">
+                    <div className="absolute left-0 top-5 h-px w-40 bg-white" />
+                    <div className="absolute left-0 top-10 h-px w-40 bg-white" />
+                    <div className="absolute left-0 top-[15px] h-px w-40 bg-white" />
+                    <div className="absolute left-0 top-20 h-px w-40 bg-white" />
+                  </div>
+
+                  {/* Hollow Circles */}
+                  <div className="pointer-events-none absolute right-7 top-5 h-14 w-14 rounded-full border border-white/20 transition-transform duration-500 group-hover/balance:scale-125" />
+                  <div className="pointer-events-none absolute right-12 top-10 h-5 w-5 rounded-full border border-white/30" />
+                  <div className="pointer-events-none absolute bottom-3 left-[48%] h-8 w-8 rounded-full border-2 border-white/10" />
+
+                  {/* Small Geometric Details */}
+                  <div className="pointer-events-none absolute right-28 bottom-5 h-3 w-3 rotate-45 border border-white/30" />
+                  <div className="pointer-events-none absolute left-[42%] top-5 h-1.5 w-1.5 rounded-full bg-white/40" />
+
+                  {/* Soft Glow */}
+                  <div className="pointer-events-none absolute -bottom-12 right-16 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-transform duration-700 group-hover/balance:scale-150" />
+
+                  {/* Shine */}
+                  <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-25deg] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover/balance:translate-x-[450%]" />
+
+                  {/* Content */}
+                  <p className={`relative z-10 text-xs font-semibold uppercase tracking-wider ${leave.theme.soft}`}>
+                    Available Balance
+                  </p>
+
+                  <div className="relative z-10 mt-2 flex items-end justify-between">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-bold tracking-tight text-white transition-transform duration-300 group-hover/balance:translate-x-1">
+                        {remaining}
+                      </span>
+
+                      <span className="pb-1 text-sm font-medium text-gray-400">
+                        days left
+                      </span>
+                    </div>
+
+                    <div className={`mb-1 flex h-9 w-9 items-center justify-center rounded-full bg-white ${leave.theme.main} shadow-md transition-all duration-300 group-hover/balance:rotate-45 group-hover/balance:scale-110`}>
+                      <ArrowUpRight size={19} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress */}
+                <div className="mt-5">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700">
+                      Leave Utilization
+                    </span>
+
+                    <span className={`text-sm font-bold ${leave.theme.main}`}>
+                      {Math.round(usedPercentage)}%
+                    </span>
+                  </div>
+
+                  <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 shadow-inner">
+                    <div
+                      className={`h-full rounded-full ${leave.theme.progress} transition-all duration-700`}
+                      style={{
+                        width: `${usedPercentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${leave.theme.accent}`} />
+                      <span className="text-xs text-gray-500">
+                        {leave.used} days used
+                      </span>
+                    </div>
+
+                    <span className="text-xs text-gray-500">
+                      {leave.total} days total
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
+                  <span className="text-xs font-medium text-gray-500">
+                    Remaining entitlement
+                  </span>
+
+                  <span className={`text-sm font-bold ${leave.theme.main}`}>
+                    {Math.round(percentage)}% available
+                  </span>
+                </div>
 
               </div>
-
             </div>
-
-          ))}
-
-        </div>
+          );
+        })}
 
       </div>
-
-      {/* Apply Leave Modal */}
-      <Modal
-        isOpen={applyLeaveOpen}
-        onClose={handleCloseApplyLeave}
-        title='Apply Leave'
-        size='md'
-      >
-        <LeaveModal
-          onClose={handleCloseApplyLeave}
-        />
-      </Modal>
-
     </div>
-  )
-}
+  );
+};
 
-export default Leave
+export default EmpLeave;
