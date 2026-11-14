@@ -559,7 +559,7 @@ const EmployeeDashboard = () => {
             <div className='mt-4'>
               <div className='h-2 overflow-hidden rounded-full bg-white/20'>
                 <div
-                  className='h-full rounded-full bg-white transition-all'
+                  className='h-full rounded-full bg-blue-700 transition-all'
                   style={{ width: `${progress}%` }}
                 />
               </div>
