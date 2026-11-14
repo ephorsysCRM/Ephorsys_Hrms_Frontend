@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { getMyAttendance } from '../../redux/features/attendance/attendanceThunk'
+import { getAdminProfile } from '../../redux/features/auth/authThunk'
 
 // ======================================================
 // Config
@@ -163,7 +164,7 @@ const getRecordMinutes = record =>
       Number(record?.creditedDuration || 0)
   )
 
-// Check-in time of a half that has no check-out yet (user is working now)
+// Check-in time of a half that has no check-out yet
 const getOpenCheckIn = record =>
   [record?.firstHalf, record?.secondHalf].find(
     half => half?.checkIn?.time && !half?.checkOut?.time
@@ -200,6 +201,34 @@ const statusDots = {
   Pending: 'bg-amber-500',
   'Not Marked': 'bg-gray-400'
 }
+
+// ======================================================
+// Leave Config
+// ======================================================
+
+const leaveItems = [
+  {
+    name: 'Casual Leave',
+    key: 'casualLeave',
+    color: 'bg-blue-600',
+    text: 'text-blue-700',
+    light: 'bg-blue-50'
+  },
+  {
+    name: 'Sick Leave',
+    key: 'sickLeave',
+    color: 'bg-yellow-500',
+    text: 'text-yellow-700',
+    light: 'bg-yellow-50'
+  },
+  {
+    name: 'Work From Home',
+    key: 'workFromHome',
+    color: 'bg-emerald-600',
+    text: 'text-emerald-700',
+    light: 'bg-emerald-50'
+  }
+]
 
 // ======================================================
 // Reusable Components
@@ -251,10 +280,81 @@ const EmployeeDashboard = () => {
   const todayString = getDateString(new Date())
   const monthKey = todayString.slice(0, 7)
 
+  // ======================================================
+  // TODAY ATTENDANCE STATES
+  // ======================================================
+
   const [todayData, setTodayData] = useState(null)
   const [todayLoading, setTodayLoading] = useState(true)
   const [todayError, setTodayError] = useState('')
   const [now, setNow] = useState(() => Date.now())
+
+  // ======================================================
+  // EMPLOYEE LEAVE STATES
+  // ======================================================
+
+  const [leaveDetails, setLeaveDetails] = useState(null)
+  const [leaveLoading, setLeaveLoading] = useState(true)
+  const [leaveError, setLeaveError] = useState('')
+
+  // ======================================================
+  // FETCH EMPLOYEE LEAVE DETAILS
+  // ======================================================
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadLeaveDetails = async () => {
+      setLeaveLoading(true)
+      setLeaveError('')
+
+      try {
+        const response = await dispatch(getAdminProfile())
+
+        if (!response?.success) {
+          throw new Error(response?.message || 'Failed to load leave details')
+        }
+
+        const employee =
+          response?.data?.user ||
+          response?.data?.employee ||
+          response?.data?.admin ||
+          response?.data
+
+        if (!employee) {
+          throw new Error('Employee profile not found')
+        }
+
+        const currentYear = new Date().getFullYear()
+
+        const currentYearLeave = employee?.leaveDetails?.find(
+          leave => Number(leave.year) === currentYear
+        )
+
+        if (!cancelled) {
+          setLeaveDetails(currentYearLeave || null)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLeaveError(error?.message || 'Unable to load leave details')
+        }
+      } finally {
+        if (!cancelled) {
+          setLeaveLoading(false)
+        }
+      }
+    }
+
+    loadLeaveDetails()
+
+    return () => {
+      cancelled = true
+    }
+  }, [dispatch])
+
+  // ======================================================
+  // FETCH TODAY ATTENDANCE
+  // ======================================================
 
   useEffect(() => {
     let cancelled = false
@@ -312,6 +412,10 @@ const EmployeeDashboard = () => {
     return () => clearInterval(timer)
   }, [openCheckIn])
 
+  // ======================================================
+  // MONTH ATTENDANCE STATES
+  // ======================================================
+
   const [monthStats, setMonthStats] = useState(null)
   const [monthLoading, setMonthLoading] = useState(true)
   const [monthError, setMonthError] = useState('')
@@ -352,6 +456,10 @@ const EmployeeDashboard = () => {
       cancelled = true
     }
   }, [dispatch, monthKey])
+
+  // ======================================================
+  // ATTENDANCE DATA
+  // ======================================================
 
   const pieItems = [
     {
@@ -394,6 +502,10 @@ const EmployeeDashboard = () => {
     Math.round((workedMinutes / TARGET_MINUTES) * 100)
   )
 
+  // ======================================================
+  // RENDER
+  // ======================================================
+
   return (
     <div className='mx-auto w-full max-w-[1500px] space-y-6 py-2'>
       {/* Greeting */}
@@ -405,9 +517,10 @@ const EmployeeDashboard = () => {
         <p className='mt-1 text-sm text-gray-500'>{formatToday()}</p>
       </div>
 
+
       {/* Today's attendance + leave */}
-      <div className='grid grid-cols-1 gap-5 xl:grid-cols-3'>
-        <section className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-black via-[#111111] to-[#2a2a2a] p-5 text-white shadow-lg shadow-black/20 sm:p-6 xl:col-span-2'>
+      <div className='grid grid-cols-1 items-start gap-5 xl:grid-cols-3'>
+        <section className='relative h-fit self-start overflow-hidden rounded-2xl bg-gradient-to-br from-black via-[#111111] to-[#2a2a2a] p-5 text-white shadow-lg shadow-black/20 sm:p-6 xl:col-span-2'>
           {/* decorative circles */}
           <div className='pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10' />
           <div className='pointer-events-none absolute -bottom-20 right-24 h-48 w-48 rounded-full bg-white/5' />
@@ -421,7 +534,6 @@ const EmployeeDashboard = () => {
 
                 <div>
                   <h2 className='font-semibold'>Today's Attendance</h2>
-
                   <p className='text-xs text-gray-300'>{formatToday()}</p>
                 </div>
               </div>
@@ -490,14 +602,93 @@ const EmployeeDashboard = () => {
           </div>
         </section>
 
+        {/* My Leave */}
         <section className='flex flex-col rounded-2xl border border-gray-200 bg-white p-4 sm:p-5'>
           <SectionHeader
             icon={CalendarDays}
             title='My Leave'
-            subtitle='Leave balance and requests'
+            subtitle='Your current year leave balance'
           />
 
-          <ComingSoon className='flex-1' />
+          {leaveLoading ? (
+            <div className='flex flex-1 items-center justify-center gap-2 py-8 text-sm text-gray-500'>
+              <LoaderCircle size={17} className='animate-spin' />
+              Loading leave details...
+            </div>
+          ) : leaveError ? (
+            <div className='rounded-xl bg-red-50 p-3 text-sm text-red-600'>
+              {leaveError}
+            </div>
+          ) : !leaveDetails ? (
+            <div className='flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-8 text-center'>
+              <CalendarDays size={25} className='mb-2 text-gray-400' />
+
+              <p className='text-sm font-semibold text-gray-900'>
+                No Leave Assigned
+              </p>
+
+              <p className='mt-1 text-xs text-gray-500'>
+                Leave has not been assigned for {new Date().getFullYear()}.
+              </p>
+            </div>
+          ) : (
+            <div className='space-y-3'>
+              {leaveItems.map(item => {
+                const balance = leaveDetails?.[item.key]
+
+                const total = Number(balance?.total || 0)
+                const used = Number(balance?.used || 0)
+                const remaining = Number(balance?.remaining || 0)
+
+                const usedPercentage =
+                  total > 0 ? Math.min(100, (used / total) * 100) : 0
+
+                return (
+                  <div
+                    key={item.key}
+                    className='rounded-xl border border-gray-100 bg-gray-50 p-3.5 transition-all hover:border-gray-200'
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <div>
+                        <h3 className='text-sm font-semibold text-gray-800'>
+                          {item.name}
+                        </h3>
+
+                        <p className='mt-1 text-xs text-gray-500'>
+                          {used} used / {total} total
+                        </p>
+                      </div>
+
+                      <div
+                        className={`rounded-lg ${item.light} px-3 py-2 text-center`}
+                      >
+                        <p className={`text-xl font-bold ${item.text}`}>
+                          {remaining}
+                        </p>
+
+                        <p className='text-[10px] font-medium text-gray-500'>
+                          Remaining
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className='mt-3 h-2 overflow-hidden rounded-full bg-gray-200'>
+                      <div
+                        className={`h-full rounded-full ${item.color} transition-all duration-700`}
+                        style={{ width: `${usedPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+
+              <div className='pt-1 text-center'>
+                <span className='text-xs font-medium text-gray-500'>
+                  Leave Year {leaveDetails.year}
+                </span>
+              </div>
+            </div>
+          )}
         </section>
       </div>
 
