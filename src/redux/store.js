@@ -8,34 +8,23 @@ import {
 
 import rootReducer from "./rootReducer";
 
-
 // =====================================================
 // STORE
 // =====================================================
 
-export const store =
-    configureStore({
+export const store = configureStore({
+    reducer: rootReducer,
 
-        reducer:
-            rootReducer,
-
-        middleware:
-            (getDefaultMiddleware) =>
-                getDefaultMiddleware({
-
-                    // redux-persist actions
-                    // are non-serializable
-                    serializableCheck:
-                        false,
-
-                }),
-
-    });
-
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            // redux-persist actions
+            // are non-serializable
+            serializableCheck: false,
+        }),
+});
 
 // =====================================================
 // PERSISTOR
 // =====================================================
 
-export const persistor =
-    persistStore(store);
+export const persistor = persistStore(store);

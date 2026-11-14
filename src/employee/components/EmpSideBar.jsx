@@ -50,9 +50,20 @@ const NAV_ITEMS = [
   },
 
   {
-    label: 'My Leave',
+    label: 'Leave',
     icon: Users,
-    path: '/employee/leave',
+     children: [
+      {
+        label: 'My Leave',
+        path: '/employee/leave',
+        icon: CalendarDays
+      },
+       {
+        label: 'Leave Requests',
+        path: '/employee/leave-requests',
+        icon: CalendarDays
+      }
+    ]
     
   },
 

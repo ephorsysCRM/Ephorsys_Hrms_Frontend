@@ -5,6 +5,7 @@ import createWebStorage from "redux-persist/es/storage/createWebStorage";
 import authReducer from "./features/auth/authSlice";
 import departmentReducer from "./features/department/departmentSlice";
 import employeeReducer from "./features/employee/employeeSlice";
+import employeeLeaveReducer from "./features/employeeLeave/employeeLeaveSlice";
 import attendanceReducer from "./features/attendance/attendanceSlice";
 import regularizationReducer from "./features/regularization/regularizationSlice";
 
@@ -52,6 +53,8 @@ const rootReducer = combineReducers({
     department: departmentReducer,
 
     employee: employeeReducer,
+
+    employeeLeave: employeeLeaveReducer,
 
     attendance: attendanceReducer,
 

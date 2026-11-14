@@ -84,8 +84,13 @@ const HR_ITEMS = [
         icon: CalendarSearch
       },
       {
-        label: 'Leave Management',
-        path: '/hr/leave-management',
+        label: ' Add Leave ',
+        path: '/hr/add-leave',
+        icon: ClipboardList
+      },
+      {
+        label: 'Leave Requests ',
+        path: '/hr/leave-requests',
         icon: ClipboardList
       }
     ]
