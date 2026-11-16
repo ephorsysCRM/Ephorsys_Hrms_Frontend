@@ -15,8 +15,8 @@ import {
   User,
   Wallet,
   Megaphone,
-  FileCheck2,
-  CalendarSearch
+  CalendarSearch,
+  Calendar
 } from 'lucide-react'
 
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
@@ -97,6 +97,12 @@ const HR_ITEMS = [
   },
 
   {
+    label: 'Holidays',
+    path: '/hr/all-holidays',
+    icon: Calendar
+  },
+
+  {
     label: 'Announcements',
     path: '/hr/announcements',
     icon: Megaphone
@@ -161,9 +167,21 @@ const SELF_ITEMS = [
   },
 
   {
-    label: 'My Leave',
-    path: '/hr/my/leave',
-    icon: CalendarDays
+    label: 'Leave',
+    icon: Users,
+     children: [
+      {
+        label: 'My Leave',
+        path: '/hr/my/leave',
+        icon: CalendarDays
+      },
+       {
+        label: 'Leave Requests',
+        path: '/hr/my/leave-requests',
+        icon: CalendarDays
+      }
+    ]
+    
   },
 
   {

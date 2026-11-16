@@ -74,8 +74,13 @@ const NAV_ITEMS = [
         icon: FileCheck2
       },
       {
-        label: 'Leave Management',
-        path: '/admin/leave-management',
+        label: 'Add Leave',
+        path: '/admin/add-leaves',
+        icon: ClipboardList
+      },
+      {
+        label: 'Leave Requests',
+        path: '/admin/leave-requests',
         icon: ClipboardList
       }
     ]
