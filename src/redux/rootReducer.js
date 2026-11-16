@@ -8,6 +8,7 @@ import employeeReducer from "./features/employee/employeeSlice";
 import employeeLeaveReducer from "./features/employeeLeave/employeeLeaveSlice";
 import attendanceReducer from "./features/attendance/attendanceSlice";
 import regularizationReducer from "./features/regularization/regularizationSlice";
+import holidayReducer from "./features/holiday/holidaySlice";
 
 // =====================================================
 // STORAGE
@@ -60,6 +61,9 @@ const rootReducer = combineReducers({
 
     // Regularization (Employee + HR/Admin)
     regularization: regularizationReducer,
+
+    // Holiday Management
+    holiday: holidayReducer,
 });
 
 // =====================================================
