@@ -20,6 +20,9 @@ import PaySlips from '../hr/pages/PaySlips'
 import Reports from '../hr/pages/Reports'
 import AttendanceRequests from '../hr/pages/AttendanceRequests'
 import AttendanceDetails from '../hr/pages/AttendanceDetails'
+import AddLeave from '../hr/pages/AddLeave'
+import LeaveRequests from '../hr/pages/LeaveRequests'
+import Holidays from '../hr/pages/Holidays'
 
 // Employee pages, reused so HR can use them as a normal employee
 import EmpDashboard from '../employee/pages/EmpDashboard'
@@ -30,8 +33,11 @@ import EmpAttendance from '../employee/pages/EmpAttendance'
 import MyDashboard from '../hr/pages/MyDashboard'
 import RegularizationRequests from '../hr/pages/RegularizationRequests'
 import Regularization from '../employee/pages/Regularization'
-import AddLeave from '../hr/pages/AddLeave'
-import LeaveRequests from '../hr/pages/LeaveRequests'
+import EmpLeaveReq from "../employee/pages/EmpLeaveReq"
+
+
+
+
 
 const HrRoutes = (
   <Route path='hr'>
@@ -62,6 +68,10 @@ const HrRoutes = (
           path='regularization-requests'
           element={<RegularizationRequests />}
         />
+
+        <Route path='all-holidays' element={<Holidays/>} />
+
+
         <Route path='leave-management' element={<LeaveManagement />} />
         <Route path='add-leave' element={<AddLeave/>}/>
         <Route path='leave-requests' element={<LeaveRequests/>}/>
@@ -76,6 +86,7 @@ const HrRoutes = (
           <Route path='attendance' element={<EmpAttendance />} />
           <Route path='regularization' element={<Regularization />} />
           <Route path='leave' element={<EmpLeave />} />
+          <Route path='leave-requests' element={<EmpLeaveReq/>} />
           <Route path='salary' element={<EmpSalary />} />
         </Route>
       </Route>

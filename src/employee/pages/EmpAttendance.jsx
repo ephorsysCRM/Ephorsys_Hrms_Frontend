@@ -18,6 +18,7 @@ import {
   createRegularizationRequest,
   getMyRegularization
 } from '../../redux/features/regularization/regularizationThunk'
+import { getAllHolidays } from '../../redux/features/holiday/holidayThunk'
 import Modal from '../../UI/Modal'
 
 // ======================================================
@@ -256,7 +257,6 @@ const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const SUNDAY_LABEL = 'Sunday Off'
 
-// Calendar cell colours, keyed by day label
 const cellClasses = {
   [SUNDAY_LABEL]: 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100',
   Present:
@@ -264,7 +264,10 @@ const cellClasses = {
   Absent: 'border-red-500 bg-red-500 text-white hover:bg-red-600',
   'On Leave': 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100',
   'Half Day': 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
-  Holiday: 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100',
+
+  // Automatically matched holidays are BLUE
+  Holiday: 'border-blue-300 bg-blue-100 text-blue-700 hover:bg-blue-200',
+
   'Weekly Off': 'border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200',
   Pending: 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
   'No Record': 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
@@ -277,7 +280,10 @@ const statusClasses = {
   Absent: 'bg-red-50 text-red-700',
   'On Leave': 'bg-blue-50 text-blue-700',
   Pending: 'bg-amber-50 text-amber-700',
-  Holiday: 'bg-purple-50 text-purple-700',
+
+  // Holiday badge is BLUE
+  Holiday: 'bg-blue-100 text-blue-700',
+
   'Weekly Off': 'bg-gray-100 text-gray-600',
   'No Record': 'bg-gray-100 text-gray-600'
 }
@@ -287,7 +293,7 @@ const legendItems = [
   { label: 'Absent', dot: 'bg-red-500' },
   { label: 'On Leave', dot: 'bg-blue-500' },
   { label: 'Half Day', dot: 'bg-amber-500' },
-  { label: 'Holiday', dot: 'bg-purple-500' },
+  { label: 'Holiday', dot: 'bg-blue-500' },
   { label: SUNDAY_LABEL, dot: 'bg-red-300' }
 ]
 
@@ -320,7 +326,10 @@ const DetailRow = ({ icon: Icon, label, children }) => (
   </div>
 )
 
-// Content shown inside the modal when a calendar date is clicked
+// ======================================================
+// Day Details
+// ======================================================
+
 const DayDetails = ({ day, onRegularize, request }) => {
   const { dateString, record, label } = day
   const times = getRecordTimes(record)
@@ -374,6 +383,7 @@ const DayDetails = ({ day, onRegularize, request }) => {
                 {request.status === 'approved' ? 'Approved' : 'Pending HR'}
               </span>
             </div>
+
             {request.reason && (
               <p className='text-xs text-amber-800'>{request.reason}</p>
             )}
@@ -392,6 +402,10 @@ const DayDetails = ({ day, onRegularize, request }) => {
     </div>
   )
 }
+
+// ======================================================
+// Regularization Form
+// ======================================================
 
 const RegularizationForm = ({ day, onClose, onSubmit, loading = false }) => {
   const [description, setDescription] = useState('')
@@ -412,7 +426,6 @@ const RegularizationForm = ({ day, onClose, onSubmit, loading = false }) => {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
-      {/* Regularization Status */}
       <div>
         <label className='mb-1.5 block text-sm font-medium text-gray-700'>
           Regularization Status
@@ -433,7 +446,6 @@ const RegularizationForm = ({ day, onClose, onSubmit, loading = false }) => {
         </select>
       </div>
 
-      {/* Reason */}
       <div>
         <label className='mb-1.5 block text-sm font-medium text-gray-700'>
           Reason For Regularization
@@ -449,7 +461,6 @@ const RegularizationForm = ({ day, onClose, onSubmit, loading = false }) => {
         />
       </div>
 
-      {/* Actions */}
       <div className='flex justify-end gap-3 pt-2'>
         <button
           type='button'
@@ -485,6 +496,9 @@ const Attendance = () => {
 
   const user = useSelector(state => state.auth?.user)
 
+  // Get holidays from the Holiday Redux slice
+  const holidayList = useSelector(state => state.holiday?.holidays || [])
+
   const joiningDateValue =
     user?.joiningDate ||
     user?.dateOfJoining ||
@@ -511,6 +525,7 @@ const Attendance = () => {
   const [selectedDay, setSelectedDay] = useState(null)
   const [selectedRegularizationDay, setSelectedRegularizationDay] =
     useState(null)
+
   const {
     myRequests: regularizationRequestList = [],
     loading: regularizationLoading = {},
@@ -523,7 +538,9 @@ const Attendance = () => {
         0,
         10
       )
+
       if (date) map[date] = request
+
       return map
     }, {})
   }, [regularizationRequestList])
@@ -538,14 +555,41 @@ const Attendance = () => {
   const canGoPrev = !joiningMonthKey || calendarMonth > joiningMonthKey
   const canGoNext = calendarMonth < todayMonthKey
 
-  // Load the employee's regularization requests from Redux/API.
+  // ======================================================
+  // FETCH HOLIDAYS FOR THE DISPLAYED CALENDAR YEAR
+  // ======================================================
+
+  const calendarYear = Number(calendarMonth.slice(0, 4))
+
+  useEffect(() => {
+    dispatch(getAllHolidays(calendarYear, 1, 100))
+  }, [dispatch, calendarYear])
+
+  // Create a Set containing all holiday dates.
+  // Example: Set(['2026-11-16', '2026-12-25'])
+  const holidayDates = useMemo(() => {
+    return new Set(
+      (holidayList || [])
+        .filter(holiday => holiday?.isActive !== false)
+        .map(holiday => {
+          // Your Holiday Management form uses the "date" field.
+          return String(holiday?.date || '').slice(0, 10)
+        })
+        .filter(Boolean)
+    )
+  }, [holidayList])
+
+  // ======================================================
+  // FETCH REGULARIZATION REQUESTS
+  // ======================================================
+
   useEffect(() => {
     dispatch(getMyRegularization({ page: 1, limit: 100 }))
   }, [dispatch])
 
-  // ------------------------------------------------------
-  // Fetch today's attendance
-  // ------------------------------------------------------
+  // ======================================================
+  // FETCH TODAY'S ATTENDANCE
+  // ======================================================
 
   useEffect(() => {
     let cancelled = false
@@ -594,9 +638,9 @@ const Attendance = () => {
     }
   }, [dispatch, todayString])
 
-  // ------------------------------------------------------
-  // Fetch a single month
-  // ------------------------------------------------------
+  // ======================================================
+  // FETCH A SINGLE MONTH
+  // ======================================================
 
   const fetchMonth = useCallback(
     async monthKey => {
@@ -678,23 +722,28 @@ const Attendance = () => {
     }
   }, [calendarMonth, fetchMonth])
 
-  const refreshCalendar = () => loadMonths([calendarMonth])
+  const refreshCalendar = () => {
+    loadMonths([calendarMonth])
+    dispatch(getAllHolidays(calendarYear, 1, 100))
+  }
 
-  // Submit the regularization request through Redux.
+  // ======================================================
+  // SUBMIT REGULARIZATION REQUEST
+  // ======================================================
+
   const handleRegularizationSubmit = async payload => {
     try {
       await dispatch(createRegularizationRequest(payload)).unwrap()
       await dispatch(getMyRegularization({ page: 1, limit: 100 }))
       setSelectedRegularizationDay(null)
     } catch (error) {
-      // The Redux slice stores the API error; keep the form open for correction.
       console.error('Regularization request failed:', error)
     }
   }
 
-  // ------------------------------------------------------
-  // Calendar cells
-  // ------------------------------------------------------
+  // ======================================================
+  // CALENDAR CELLS
+  // ======================================================
 
   const calendarCells = useMemo(() => {
     const [year, month] = calendarMonth.split('-').map(Number)
@@ -714,15 +763,23 @@ const Attendance = () => {
       const dateString = `${year}-${pad(month)}-${pad(day)}`
       const weekDay = new Date(year, month - 1, day).getDay()
       const record = recordsByDate[dateString] || null
+
       const isSunday = weekDay === 0
       const isFuture = dateString > todayString
       const isBeforeJoining = Boolean(
         joiningString && dateString < joiningString
       )
 
+      // Check whether this date exists in Holiday Management.
+      const isHoliday = holidayDates.has(dateString)
+
       let label
 
-      if (isSunday && !getRecordTimes(record).checkIn) {
+      // IMPORTANT:
+      // Holiday gets priority over Sunday and attendance status.
+      if (isHoliday) {
+        label = 'Holiday'
+      } else if (isSunday && !getRecordTimes(record).checkIn) {
         label = SUNDAY_LABEL
       } else if (record) {
         label = getStatus(record)
@@ -736,28 +793,36 @@ const Attendance = () => {
         record,
         label,
         isSunday,
+        isHoliday,
         isToday: dateString === todayString,
-        // Sundays always stay red (even in the future), other future days
-        // and days before joining are disabled.
-        disabled: isBeforeJoining || (isFuture && !isSunday),
+
+        // Holidays are displayed even if no attendance record exists.
+        // Future non-Sunday dates and dates before joining stay disabled.
+        disabled: isBeforeJoining || (isFuture && !isSunday && !isHoliday),
+
         isBeforeJoining
       })
     }
 
     return cells
-  }, [calendarMonth, calendarData, todayString, joiningString])
+  }, [calendarMonth, calendarData, todayString, joiningString, holidayDates])
 
-  // ------------------------------------------------------
-  // Today's attendance details
-  // ------------------------------------------------------
+  // ======================================================
+  // TODAY'S ATTENDANCE DETAILS
+  // ======================================================
 
   const todayTimes = getRecordTimes(todayData)
   const isCurrentlyCheckedIn = isCheckedInNow(todayData)
   const todayStatus = todayData ? getStatus(todayData) : 'Pending'
 
-  // ------------------------------------------------------
-  // Render
-  // ------------------------------------------------------
+  // If today is an added holiday, display Holiday status.
+  const displayedTodayStatus = holidayDates.has(todayString)
+    ? 'Holiday'
+    : todayStatus
+
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
     <div className='min-h-screen py-2 sm:py-4'>
@@ -780,9 +845,8 @@ const Attendance = () => {
           </div>
         </div>
 
-        {/* Top section */}
+        {/* Today's attendance */}
         <div className='grid grid-cols-1 gap-5'>
-          {/* Today's attendance */}
           <section className='overflow-hidden rounded-2xl border border-gray-200 bg-white'>
             <div className='h-1 bg-black' />
 
@@ -804,10 +868,11 @@ const Attendance = () => {
 
                 <span
                   className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                    statusClasses[todayStatus] || 'bg-gray-100 text-gray-600'
+                    statusClasses[displayedTodayStatus] ||
+                    'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {todayStatus}
+                  {displayedTodayStatus}
                 </span>
               </div>
 
@@ -1051,6 +1116,7 @@ const Attendance = () => {
                 Track the status of your attendance correction requests.
               </p>
             </div>
+
             <button
               type='button'
               onClick={() =>
@@ -1079,8 +1145,8 @@ const Attendance = () => {
 
           {regularizationLoading?.getMyRequests ? (
             <div className='flex items-center gap-2 py-8 text-sm text-gray-500'>
-              <LoaderCircle size={16} className='animate-spin' /> Loading
-              requests...
+              <LoaderCircle size={16} className='animate-spin' />
+              Loading requests...
             </div>
           ) : regularizationRequestList.length === 0 ? (
             <p className='py-8 text-center text-sm text-gray-500'>
@@ -1092,12 +1158,14 @@ const Attendance = () => {
                 const requestStatus = String(
                   request.status || 'pending'
                 ).toLowerCase()
+
                 const badgeClass =
                   requestStatus === 'approved'
                     ? 'bg-emerald-50 text-emerald-700'
                     : requestStatus === 'rejected'
                     ? 'bg-red-50 text-red-700'
                     : 'bg-amber-50 text-amber-700'
+
                 return (
                   <div
                     key={request._id}
@@ -1108,6 +1176,7 @@ const Attendance = () => {
                         <p className='text-sm font-semibold text-gray-900'>
                           {formatDate(request.attendanceDate || request.date)}
                         </p>
+
                         <p className='mt-1 text-xs text-gray-500'>
                           Requested status:{' '}
                           <span className='font-medium capitalize'>
@@ -1118,17 +1187,20 @@ const Attendance = () => {
                           </span>
                         </p>
                       </div>
+
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${badgeClass}`}
                       >
                         {requestStatus}
                       </span>
                     </div>
+
                     {request.reason && (
                       <p className='mt-3 text-sm text-gray-600'>
                         {request.reason}
                       </p>
                     )}
+
                     {requestStatus === 'rejected' && request.rejectionReason && (
                       <div className='mt-3 rounded-lg bg-red-50 p-3'>
                         <p className='text-xs font-semibold text-red-700'>

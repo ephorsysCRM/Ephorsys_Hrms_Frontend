@@ -15,11 +15,11 @@ import DepartmentView from '../admin/pages/DepartmentView'
 import EditEmployee from '../admin/pages/EditEmployee'
 import ManageHr from '../admin/pages/ManageHr'
 import Attendance from '../admin/pages/Attendance'
-import LeaveManagement from '../admin/pages/LeaveManagement'
-import AttendanceRequests from '../admin/pages/AttendanceRequests'
 import Announcements from '../admin/pages/Announcements'
 import AttendanceDetails from '../admin/pages/AttendanceDetails'
 import RegularizationRequests from '../admin/pages/RegularizationRequests'
+import AddLeave from '../admin/pages/AddLeave'
+import LeaveRequests from '../admin/pages/LeaveRequests'
 
 const AdminRoutes = (
   <Route path='/'>
@@ -50,7 +50,8 @@ const AdminRoutes = (
           element={<RegularizationRequests />}
         />
 
-        <Route path='leave-management' element={<LeaveManagement />} />
+        <Route path='add-leaves' element={<AddLeave />} />
+        <Route path='leave-requests' element={<LeaveRequests/>} />
 
         <Route path='announcements' element={<Announcements />} />
       </Route>
