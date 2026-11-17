@@ -20,6 +20,7 @@ import AttendanceDetails from '../admin/pages/AttendanceDetails'
 import RegularizationRequests from '../admin/pages/RegularizationRequests'
 import AddLeave from '../admin/pages/AddLeave'
 import LeaveRequests from '../admin/pages/LeaveRequests'
+import Holiday from '../admin/pages/Holiday'
 
 const AdminRoutes = (
   <Route path='/'>
@@ -52,6 +53,7 @@ const AdminRoutes = (
 
         <Route path='add-leaves' element={<AddLeave />} />
         <Route path='leave-requests' element={<LeaveRequests/>} />
+        <Route path='all-holidays' element={<Holiday/>} />
 
         <Route path='announcements' element={<Announcements />} />
       </Route>
