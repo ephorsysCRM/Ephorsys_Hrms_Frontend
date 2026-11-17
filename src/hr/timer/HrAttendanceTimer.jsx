@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -109,6 +110,22 @@ const HrAttendanceTimer = () => {
   const [justDone, setJustDone] = useState('') // '', 'in', 'out'
   const [isMinimized, setIsMinimized] = useState(readMinimized)
 
+  // Temporary widget position. It resets to { x: 0, y: 0 } on refresh.
+  const [widgetPosition, setWidgetPosition] = useState({ x: 0, y: 0 })
+
+  const widgetDragRef = useRef({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    startPositionX: 0,
+    startPositionY: 0,
+    startRect: null,
+    moved: false
+  })
+
+  const dragTargetRef = useRef(null)
+  const suppressClickRef = useRef(false)
+
   const trackRef = useRef(null)
   const startXRef = useRef(0)
   const dragXRef = useRef(0)
@@ -143,6 +160,101 @@ const HrAttendanceTimer = () => {
     const timeout = setTimeout(() => setJustDone(''), 2500)
     return () => clearTimeout(timeout)
   }, [justDone])
+
+  // Drag the attendance widget temporarily
+  const handleWidgetPointerDown = event => {
+    // In the expanded widget, don't start dragging from the minimize button.
+    if (!isMinimized && event.target.closest('button')) return
+
+    if (widgetDragRef.current.pointerId !== null) return
+
+    event.preventDefault()
+
+    const rect = event.currentTarget.getBoundingClientRect()
+
+    widgetDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startPositionX: widgetPosition.x,
+      startPositionY: widgetPosition.y,
+      startRect: rect,
+      moved: false
+    }
+
+    dragTargetRef.current = event.currentTarget
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const handleWidgetPointerMove = event => {
+    const drag = widgetDragRef.current
+
+    if (drag.pointerId !== event.pointerId || !drag.startRect) return
+
+    const deltaX = event.clientX - drag.startX
+    const deltaY = event.clientY - drag.startY
+
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+      drag.moved = true
+    }
+
+    // Keep the widget inside the visible screen.
+    const minX = -drag.startRect.left
+    const maxX = window.innerWidth - drag.startRect.right
+    const minY = -drag.startRect.top
+    const maxY = window.innerHeight - drag.startRect.bottom
+
+    const limitedX = Math.max(minX, Math.min(maxX, deltaX))
+    const limitedY = Math.max(minY, Math.min(maxY, deltaY))
+
+    setWidgetPosition({
+      x: drag.startPositionX + limitedX,
+      y: drag.startPositionY + limitedY
+    })
+  }
+
+  const handleWidgetPointerUp = event => {
+    const drag = widgetDragRef.current
+
+    if (drag.pointerId !== event.pointerId) return
+
+    if (drag.moved) {
+      suppressClickRef.current = true
+    }
+
+    if (dragTargetRef.current?.hasPointerCapture(event.pointerId)) {
+      dragTargetRef.current.releasePointerCapture(event.pointerId)
+    }
+
+    widgetDragRef.current.pointerId = null
+    widgetDragRef.current.startRect = null
+    dragTargetRef.current = null
+  }
+
+  const handleWidgetPointerCancel = event => {
+    const drag = widgetDragRef.current
+
+    if (drag.pointerId !== event.pointerId) return
+
+    if (dragTargetRef.current?.hasPointerCapture(event.pointerId)) {
+      dragTargetRef.current.releasePointerCapture(event.pointerId)
+    }
+
+    widgetDragRef.current.pointerId = null
+    widgetDragRef.current.startRect = null
+    dragTargetRef.current = null
+  }
+
+  const widgetDragHandlers = {
+    onPointerDown: handleWidgetPointerDown,
+    onPointerMove: handleWidgetPointerMove,
+    onPointerUp: handleWidgetPointerUp,
+    onPointerCancel: handleWidgetPointerCancel
+  }
+
+  const widgetPositionStyle = {
+    transform: `translate3d(${widgetPosition.x}px, ${widgetPosition.y}px, 0)`
+  }
 
   // Today's attendance record
   const todayAttendance = attendance.find(
@@ -345,14 +457,26 @@ const HrAttendanceTimer = () => {
     ? 'text-emerald-700'
     : 'text-gray-100'
 
-  // Minimized: small button that shows only the timer
+  // Minimized: small draggable button that shows only the timer
   if (isMinimized) {
     return (
       <button
         type='button'
-        onClick={() => toggleMinimized(false)}
+        {...widgetDragHandlers}
+        onClick={() => {
+          if (suppressClickRef.current) {
+            suppressClickRef.current = false
+            return
+          }
+
+          toggleMinimized(false)
+        }}
         aria-label='Open attendance'
-        className={`fixed bottom-3 right-3 z-50 flex h-12 items-center gap-2 rounded-full px-4 text-sm font-semibold text-white shadow-lg outline-none transition-transform hover:scale-105 focus-visible:ring-4 sm:bottom-5 sm:right-5 ${
+        style={{
+          ...widgetPositionStyle,
+          touchAction: 'none'
+        }}
+        className={`fixed bottom-3 right-3 z-50 flex h-12 cursor-grab items-center gap-2 rounded-full px-4 text-sm font-semibold text-white shadow-lg outline-none transition-colors active:cursor-grabbing focus-visible:ring-4 sm:bottom-5 sm:right-5 ${
           isCheckedIn
             ? 'bg-rose-600 shadow-rose-500/40 focus-visible:ring-rose-300'
             : isCompleted
@@ -381,10 +505,16 @@ const HrAttendanceTimer = () => {
   }
 
   return (
-    <div className='fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-90'>
+    <div
+      className='fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-90'
+      style={widgetPositionStyle}
+    >
       <div className='rounded-3xl border border-gray-200 bg-white p-3 shadow-xl shadow-gray-900/10'>
-        {/* Status + timer */}
-        <div className='flex items-center justify-between px-2 pb-3 pt-1'>
+        {/* Status + timer - drag the widget from this area */}
+        <div
+          {...widgetDragHandlers}
+          className='flex cursor-grab touch-none items-center justify-between px-2 pb-3 pt-1 active:cursor-grabbing'
+        >
           <div className='min-w-0'>
             <div className='flex items-center gap-2'>
               <span className={`h-2 w-2 rounded-full ${status.dot}`} />

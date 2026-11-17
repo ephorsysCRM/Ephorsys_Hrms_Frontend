@@ -16,7 +16,8 @@ import {
   Wallet,
   Megaphone,
   CalendarSearch,
-  Calendar
+  Calendar,
+  CalendarOff
 } from 'lucide-react'
 
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
@@ -154,7 +155,11 @@ const SELF_ITEMS = [
     path: '/hr/my/profile',
     icon: User
   },
-
+  {
+    label: 'Holiday list',
+    icon: CalendarOff,
+    path: '/hr/my/holiday-list' 
+  },
   {
     label: 'My Attendance',
     path: '/hr/my/attendance',

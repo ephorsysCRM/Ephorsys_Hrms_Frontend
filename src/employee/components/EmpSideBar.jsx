@@ -31,9 +31,9 @@ const NAV_ITEMS = [
     path: '/employee/profile'
   },
   {
-    label: 'Holidays',
+    label: 'Holiday list',
     icon: CalendarOff,
-    path: '/employee/holiday'
+    path: '/employee/holiday-list' 
   },
 
   {

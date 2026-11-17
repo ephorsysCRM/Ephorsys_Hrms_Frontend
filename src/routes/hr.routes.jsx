@@ -34,6 +34,7 @@ import MyDashboard from '../hr/pages/MyDashboard'
 import RegularizationRequests from '../hr/pages/RegularizationRequests'
 import Regularization from '../employee/pages/Regularization'
 import EmpLeaveReq from "../employee/pages/EmpLeaveReq"
+import HolidayList from '../hr/pages/HolidayList'
 
 
 
@@ -88,6 +89,8 @@ const HrRoutes = (
           <Route path='leave' element={<EmpLeave />} />
           <Route path='leave-requests' element={<EmpLeaveReq/>} />
           <Route path='salary' element={<EmpSalary />} />
+        <Route path='holiday-list' element={<HolidayList />} />
+
         </Route>
       </Route>
     </Route>

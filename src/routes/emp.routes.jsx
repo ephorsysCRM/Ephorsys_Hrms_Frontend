@@ -26,7 +26,7 @@ const EmpRoutes = (
         <Route path='/employee/leave-requests' element={<EmpLeaveReq />} />
         <Route path='salary' element={<EmpSalary />} />
         <Route path='attendance' element={<EmpAttendance />} />
-        <Route path='holiday' element={<Holidays />} />
+        <Route path='holiday-list' element={<Holidays />} />
         <Route path='regularization' element={<Regularization />} />
       </Route>
     </Route>
