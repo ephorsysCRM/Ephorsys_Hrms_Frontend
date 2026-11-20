@@ -372,7 +372,7 @@ const Holiday = () => {
       {/* HEADER */}
       <div className='flex flex-col justify-between gap-3 sm:flex-row sm:items-center'>
         <div>
-          <h1 className='text-2xl font-bold text-gray-900'>
+          <h1 className='text-2xl sm:text-3xl  font-bold text-gray-900'>
             Holiday Management
           </h1>
 

@@ -309,7 +309,7 @@ const Holidays = () => {
         <div className="flex items-center gap-3">
 
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">
+            <h1 className="text-2xl sm:text-3xl  font-bold tracking-tight text-gray-950">
               Holiday Management
             </h1>
 
