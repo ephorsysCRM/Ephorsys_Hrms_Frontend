@@ -14,7 +14,8 @@ import {
   ClipboardList,
   UserRoundCog,
   FileCheck2,
-  Megaphone
+  Megaphone,
+  Calendar
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -84,6 +85,11 @@ const NAV_ITEMS = [
         icon: ClipboardList
       }
     ]
+  },
+   {
+    label: 'Holidays',
+    path: '/admin/all-holidays',
+    icon: Calendar
   },
   {
     label: 'Announcements',

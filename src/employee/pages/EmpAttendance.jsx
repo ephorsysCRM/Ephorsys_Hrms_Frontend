@@ -830,7 +830,7 @@ const Attendance = () => {
         {/* Header */}
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight text-gray-900'>
+            <h1 className='text-2xl sm:text-3xl font-bold tracking-tight text-gray-900'>
               Attendance
             </h1>
 

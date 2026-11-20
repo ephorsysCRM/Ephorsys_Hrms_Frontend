@@ -3,16 +3,12 @@ import {
   LogOut,
   X,
   Users,
-  UserRound,
   Building2,
   CalendarCheck,
   CalendarDays,
-  WalletCards,
-  FileText,
-  Settings,
   ChevronDown,
-  ClipboardList,
-  CalendarSearch
+  CalendarSearch,
+  CalendarOff
 } from 'lucide-react'
 
 import { NavLink } from 'react-router-dom'
@@ -32,39 +28,40 @@ const NAV_ITEMS = [
   {
     label: 'My Profile',
     icon: Building2,
-    path: '/employee/profile',
-   
+    path: '/employee/profile'
+  },
+  {
+    label: 'Holiday list',
+    icon: CalendarOff,
+    path: '/employee/holiday-list' 
   },
 
   {
     label: 'My Attendance',
     icon: Users,
-    path: '/employee/attendance',
-    
+    path: '/employee/attendance'
   },
   {
     label: 'Regularization Requests',
     icon: CalendarSearch,
-    path: '/employee/regularization',
-    
+    path: '/employee/regularization'
   },
 
   {
     label: 'Leave',
     icon: Users,
-     children: [
+    children: [
       {
         label: 'My Leave',
         path: '/employee/leave',
         icon: CalendarDays
       },
-       {
+      {
         label: 'Leave Requests',
         path: '/employee/leave-requests',
         icon: CalendarDays
       }
     ]
-    
   },
 
   {
@@ -77,8 +74,7 @@ const NAV_ITEMS = [
         icon: CalendarDays
       }
     ]
-  },
-
+  }
 ]
 
 const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {
