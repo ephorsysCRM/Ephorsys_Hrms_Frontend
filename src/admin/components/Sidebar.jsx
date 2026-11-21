@@ -61,7 +61,7 @@ const NAV_ITEMS = [
   },
 
   {
-    label: 'Attendance',
+    label: 'Attendance & Leave',
     icon: CalendarCheck,
     children: [
       {
@@ -91,40 +91,6 @@ const NAV_ITEMS = [
     path: '/admin/all-holidays',
     icon: Calendar
   },
-  {
-    label: 'Announcements',
-    path: '/admin/announcements',
-    icon: Megaphone
-  },
-
-  {
-    label: 'Payroll',
-    icon: WalletCards,
-    children: [
-      {
-        label: 'Payroll',
-        path: '/admin/payroll',
-        icon: WalletCards
-      },
-      {
-        label: 'Payslips',
-        path: '/admin/payslips',
-        icon: FileText
-      }
-    ]
-  },
-
-  {
-    label: 'Reports',
-    path: '/admin/reports',
-    icon: FileText
-  },
-
-  {
-    label: 'Settings',
-    path: '/admin/settings',
-    icon: Settings
-  }
 ]
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {

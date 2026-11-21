@@ -15,7 +15,6 @@ import DepartmentView from '../admin/pages/DepartmentView'
 import EditEmployee from '../admin/pages/EditEmployee'
 import ManageHr from '../admin/pages/ManageHr'
 import Attendance from '../admin/pages/Attendance'
-import Announcements from '../admin/pages/Announcements'
 import AttendanceDetails from '../admin/pages/AttendanceDetails'
 import RegularizationRequests from '../admin/pages/RegularizationRequests'
 import AddLeave from '../admin/pages/AddLeave'
@@ -55,7 +54,6 @@ const AdminRoutes = (
         <Route path='leave-requests' element={<LeaveRequests/>} />
         <Route path='all-holidays' element={<Holiday/>} />
 
-        <Route path='announcements' element={<Announcements />} />
       </Route>
     </Route>
 
