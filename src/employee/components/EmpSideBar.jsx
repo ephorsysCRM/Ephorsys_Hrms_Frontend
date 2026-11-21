@@ -33,7 +33,7 @@ const NAV_ITEMS = [
   {
     label: 'Holiday list',
     icon: CalendarOff,
-    path: '/employee/holiday-list' 
+    path: '/employee/holiday-list'
   },
 
   {
@@ -46,35 +46,16 @@ const NAV_ITEMS = [
     icon: CalendarSearch,
     path: '/employee/regularization'
   },
-
   {
     label: 'Leave',
-    icon: Users,
-    children: [
-      {
-        label: 'My Leave',
-        path: '/employee/leave',
-        icon: CalendarDays
-      },
-      {
-        label: 'Leave Requests',
-        path: '/employee/leave-requests',
-        icon: CalendarDays
-      }
-    ]
+    icon: CalendarDays,
+    path: '/employee/leave-requests'
   },
-
   {
-    label: 'My Salary',
+    label: 'Pay Slips',
     icon: CalendarCheck,
-    children: [
-      {
-        label: 'Pay Slips',
-        path: '/employee/salary',
-        icon: CalendarDays
-      }
-    ]
-  }
+    path: '/employee/salary'
+  },
 ]
 
 const EmpSideBar = ({ sidebarOpen, setSidebarOpen }) => {

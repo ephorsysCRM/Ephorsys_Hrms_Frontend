@@ -1,5 +1,11 @@
-import { Plus, LoaderCircle, CalendarDays } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import {
+  Plus,
+  LoaderCircle,
+  CalendarDays,
+  HeartPulse,
+  Home
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Modal from '../../UI/Modal'
@@ -7,8 +13,37 @@ import LeaveModal from '../employeeModal/LeaveModal'
 import Pagination from '../../UI/Pagination'
 
 import { getMyLeaveApplications } from '../../redux/features/employeeLeave/employeeLeaveThunk'
+import { getAdminProfile } from '../../redux/features/auth/authThunk'
 
 const LIMIT = 5
+
+// Leave types for the balance cards
+const leaveTypes = [
+  {
+    name: 'Casual Leave',
+    shortName: 'Casual',
+    key: 'casualLeave',
+    icon: CalendarDays,
+    iconStyle: 'bg-blue-50 text-blue-700',
+    progress: 'bg-blue-600'
+  },
+  {
+    name: 'Sick Leave',
+    shortName: 'Sick',
+    key: 'sickLeave',
+    icon: HeartPulse,
+    iconStyle: 'bg-amber-50 text-amber-700',
+    progress: 'bg-amber-500'
+  },
+  {
+    name: 'Work From Home',
+    shortName: 'WFH',
+    key: 'workFromHome',
+    icon: Home,
+    iconStyle: 'bg-green-50 text-green-600',
+    progress: 'bg-green-600'
+  }
+]
 
 // Format leave type
 const formatLeaveType = type => {
@@ -83,12 +118,74 @@ const EmpLeaveReq = () => {
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
+  const selectedYear = new Date().getFullYear()
+
+  // Leave balance states
+  const [employee, setEmployee] = useState(null)
+  const [balanceLoading, setBalanceLoading] = useState(true)
+  const [balanceError, setBalanceError] = useState('')
+
   const {
     myLeaveApplications = [],
     myApplicationsPagination,
     myApplicationsLoading,
     myApplicationsError
   } = useSelector(state => state.employeeLeave)
+
+  // Fetch leave balance (employee profile)
+  const fetchBalance = async () => {
+    setBalanceLoading(true)
+    setBalanceError('')
+
+    try {
+      const response = await dispatch(getAdminProfile())
+
+      if (!response?.success) {
+        throw new Error(response?.message || 'Failed to fetch employee profile')
+      }
+
+      const employeeData =
+        response?.data?.user ||
+        response?.data?.employee ||
+        response?.data?.admin ||
+        response?.data
+
+      if (!employeeData) {
+        throw new Error('Employee details not found')
+      }
+
+      setEmployee(employeeData)
+    } catch (err) {
+      setBalanceError(err?.message || 'Unable to load leave details')
+    } finally {
+      setBalanceLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchBalance()
+  }, [dispatch])
+
+  const currentYearLeave = useMemo(() => {
+    return (
+      employee?.leaveDetails?.find(
+        leave => Number(leave.year) === Number(selectedYear)
+      ) || null
+    )
+  }, [employee, selectedYear])
+
+  const leaveBalances = useMemo(() => {
+    return leaveTypes.map(leave => {
+      const balance = currentYearLeave?.[leave.key]
+
+      return {
+        ...leave,
+        used: Number(balance?.used ?? 0),
+        total: Number(balance?.total ?? 0),
+        remaining: Number(balance?.remaining ?? 0)
+      }
+    })
+  }, [currentYearLeave])
 
   // Fetch applications whenever page changes
   useEffect(() => {
@@ -102,11 +199,13 @@ const EmpLeaveReq = () => {
 
   const totalPages = myApplicationsPagination?.totalPages || 1
 
-  // Refresh list after modal closes successfully
+  // Refresh list and leave balances after modal closes
   const handleCloseApplyLeave = () => {
     setApplyLeaveOpen(false)
 
     setCurrentPage(1)
+
+    fetchBalance()
 
     dispatch(
       getMyLeaveApplications({
@@ -121,9 +220,9 @@ const EmpLeaveReq = () => {
   }
 
   return (
-    <div className='flex h-[calc(100vh-80px)] min-h-[500px] flex-col overflow-hidden p-4 sm:p-6 lg:p-1'>
+    <div className='flex flex-col px-0 py-2 sm:p-6 lg:p-1'>
       {/* Fixed Header */}
-      <div className='sticky top-0 z-20 mb-6 flex shrink-0 flex-col gap-4  px-2 py-3 sm:flex-row sm:items-end sm:justify-between'>
+      <div className='sticky top-0 z-20 mb-4 flex shrink-0 flex-col gap-4 px-0 py-3 sm:flex-row sm:items-end sm:justify-between'>
         <div>
           <h1 className='text-2xl sm:text-3xl font-bold tracking-tight text-black '>
             My Leave Requests
@@ -143,8 +242,85 @@ const EmpLeaveReq = () => {
         </button>
       </div>
 
+      {/* Leave Balance Cards */}
+      <div className='mb-4 shrink-0'>
+        {balanceLoading ? (
+          <div className='rounded-xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500'>
+            Loading your leave details...
+          </div>
+        ) : balanceError ? (
+          <div className='rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600'>
+            {balanceError}
+          </div>
+        ) : !employee ? (
+          <div className='rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700'>
+            Employee profile not found. Please log in again.
+          </div>
+        ) : (
+          <>
+            {!currentYearLeave && (
+              <div className='mb-3 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700'>
+                Leave has not been assigned for {selectedYear} yet.
+              </div>
+            )}
+
+            <div className='grid grid-cols-3 gap-2 sm:gap-4'>
+              {leaveBalances.map(leave => {
+                const Icon = leave.icon
+
+                const usedPercentage =
+                  leave.total > 0 ? (leave.used / leave.total) * 100 : 0
+
+                return (
+                  <div
+                    key={leave.key}
+                    className='rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition-all duration-300 hover:shadow-md sm:rounded-2xl sm:p-5'
+                  >
+                    <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4'>
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-11 sm:w-11 sm:rounded-xl ${leave.iconStyle}`}
+                      >
+                        <Icon
+                          className='h-4 w-4 sm:h-5 sm:w-5'
+                          strokeWidth={1.8}
+                        />
+                      </div>
+
+                      <div className='min-w-0'>
+                        <p className='truncate text-[11px] font-medium text-gray-500 sm:text-sm'>
+                          <span className='sm:hidden'>{leave.shortName}</span>
+                          <span className='hidden sm:inline'>{leave.name}</span>
+                        </p>
+
+                        <h2 className='text-xl font-bold leading-tight text-gray-900 sm:text-3xl'>
+                          {String(leave.remaining).padStart(2, '0')}
+                          <span className='ml-1 text-[11px] font-medium text-gray-400 sm:text-sm'>
+                            left
+                          </span>
+                        </h2>
+                      </div>
+                    </div>
+
+                    <div className='mt-3 h-1.5 overflow-hidden rounded-full bg-gray-100'>
+                      <div
+                        className={`h-full rounded-full ${leave.progress} transition-all duration-500`}
+                        style={{ width: `${Math.min(100, usedPercentage)}%` }}
+                      />
+                    </div>
+
+                    <p className='mt-2 text-[10px] text-gray-400 sm:text-xs'>
+                      {leave.used} / {leave.total} used
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
       {/* Leave History Container */}
-      <div className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm'>
+      <div className='flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm'>
         {/* Table Heading - Fixed */}
         <div className='shrink-0 border-b border-gray-100 px-5 py-5 sm:px-6'>
           <h2 className='text-lg font-bold text-black'>
@@ -157,7 +333,7 @@ const EmpLeaveReq = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className='min-h-0 flex-1 overflow-y-auto'>
+        <div>
           {/* Loading */}
           {myApplicationsLoading && (
             <div className='flex min-h-[250px] items-center justify-center'>

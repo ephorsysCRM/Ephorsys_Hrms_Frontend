@@ -71,7 +71,7 @@ const HR_ITEMS = [
   },
 
   {
-    label: 'Attendance',
+    label: 'Attendance & Leave',
     icon: CalendarCheck,
     children: [
       {
@@ -102,41 +102,6 @@ const HR_ITEMS = [
     path: '/hr/all-holidays',
     icon: Calendar
   },
-
-  {
-    label: 'Announcements',
-    path: '/hr/announcements',
-    icon: Megaphone
-  },
-
-  {
-    label: 'Payroll',
-    icon: WalletCards,
-    children: [
-      {
-        label: 'Payroll',
-        path: '/hr/payroll',
-        icon: WalletCards
-      },
-      {
-        label: 'Payslips',
-        path: '/hr/payslips',
-        icon: FileText
-      }
-    ]
-  },
-
-  {
-    label: 'Reports',
-    path: '/hr/reports',
-    icon: FileText
-  },
-
-  {
-    label: 'Settings',
-    path: '/hr/settings',
-    icon: Settings
-  }
 ]
 
 // =========================================================
@@ -158,7 +123,7 @@ const SELF_ITEMS = [
   {
     label: 'Holiday list',
     icon: CalendarOff,
-    path: '/hr/my/holiday-list' 
+    path: '/hr/my/holiday-list'
   },
   {
     label: 'My Attendance',
@@ -173,26 +138,14 @@ const SELF_ITEMS = [
 
   {
     label: 'Leave',
-    icon: Users,
-     children: [
-      {
-        label: 'My Leave',
-        path: '/hr/my/leave',
-        icon: CalendarDays
-      },
-       {
-        label: 'Leave Requests',
-        path: '/hr/my/leave-requests',
-        icon: CalendarDays
-      }
-    ]
-    
+    icon: CalendarDays,
+    path: '/hr/my/leave-requests'
   },
 
   {
-    label: 'My Salary',
+    label: 'Pay Slips',
     path: '/hr/my/salary',
-    icon: Wallet
+    icon: CalendarCheck
   }
 ]
 

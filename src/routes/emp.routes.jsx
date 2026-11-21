@@ -5,7 +5,6 @@ import EmpLayout from '../layout/EmpLayout'
 import EmpDashboard from '../employee/pages/EmpDashboard'
 import ProtectedRoute from './protected.routes'
 import EmpProfile from '../employee/pages/EmpProfile'
-import EmpLeave from '../employee/pages/EmpLeave'
 import EmpSalary from '../employee/pages/EmpSalary'
 import EmpAttendance from '../employee/pages/EmpAttendance'
 import Regularization from '../employee/pages/Regularization'
@@ -22,7 +21,6 @@ const EmpRoutes = (
       <Route element={<EmpLayout />}>
         <Route path='dashboard' element={<EmpDashboard />} />
         <Route path='profile' element={<EmpProfile />} />
-        <Route path='leave' element={<EmpLeave />} />
         <Route path='/employee/leave-requests' element={<EmpLeaveReq />} />
         <Route path='salary' element={<EmpSalary />} />
         <Route path='attendance' element={<EmpAttendance />} />
