@@ -1,3 +1,4 @@
+
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
@@ -7,6 +8,7 @@ const initialState = {
     admin: null,
 
     loading: false,
+    loginLoading: false,
     error: null,
     isAuthenticated: false,
     authChecked: false,
@@ -54,16 +56,30 @@ const authSlice = createSlice({
     initialState,
 
     reducers: {
+        // General loading (session restore, OTP, etc.)
         authStart: state => {
             state.loading = true
             state.error = null
+        },
+
+        // Separate manual login loading
+        loginStart: state => {
+            state.loginLoading = true
+            state.error = null
+        },
+
+        loginFailure: (state, action) => {
+            state.loginLoading = false
+            state.error = action.payload || 'Login failed'
         },
 
         loginSuccess: (state, action) => {
             const { user, userType, role } = getAuthData(action.payload)
 
             state.loading = false
+            state.loginLoading = false
             state.error = null
+
             state.user = user
             state.userType = userType
             state.role = role
@@ -76,6 +92,7 @@ const authSlice = createSlice({
             const { user, userType, role } = getAuthData(action.payload)
 
             state.loading = false
+            state.loginLoading = false
             state.error = null
 
             if (!user || !userType) {
@@ -106,6 +123,7 @@ const authSlice = createSlice({
             clearUserSession(state)
 
             state.loading = false
+            state.loginLoading = false
             state.error = null
             state.authChecked = true
             state.otpSent = false
@@ -143,6 +161,8 @@ const authSlice = createSlice({
 
 export const {
     authStart,
+    loginStart,
+    loginFailure,
     loginSuccess,
     sessionRestored,
     authCheckComplete,
