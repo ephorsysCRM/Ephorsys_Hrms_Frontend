@@ -6,10 +6,12 @@ import {
   LockKeyhole,
   Mail
 } from 'lucide-react'
+
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 import {
   loginAdmin,
@@ -17,13 +19,13 @@ import {
   verifyForgotOtp,
   resetForgotPassword
 } from '../../redux/features/auth/authThunk'
-import { loginSuccess } from '../../redux/features/auth/authSlice'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { loading } = useSelector(state => state.auth)
+  // Separate loading states
+  const { loading, loginLoading } = useSelector(state => state.auth)
 
   const [step, setStep] = useState('login')
 
@@ -75,10 +77,9 @@ const Login = () => {
       return
     }
 
-    const { user, userType, role } = result.data || {}
+    const { user, role } = result.data || {}
     const currentRole = role || user?.role
 
-    // Redirect based on user role
     const dashboardByRole = {
       super_admin: '/admin/dashboard',
       admin: '/admin/dashboard',
@@ -92,26 +93,19 @@ const Login = () => {
     if (!dashboard) {
       console.error('User role:', currentRole)
       console.error('Login response:', result.data)
+
       toast.error(`Dashboard not configured for role: ${currentRole}`)
+
       return
     }
 
-    // Update Redux state
-    dispatch(
-      loginSuccess({
-        user,
-        userType,
-        role: currentRole
-      })
-    )
-
-    // Navigate after successful login
+    // loginSuccess is already dispatched inside loginAdmin thunk.
+    // Navigate after successful login.
     navigate(dashboard, { replace: true })
   }
 
   // ------------------------------------------------
   // FORGOT PASSWORD
-  // POST /admin/forgot-password
   // ------------------------------------------------
 
   const handleForgotPassword = async e => {
@@ -126,7 +120,6 @@ const Login = () => {
 
   // ------------------------------------------------
   // VERIFY OTP
-  // POST /admin/verify-otp
   // ------------------------------------------------
 
   const handleVerifyOtp = async e => {
@@ -141,7 +134,6 @@ const Login = () => {
 
   // ------------------------------------------------
   // RESET PASSWORD
-  // POST /admin/reset-password
   // ------------------------------------------------
 
   const handleResetPassword = async e => {
@@ -160,7 +152,6 @@ const Login = () => {
       setOtp('')
       setNewPassword('')
       setConfirmPassword('')
-
       setStep('login')
     }
   }
@@ -255,7 +246,7 @@ const Login = () => {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      disabled={loading}
+                      disabled={loginLoading}
                       className='w-full border border-border rounded-md px-3 py-2 focus:outline-none focus:border-border-dark transition-colors duration-200 disabled:opacity-60'
                       placeholder='Enter your email'
                     />
@@ -277,7 +268,7 @@ const Login = () => {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required
-                        disabled={loading}
+                        disabled={loginLoading}
                         className='w-full border border-border rounded-md px-3 py-2 pr-10 focus:outline-none focus:border-border-dark transition-colors duration-200 disabled:opacity-60'
                         placeholder='Enter your password'
                       />
@@ -313,7 +304,7 @@ const Login = () => {
                   {/* Login Button */}
                   <motion.button
                     type='submit'
-                    disabled={loading}
+                    disabled={loginLoading}
                     whileHover={{
                       scale: 1.02
                     }}
@@ -322,7 +313,7 @@ const Login = () => {
                     }}
                     className='w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 transition duration-200 bg-black text-white hover:bg-black/90 disabled:opacity-60 disabled:cursor-not-allowed'
                   >
-                    {loading ? 'Signing In...' : 'Sign In'}
+                    {loginLoading ? 'Signing In...' : 'Sign In'}
                   </motion.button>
                 </form>
               </motion.div>
@@ -350,7 +341,6 @@ const Login = () => {
                   className='flex items-center gap-1 text-sm text-text-muted hover:text-black mb-5'
                 >
                   <ArrowLeft size={17} />
-
                   <span>Back to Login</span>
                 </button>
 

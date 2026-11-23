@@ -1,9 +1,12 @@
+
 import api from "../../services/api";
 import toast from "react-hot-toast";
 
 import {
     authFailure,
     authStart,
+    loginStart,
+    loginFailure,
     loginSuccess,
     logoutSuccess,
     otpSentSuccess,
@@ -15,7 +18,6 @@ import {
 
 // =====================================================
 // HELPER: NORMALIZE PROFILE RESPONSE
-// Supports { user, userType, role } and legacy responses
 // =====================================================
 
 const normalizeAuthData = (responseData) => {
@@ -52,7 +54,7 @@ const normalizeAuthData = (responseData) => {
 
 export const loginAdmin = (formData) => async (dispatch) => {
     try {
-        dispatch(authStart());
+        dispatch(loginStart());
 
         const { data } = await api.post(
             "/admin/login",
@@ -75,7 +77,7 @@ export const loginAdmin = (formData) => async (dispatch) => {
             error.message ||
             "Login failed";
 
-        dispatch(authFailure(message));
+        dispatch(loginFailure(message));
         toast.error(message);
 
         return {
@@ -87,11 +89,11 @@ export const loginAdmin = (formData) => async (dispatch) => {
 
 // =====================================================
 // RESTORE SESSION ON APP REFRESH
-// HTTP-ONLY COOKIE IS SENT BY THE API CLIENT
 // =====================================================
 
 export const restoreAdminSession = () => async (dispatch) => {
     try {
+        // This uses general loading, NOT loginLoading
         dispatch(authStart());
 
         const { data } = await api.get("/admin/profile");
@@ -106,9 +108,6 @@ export const restoreAdminSession = () => async (dispatch) => {
     } catch (error) {
         const status = error.response?.status;
 
-        // Clear Redux identity when the server explicitly rejects
-        // the session. For temporary server/network errors, preserve
-        // the current state and finish the auth check.
         if (status === 401 || status === 403) {
             dispatch(logoutSuccess());
         } else {
@@ -155,8 +154,6 @@ export const getAdminProfile = () => async (dispatch) => {
 
 // =====================================================
 // UPDATE PROFILE
-// NOTE: Endpoint and response must support the logged-in
-// user type on the backend.
 // =====================================================
 
 export const updateAdminProfile =
@@ -165,7 +162,7 @@ export const updateAdminProfile =
             dispatch(authStart());
 
             const { data } = await api.put(
-                `/admin/profile/${ userId } `,
+                `/admin/profile/${userId}`,
                 formData,
                 {
                     headers: {
@@ -219,7 +216,6 @@ export const logOutAdmin = () => async (dispatch) => {
             error.response?.data?.message ||
             "Logout failed";
 
-        // Clear local Redux identity even if the request fails.
         dispatch(logoutSuccess());
 
         toast.error(message);
