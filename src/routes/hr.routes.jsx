@@ -11,6 +11,8 @@ import EmployeeProfileHr from '../hr/pages/EmployProfileHr'
 import DepartmentHr from '../hr/pages/DepartmentHr'
 import DepartmentViewHr from '../hr/pages/DepartmentViewHr'
 import ProtectedRoute from './protected.routes'
+import PublicRoute from './PublicRoute'
+
 import EditEmployee from '../hr/pages/EditEmployee'
 import Attendance from '../hr/pages/Attendance'
 import LeaveManagement from '../hr/pages/LeaveManagement'
@@ -31,22 +33,21 @@ import EmpAttendance from '../employee/pages/EmpAttendance'
 import MyDashboard from '../hr/pages/MyDashboard'
 import RegularizationRequests from '../hr/pages/RegularizationRequests'
 import Regularization from '../employee/pages/Regularization'
-import EmpLeaveReq from "../employee/pages/EmpLeaveReq"
+import EmpLeaveReq from '../employee/pages/EmpLeaveReq'
 import HolidayList from '../hr/pages/HolidayList'
-
-
-
-
 
 const HrRoutes = (
   <Route path='hr'>
     {/* Public Login Route */}
-    <Route index element={<Login />} />
+    <Route element={<PublicRoute />}>
+      <Route index element={<Login />} />
+    </Route>
 
     {/* HR Protected Routes */}
     <Route element={<ProtectedRoute allowedRoles={['hr']} />}>
       <Route element={<HrLayout />}>
         {/* ---------- HR Panel ---------- */}
+
         <Route path='dashboard' element={<HrDashboard />} />
 
         <Route path='all-employees' element={<AllEmployee />} />
@@ -58,35 +59,50 @@ const HrRoutes = (
         <Route path='departments' element={<DepartmentHr />} />
 
         <Route path='departments/:id' element={<DepartmentViewHr />} />
+
         <Route path='edit-employees/:id' element={<EditEmployee />} />
+
         <Route path='attendance' element={<Attendance />} />
+
         <Route path='attendance/:id' element={<AttendanceDetails />} />
+
         <Route path='attendance-requests' element={<AttendanceRequests />} />
+
         <Route
           path='regularization-requests'
           element={<RegularizationRequests />}
         />
 
-        <Route path='all-holidays' element={<Holidays/>} />
-
+        <Route path='all-holidays' element={<Holidays />} />
 
         <Route path='leave-management' element={<LeaveManagement />} />
-        <Route path='add-leave' element={<AddLeave/>}/>
-        <Route path='leave-requests' element={<LeaveRequests/>}/>
+
+        <Route path='add-leave' element={<AddLeave />} />
+
+        <Route path='leave-requests' element={<LeaveRequests />} />
+
         <Route path='payroll' element={<PayRoll />} />
+
         <Route path='payslips' element={<PaySlips />} />
+
         <Route path='reports' element={<Reports />} />
 
         {/* ---------- My Space (HR as an employee) ---------- */}
+
         <Route path='my'>
           <Route path='dashboard' element={<MyDashboard />} />
-          <Route path='profile' element={<EmpProfile />} />
-          <Route path='attendance' element={<EmpAttendance />} />
-          <Route path='regularization' element={<Regularization />} />
-          <Route path='leave-requests' element={<EmpLeaveReq/>} />
-          <Route path='salary' element={<EmpSalary />} />
-        <Route path='holiday-list' element={<HolidayList />} />
 
+          <Route path='profile' element={<EmpProfile />} />
+
+          <Route path='attendance' element={<EmpAttendance />} />
+
+          <Route path='regularization' element={<Regularization />} />
+
+          <Route path='leave-requests' element={<EmpLeaveReq />} />
+
+          <Route path='salary' element={<EmpSalary />} />
+
+          <Route path='holiday-list' element={<HolidayList />} />
         </Route>
       </Route>
     </Route>
