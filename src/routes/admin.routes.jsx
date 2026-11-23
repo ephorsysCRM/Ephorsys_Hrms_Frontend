@@ -4,6 +4,7 @@ import AdminLogin from '../admin/pages/Login'
 import AdminDashboard from '../admin/pages/AdminDashboard'
 
 import ProtectedRoute from './protected.routes'
+import PublicRoute from './PublicRoute'
 import AdminLayout from '../layout/AdminLayout'
 import NotFound from '../NotFound'
 
@@ -24,7 +25,9 @@ import Holiday from '../admin/pages/Holiday'
 const AdminRoutes = (
   <Route path='/'>
     {/* Public Login Route */}
-    <Route index element={<AdminLogin />} />
+    <Route element={<PublicRoute />}>
+      <Route index element={<AdminLogin />} />
+    </Route>
 
     {/* Admin Protected Routes */}
     <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin']} />}>
@@ -40,7 +43,6 @@ const AdminRoutes = (
         <Route path='edit-employees/:id' element={<EditEmployee />} />
 
         <Route path='departments' element={<Department />} />
-
         <Route path='departments/:id' element={<DepartmentView />} />
 
         <Route path='attendance' element={<Attendance />} />
@@ -51,9 +53,8 @@ const AdminRoutes = (
         />
 
         <Route path='add-leaves' element={<AddLeave />} />
-        <Route path='leave-requests' element={<LeaveRequests/>} />
-        <Route path='all-holidays' element={<Holiday/>} />
-
+        <Route path='leave-requests' element={<LeaveRequests />} />
+        <Route path='all-holidays' element={<Holiday />} />
       </Route>
     </Route>
 

@@ -3,7 +3,10 @@ import { Route } from 'react-router-dom'
 import Login from '../admin/pages/Login'
 import EmpLayout from '../layout/EmpLayout'
 import EmpDashboard from '../employee/pages/EmpDashboard'
+
 import ProtectedRoute from './protected.routes'
+import PublicRoute from './PublicRoute'
+
 import EmpProfile from '../employee/pages/EmpProfile'
 import EmpSalary from '../employee/pages/EmpSalary'
 import EmpAttendance from '../employee/pages/EmpAttendance'
@@ -14,17 +17,25 @@ import Holidays from '../employee/pages/Holidays'
 const EmpRoutes = (
   <Route path='employee'>
     {/* Public Login Route */}
-    <Route index element={<Login />} />
+    <Route element={<PublicRoute />}>
+      <Route index element={<Login />} />
+    </Route>
 
-    {/* HR Protected Routes */}
+    {/* Employee Protected Routes */}
     <Route element={<ProtectedRoute allowedRoles={['employee']} />}>
       <Route element={<EmpLayout />}>
         <Route path='dashboard' element={<EmpDashboard />} />
+
         <Route path='profile' element={<EmpProfile />} />
-        <Route path='/employee/leave-requests' element={<EmpLeaveReq />} />
+
+        <Route path='leave-requests' element={<EmpLeaveReq />} />
+
         <Route path='salary' element={<EmpSalary />} />
+
         <Route path='attendance' element={<EmpAttendance />} />
+
         <Route path='holiday-list' element={<Holidays />} />
+
         <Route path='regularization' element={<Regularization />} />
       </Route>
     </Route>
